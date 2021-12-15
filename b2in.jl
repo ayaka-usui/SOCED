@@ -1,7 +1,10 @@
 function b2in(vecmb::Vector{Int})
 
-    Msize = legnth(vecmb)-1
-    Np = sum(vecmb[1:mbsize])
+    # this function return the index of many body state at the index of Fock state
+
+    # ignore the last element since it is the coefficient
+    Msize = length(vecmb)-1
+    Np = sum(vecmb[1:Msize])
 
     # Lm = mbsize+1
     # Ln = Np + 1
@@ -9,7 +12,7 @@ function b2in(vecmb::Vector{Int})
     # include("pascaltriangle.jl") # define pascaltriangle(m,n)
     include("pascalmax.jl") # degine pascalmax(m,n)
 
-    for jj = 1:mbsize
+    for jj = 1:Msize
         for ii = 0:vecmb[jj]
 
             if ii == vecmb[jj]
@@ -17,7 +20,7 @@ function b2in(vecmb::Vector{Int})
             end
 
             sumparticles = sum(vecmb[1:jj-1]) # numnber of particles taken account so far
-            indfk = indfk + pascalmax(mbsize-jj,Np-ii-sumparticles) # pascalmax(m,n) = (n+m-1)!/n!(m-1)!
+            indfk = indfk + pascalmax(Msize-jj,Np-ii-sumparticles) # pascalmax(m,n) = (n+m-1)!/n!(m-1)!
 
         end
     end
