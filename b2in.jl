@@ -1,4 +1,7 @@
-function b2in(vecmb::Vector{Int},Msize::Int,Np::Int)
+function b2in(vecmb::Vector{Int})
+
+    Msize = legnth(vecmb)
+    Np = sum(vecmb)
 
     # Lm = Msize+1
     Ln = Np + 1
