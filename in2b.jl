@@ -1,30 +1,36 @@
-function in2b(vecmb::Vector{Int})
+function in2b(indfk::Int,Msize::Int,Np::Int)
 
-    # this function return the index of many body state at the index of Fock state
+    # this function return the index of Fock state at the index of many body state
 
-    # ignore the last element since it is the coefficient
-    Msize = length(vecmb)-1
-    Np = sum(vecmb[1:Msize])
+    # indfk = indfk - 1
+    vecmb = zeros(Int,Msize+1)
 
-    # Lm = mbsize+1
-    # Ln = Np + 1
-    indfk = 1
-    # include("pascaltriangle.jl") # define pascaltriangle(m,n)
-    include("pascalmax.jl") # degine pascalmax(m,n)
+    include("pascaltriangle.jl") # define pascaltriangle(m,n)
+    matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
+    # note the indices are m+1 and n+1 for N^m_n
 
-    for jj = 1:Msize
-        for ii = 0:vecmb[jj]
+    indN = Np
+    indM = Msize-1
 
-            if ii == vecmb[jj]
-               continue
-            end
+    while true
 
-            sumparticles = sum(vecmb[1:jj-1]) # numnber of particles taken account so far
-            indfk = indfk + pascalmax(Msize-jj,Np-ii-sumparticles) # pascalmax(m,n) = (n+m-1)!/n!(m-1)!
+          if indfk == 1
+             break
+          end
 
-        end
+          if indfk >= matp[indM+1,indN+1]
+             indfk = indfk - matp[indM+1,indN+1]
+             vecmb[Msize-indM] = vecmb[Msize-indM] + 1
+             indN = indN - 1
+          else
+             indM = indM - 1
+          end
+
     end
 
-    return indfk
+    # the last element for the coefficient
+    vecmb[Msize+1] = 1
+
+    return vecmb
 
 end
