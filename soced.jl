@@ -1,6 +1,6 @@
 using Arpack, SparseArrays, LinearAlgebra
 
-function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
+function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64)
 
     # define functions used here
     include("ades.jl")
@@ -10,6 +10,7 @@ function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
     include("b2in.jl")
     include("nop.jl")
 
+    Msize = Msize0*2
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
@@ -34,11 +35,12 @@ function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
             for ii = 1:Msize
 
                 vecmbnnij = acre(ii,vecmbnnj)
+                energy0 = epsilon(ii,jj,Msize0)
 
                 for mm = 1:maxmatp
 
                     vecmbmm = in2b(mm,Msize,Np)
-                    Hsoc[mm,nn] = (vecmbmm[1:Msize]' * vecmbnnij[1:Msize])*sqrt(vecmbnnij[Msize+1])*epsilon()
+                    Hsoc[mm,nn] = (vecmbmm[1:Msize]' * vecmbnnij[1:Msize])*sqrt(vecmbnnij[Msize+1])*epsilon
 
                 end
 
