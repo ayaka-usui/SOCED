@@ -2,19 +2,19 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
 
     # this function return the index of Fock state at the index of many body state
 
-    # indfk = indfk - 1
+    indfk = indfk - 1
     vecmb = zeros(Int,Msize+1)
 
     include("pascaltriangle.jl") # define pascaltriangle(m,n)
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
 
-    indN = Np
     indM = Msize-1
+    indN = Np
 
     while true
 
-          if indfk == 1
+          if indN == 0
              break
           end
 
