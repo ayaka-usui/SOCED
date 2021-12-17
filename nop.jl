@@ -1,12 +1,11 @@
-function acre(jj::Int,fock::Vector{Int})
+function nop(jj::Int,fock::Vector{Int})
 
     # fock is a fock state, a vector having integers
     # its last element is square of coefficient
 
-    focksize = length(fock) 
+    focksize = length(fock)
 
-    fock[jj] = fock[jj]+1
-    fock[focksize] = fock[focksize]*fock[jj]
+    fock[focksize] = fock[focksize]*fock[jj]^2
 
     return fock
 

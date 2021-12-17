@@ -1,4 +1,4 @@
-function b2in(vecmb::Vector{Int})
+function b2in(vecmb::SparseVector{Int})
 
     # this function return the index of many body state at the index of Fock state
 

@@ -8,27 +8,44 @@ function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
     include("pascaltriangle.jl")
     include("in2b.jl")
     include("b2in.jl")
+    include("nop.jl")
 
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # defines vectors and matrices
-    vecmb = zeros(Float64,Msize+1);
-    Hsoc = zeros(Float64,maxmatp,maxmatp);
+    vecmb = sparse(zeros(Int64,Msize+1));
+    Hsoc = sparse(zeros(Float64,maxmatp,maxmatp));
 
     # define a matrix for the Hamiltonian
 
     # diagonal terms
-    for jj = 1:maxmatp
-        for ii = 1:maxmatp
+    for nn = 1:maxmatp
 
-            vecmb = in2b(jj,Msize,Np)
+        vecmbnn = in2b(nn,Msize,Np)
 
-            if jj == ii
-               Hsoc[jj,jj] = 1
+        for jj = 1:Msize
+
+            vecmbnnj = ades(jj,vecmbnn)
+            if vecmbnnj[Msize+1] == 0
+               continue
+            end
+
+            for ii = 1:Msize
+
+                vecmbnnij = acre(ii,vecmbnnj)
+
+                for mm = 1:maxmatp
+
+                    vecmbmm = in2b(mm,Msize,Np)
+                    Hsoc[mm,nn] = (vecmbmm[1:Msize]' * vecmbnnij[1:Msize])*sqrt(vecmbnnij[Msize+1])*epsilon()
+
+                end
+
             end
 
         end
+
     end
 
 end

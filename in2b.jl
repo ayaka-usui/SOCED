@@ -15,7 +15,7 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
     end
 
     indfk = indfk - 1
-    vecmb = zeros(Int,Msize+1)
+    vecmb = sparse(zeros(Int64,Msize+1))
 
     indM = Msize-1
     indN = Np
