@@ -1,6 +1,26 @@
 using Arpack, SparseArrays, LinearAlgebra
 
-#include("file.jl")
+function Hsoc(ksoc::Float64)
+
+    # define functions used here
+    include("ades.jl")
+    include("acre.jl")
+
+    # define a matrix for the Hamiltonian
+
+    # diagonal terms
+    for jj = 1:Msize
+
+end
+
+
+
+
+
+
+
+
+
 
 # defining vectors
 n = 10

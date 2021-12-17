@@ -12,6 +12,10 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
     indM = Msize-1
     indN = Np
 
+    if indfk + 1 > matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_n
+       error("indfk larger than the maximum of N^M_N.")
+    end
+
     while true
 
           if indN == 0
@@ -19,7 +23,7 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
           end
 
           if indfk >= matp[indM+1,indN+1]
-             indfk = indfk - matp[indM+1,indN+1]
+             indfk = indfk - matp[indM+1,indN+1] # the indices are m+1 and n+1 for N^m_n
              vecmb[Msize-indM] = vecmb[Msize-indM] + 1
              indN = indN - 1
           else
