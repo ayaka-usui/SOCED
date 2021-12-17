@@ -1,15 +1,25 @@
 using Arpack, SparseArrays, LinearAlgebra
 
-function Hsoc(ksoc::Float64)
+function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
 
     # define functions used here
     include("ades.jl")
     include("acre.jl")
+    include("pascaltriangle.jl")
+    include("in2b.jl")
+    include("b2in.jl")
+
+    matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
+    maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # define a matrix for the Hamiltonian
 
     # diagonal terms
-    for jj = 1:Msize
+    for jj = 1:maxmatp
+
+        in2b(jj,Msize,Np)
+
+    end
 
 end
 
