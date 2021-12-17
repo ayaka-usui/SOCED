@@ -1,6 +1,6 @@
 using Arpack, SparseArrays, LinearAlgebra
 
-function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64)
+function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
 
     # define functions used here
     include("ades.jl")
@@ -35,16 +35,19 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64)
             for ii = 1:Msize
 
                 vecmbnnij = acre(ii,vecmbnnj)
-                energy0 = epsilon(ii,jj,Msize0)
-
-                for mm = 1:maxmatp
-
-                    vecmbmm = in2b(mm,Msize,Np)
-                    Hsoc[mm,nn] = (vecmbmm[1:Msize]' * vecmbnnij[1:Msize])*sqrt(vecmbnnij[Msize+1])*epsilon
-
+                energy0 = epsilon(ii,jj,Msize0,ksoc,Omega)
+                if energy0 == 0
+                   continue
                 end
 
             end
+
+        end
+
+        for mm = 1:maxmatp
+
+            vecmbmm = in2b(mm,Msize,Np)
+            Hsoc[mm,nn] = (vecmbmm[1:Msize]' * vecmbnnij[1:Msize])*sqrt(vecmbnnij[Msize+1])*epsilon
 
         end
 
