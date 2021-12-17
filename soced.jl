@@ -12,13 +12,23 @@ function Hsoc(Msize::Int,Np::Int,ksoc::Float64)
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
+    # defines vectors and matrices
+    vecmb = zeros(Float64,Msize+1);
+    Hsoc = zeros(Float64,maxmatp,maxmatp);
+
     # define a matrix for the Hamiltonian
 
     # diagonal terms
     for jj = 1:maxmatp
+        for ii = 1:maxmatp
 
-        in2b(jj,Msize,Np)
+            vecmb = in2b(jj,Msize,Np)
 
+            if jj == ii
+               Hsoc[jj,jj] = 1
+            end
+
+        end
     end
 
 end
