@@ -22,35 +22,41 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
     for nn = 1:maxmatp
 
         vecmbnn = in2b(nn,Msize,Np)
-        energy0sum = 0.0
         vecmbnnijsum = sparse(zeros(Float64,Msize))
-
-        for jj = 1:Msize
-
-            vecmbnnj = ades(jj,vecmbnn)
-            if vecmbnnj[Msize+1] == 0
-               continue
-            end
-
-            for ii = 1:Msize
-
-                vecmbnnij = acre(ii,vecmbnnj)
-                energy0 = epsilon(ii,jj,Msize0,ksoc,Omega)
-                if energy0 == 0 # energy is Int and zero if ii==jj
-                   continue
-                end
-
-                energy0sum = energy0sum + energy0
-                vecmbnnijsum = vecmbnnijsum + vecmbnnij[1:Msize]*sqrt(vecmbnnij[Msize+1])
-
-            end
-
-        end
 
         for mm = 1:nn
 
             vecmbmm = in2b(mm,Msize,Np)
-            Hsoc[mm,nn] = vecmbmm[1:Msize]' * vecmbnnijsum
+
+            for jj = 1:Msize
+
+                vecmbnnj = ades(jj,vecmbnn)
+                if vecmbnnj[Msize+1] == 0
+                   continue
+                end
+
+                for ii = 1:Msize
+
+                    energy0 = epsilon(ii,jj,Msize0,ksoc,Omega)
+                    if energy0 == 0 # energy is Int and zero if ii==jj
+                       continue
+                    end
+
+                    vecmbnnij = acre(ii,vecmbnnj)
+                    if  vecmbnnij \= vecmbmm
+                        continue
+                    end
+
+
+
+
+
+
+                end
+
+            end
+
+Hsoc[mm,nn] = vecmbmm[1:Msize]' * vecmbnnijsum
 
         end
 
