@@ -1,11 +1,6 @@
-function epsilon(ii::Int,jj::Int,Msize0::Int,ksoc::Float64,Omega::Float64)
+include("delta.jl")
 
-    function delta(x::Int)
-      if x == 0
-         return 1
-      else
-         return 0
-    end
+function epsilon(ii::Int,jj::Int,Msize0::Int,ksoc::Float64,Omega::Float64)
 
     energy0 = 0 # Int
 

@@ -6,7 +6,7 @@ include("acre.jl")
 include("pascaltriangle.jl")
 include("in2b.jl")
 include("b2in.jl")
-include("nop.jl")
+include("epsilon.jl")
 
 function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
 
@@ -16,13 +16,13 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
 
     # defines vectors and matrices
     vecmb = sparse(zeros(Int64,Msize+1));
+    vecmbnn = sparse(zeros(Int64,Msize+1));
     Hsoc = sparse(zeros(Float64,maxmatp,maxmatp));
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatp
 
         vecmbnn = in2b(nn,Msize,Np)
-        vecmbnnijsum = sparse(zeros(Float64,Msize))
 
         for mm = 1:nn
 
