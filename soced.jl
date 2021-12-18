@@ -62,6 +62,12 @@ function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
     # since the Hamiltonian is helmitian
     Hsoc = Hsoc + Hsoc' - spdiagm(diag(Hsoc))
 
-    # return Hsoc
+    return Hsoc
+
+end
+
+function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
+
+    lambda, phi = eigs(M, nev=6, which)
 
 end
