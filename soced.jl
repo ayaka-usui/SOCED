@@ -68,6 +68,8 @@ end
 
 function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
 
-    lambda, phi = eigs(M, nev=6, which)
+    lambda, phi = eigs(Hsoc,nev=6,which=:SR)
+
+    return lambda, phi
 
 end
