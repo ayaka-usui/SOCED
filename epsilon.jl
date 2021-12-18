@@ -1,12 +1,12 @@
 include("delta.jl")
 
-function epsilon(ii::Int64, jj::Int64, Msize0::Int64, ksoc::Float64, Omega::Float64)
+function epsilon(ii::Int64, jj::Int64, ksoc::Float64, Omega::Float64)
 
     energy0 = 0 # Int64
 
     if ii == jj
 
-       energy0 = jj + 1/2 # Float64
+       energy0 = ceil(jj/2) + 1/2 # Float64
 
     elseif iseven(ii*jj)
 

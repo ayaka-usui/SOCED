@@ -1,7 +1,7 @@
 include("pascaltriangle.jl") # define pascaltriangle(m,n)
 # include("pascalmax.jl") # degine pascalmax(m,n)
 
-function b2in!(vecmb::SparseVector{Int64}, indfk::Int64)
+function b2in(vecmb::SparseVector{Int64})
 
     # this function return the index of many body state at the index of Fock state
 

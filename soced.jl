@@ -8,22 +8,24 @@ include("in2b.jl")
 include("b2in.jl")
 include("epsilon.jl")
 
-function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
+function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
     Msize = Msize0*2
-    matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
+
+    matp = zeros(Int,Msize+1,Np+1);
+    pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
     maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # defines vectors and matrices
-    vecmb = sparse(zeros(Int64,Msize+1));
-    vecmbnn = sparse(zeros(Int64,Msize+1));
-    Hsoc = sparse(zeros(Float64,maxmatp,maxmatp));
+    vecmbnn = spzeros(Int64,Msize+1);
+    vecmbnnj = spzeros(Int64,Msize+1);
+    vecmbnnij = spzeros(Int64,Msize+1);
+    Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatp
 
         vecmbnn = in2b(nn,Msize,Np)
-        energyijsum = 0.
         energyij = 0.
 
         for jj = 1:Msize
@@ -37,7 +39,7 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
 
                 vecmbnnij = acre(ii,vecmbnnj)
 
-                energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
+                energyij = epsilon(ii,jj,ksoc,Omega)
                 if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
                    continue #vecmbnnij[1+Msize] = 0
                 end
@@ -45,10 +47,9 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
                 for mm = 1:nn
 
                     vecmbmm = in2b(mm,Msize,Np)
-                    if vecmbnnij != vecmbmm
-                       continue
+                    if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
+                       Hsoc[mm,nn] = Hsoc[mm,nn] + energyij*sqrt(vecmbnnij[Msize+1])
                     end
-                    Hsoc[mm,nn] = Hsoc[mm,nn] + energyij
 
                 end
 
@@ -59,8 +60,8 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
     end
 
     # since the Hamiltonian is helmitian
-    # Hsoc = Hsoc + Hsoc' - sparse(diagm(diag(Hsoc)))
+    Hsoc = Hsoc + Hsoc' - spdiagm(diag(Hsoc))
 
-    return Hsoc
+    # return Hsoc
 
 end
