@@ -1,4 +1,4 @@
-function delta(x::Int)
+function delta(x::Int64)
    if x == 0
       return 1
    else

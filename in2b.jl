@@ -1,8 +1,9 @@
 include("pascaltriangle.jl") # define pascaltriangle(m,n)
 
-function in2b(indfk::Int,Msize::Int,Np::Int)
+function in2b!(jj::Int64, Msize::Int64, Np::Int64, vecmb::SparseVector{Int64})
 
     # this function return the index of Fock state at the index of many body state
+    indfk = copy(jj)
 
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
@@ -16,7 +17,7 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
     end
 
     indfk = indfk - 1
-    vecmb = sparse(zeros(Int64,Msize+1))
+    vecmb = 0 # vecmb = sparse(zeros(Int64,Msize+1))
 
     indM = Msize-1
     indN = Np
@@ -40,6 +41,6 @@ function in2b(indfk::Int,Msize::Int,Np::Int)
     # the last element for the coefficient
     vecmb[Msize+1] = 1
 
-    return vecmb
+    # return vecmb
 
 end

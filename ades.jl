@@ -1,8 +1,8 @@
-function ades!(jj::Int, input::SparseVector{Int}, fock::SparseVector{Int})
+function ades!(jj::Int64, input::SparseVector{Int64}, fock::SparseVector{Int64})
 
     # fock is a fock state, a vector having integers
     # its last element is square of coefficient
-    fock = input
+    fock = copy(input)
     focksize = length(fock)
 
     fock[jj] = fock[jj]-1

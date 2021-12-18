@@ -1,8 +1,8 @@
 include("delta.jl")
 
-function epsilon(ii::Int,jj::Int,Msize0::Int,ksoc::Float64,Omega::Float64)
+function epsilon(ii::Int64, jj::Int64, Msize0::Int64, ksoc::Float64, Omega::Float64)
 
-    energy0 = 0 # Int
+    energy0 = 0 # Int64
 
     if ii == jj
 
