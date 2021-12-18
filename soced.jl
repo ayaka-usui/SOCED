@@ -29,6 +29,9 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
             for jj = 1:Msize
 
                 vecmbnnj = ades(jj,vecmbnn)
+                if vecmbnnj[Msize+1] == 0
+                   continue
+                end
 
                 for ii = 1:Msize
 
@@ -36,10 +39,10 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
 
                     energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
                     if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
-                       vecmbnnij[1+Msize] = 0
+                       continue #vecmbnnij[1+Msize] = 0
                     end
 
-                    energyijsum = energyijsum + energyij
+
 
                 end
 
