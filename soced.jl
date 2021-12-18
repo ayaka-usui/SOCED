@@ -33,27 +33,33 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
                continue
             end
 
-        for ii = 1:Msize
+            for ii = 1:Msize
 
-            vecmbnnij = acre(ii,vecmbnnj)
+                vecmbnnij = acre(ii,vecmbnnj)
 
-            energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
-            if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
-               continue #vecmbnnij[1+Msize] = 0
-            end
+                energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
+                if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
+                   continue #vecmbnnij[1+Msize] = 0
+                end
 
-            for mm = nn:maxmatp
-                vecmbmm = in2b(mm,Msize,Np)
-                Hsoc[mm,nn] = energyijsum
+                for mm = 1:nn
+
+                    vecmbmm = in2b(mm,Msize,Np)
+                    if vecmbnnij != vecmbmm
+                       continue
+                    end
+                    Hsoc[mm,nn] = Hsoc[mm,nn] + energyij
+
+                end
+
             end
 
         end
 
-
     end
 
-    # since the Hamiltonian is elmitian
-    Hsoc = Hsoc + Hsoc' - diagm(diag(Hsoc))
+    # since the Hamiltonian is helmitian
+    # Hsoc = Hsoc + Hsoc' - sparse(diagm(diag(Hsoc)))
 
     return Hsoc
 
