@@ -26,37 +26,30 @@ function Hsoc(Msize0::Int64,Np::Int64,ksoc::Float64,Omega::Float64)
         energyijsum = 0.
         energyij = 0.
 
-            for jj = 1:Msize
+        for jj = 1:Msize
 
-                vecmbnnj = ades(jj,vecmbnn)
-                if vecmbnnj[Msize+1] == 0
-                   continue
-                end
-
-                for ii = 1:Msize
-
-                    vecmbnnij = acre(ii,vecmbnnj)
-
-                    energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
-                    if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
-                       continue #vecmbnnij[1+Msize] = 0
-                    end
-
-
-
-                end
-
+            vecmbnnj = ades(jj,vecmbnn)
+            if vecmbnnj[Msize+1] == 0
+               continue
             end
 
-            Hsoc[mm,nn] = energyijsum
+        for ii = 1:Msize
+
+            vecmbnnij = acre(ii,vecmbnnj)
+
+            energyij = epsilon(ii,jj,Msize0,ksoc,Omega)
+            if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
+               continue #vecmbnnij[1+Msize] = 0
+            end
+
+            for mm = nn:maxmatp
+                vecmbmm = in2b(mm,Msize,Np)
+                Hsoc[mm,nn] = energyijsum
+            end
 
         end
 
-    end
 
-    for mm = 1:nn
-
-        vecmbmm = in2b(mm,Msize,Np)
     end
 
     # since the Hamiltonian is elmitian
