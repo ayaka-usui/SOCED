@@ -8,7 +8,7 @@ include("in2b.jl")
 include("b2in.jl")
 include("epsilon.jl")
 
-function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
+function Hintfunc(Msize0::Int64, Np::Int64, gint::Float64)
 
     Msize = Msize0*2
 
@@ -20,13 +20,59 @@ function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
     vecmbnn = spzeros(Int64,Msize+1);
     vecmbnnj = spzeros(Int64,Msize+1);
     vecmbnnij = spzeros(Int64,Msize+1);
-    Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
+    # Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
+    Hint = spzeros(Float64,maxmatp,maxmatp);
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatp
 
         vecmbnn = in2b(nn,Msize,Np)
-        energyij = 0.
+        # energyij = 0.
+
+        # Interactions
+        for ll = 1:Msize
+
+            vecmbnnl = ades(ll,vecmbnn)
+            if vecmbnnl[Msize+1] == 0
+               continue
+            end
+
+            for kk = 1:Msize
+
+                vecmbnnkl = ades(kk,vecmbnnl)
+                if vecmbnnkl[Msize+1] == 0
+                   continue
+                end
+
+                for jj = 1:Msize
+
+                    vecmbnnjkl = acre(jj,vecmbnnkl)
+
+                    for ii = 1:Msize
+
+                        vecmbnnijkl = acre(ii,vecmbnnjkl)
+
+                        for mm = 1:nn
+
+                            vecmbmm = in2b(mm,Msize,Np)
+                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
+
+                               if isodd(ii) & isodd(jj) & isodd(kk) & isodd(ll)
+                                  Hint[mm,nn] = Hint[mm,nn] +
+                               end
+
+                            end
+
+                        end
+
+                    end
+
+                end
+
+            end
+
+        end
+
 
         # free terms
         for jj = 1:Msize
@@ -58,10 +104,6 @@ function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
         end
 
-        # # Interactions
-        # for ll = 1:Msize
-        #
-        # end
 
 
     end

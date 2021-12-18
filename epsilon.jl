@@ -3,8 +3,8 @@ include("delta.jl")
 function epsilon(ii::Int64, jj::Int64, ksoc::Float64, Omega::Float64)
 
     energy0 = 0 # Int64
-    njj = ceil(jj/2) - 1
-    nii = ceil(ii/2) - 1
+    njj = ceil(Int64,jj/2) - 1
+    nii = ceil(Int64,ii/2) - 1
 
     if ii == jj
 
