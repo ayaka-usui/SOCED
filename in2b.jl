@@ -1,8 +1,9 @@
+include("pascaltriangle.jl") # define pascaltriangle(m,n)
+
 function in2b(indfk::Int,Msize::Int,Np::Int)
 
     # this function return the index of Fock state at the index of many body state
 
-    include("pascaltriangle.jl") # define pascaltriangle(m,n)
     matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
 
