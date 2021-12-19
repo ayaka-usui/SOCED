@@ -1,9 +1,9 @@
-function gammahalf(nn::Int64)
-
-   loggamma = log10(pi)/2 + sum(log10.(1:2*nn)) - 2*nn*log10(2) - sum(log10.(1:nn))
-   return exp(loggamma)
-
-end
+# function gammahalf(nn::Int64)
+#
+#    loggamma = log(pi)/2 + sum(log.(1:2*nn)) - 2*nn*log(2) - sum(log.(1:nn))
+#    return exp(loggamma)
+#
+# end
 
 function Ixx(ii::Int64, jj::Int64 ,kk::Int64, ll::Int64)
 
@@ -17,7 +17,7 @@ function Ixx(ii::Int64, jj::Int64 ,kk::Int64, ll::Int64)
                    else # iseven(ii+jj+kk+ll)
                       integral = 1/sqrt(2)/2^((ii+jj+kk+ll)/2-m1-m2-m3-m4)*gammahalf((ii+jj+kk+ll)/2-m1-m2-m3-m4)
                    end
-                   
+
                end
            end
        end
