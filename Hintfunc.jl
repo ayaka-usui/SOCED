@@ -8,7 +8,7 @@ include("in2b.jl")
 include("b2in.jl")
 include("epsilon.jl")
 
-function Hintfunc(Msize0::Int64, Np::Int64, gint::Float64)
+function Hintfunc(Msize0::Int64, Np::Int64)
 
     Msize = Msize0*2
 
@@ -21,7 +21,9 @@ function Hintfunc(Msize0::Int64, Np::Int64, gint::Float64)
     vecmbnnj = spzeros(Int64,Msize+1);
     vecmbnnij = spzeros(Int64,Msize+1);
     # Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
-    Hint = spzeros(Float64,maxmatp,maxmatp);
+    Hintdown = spzeros(Float64,maxmatp,maxmatp);
+    Hintup = spzeros(Float64,maxmatp,maxmatp);
+    Hintdu = spzeros(Float64,maxmatp,maxmatp);
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatp
@@ -52,13 +54,23 @@ function Hintfunc(Msize0::Int64, Np::Int64, gint::Float64)
 
                         vecmbnnijkl = acre(ii,vecmbnnjkl)
 
+                        # if isodd(ii+jj+kk+ll)
+                        #    continue
+                        # end
+
                         for mm = 1:nn
 
                             vecmbmm = in2b(mm,Msize,Np)
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
 
-                               if isodd(ii) & isodd(jj) & isodd(kk) & isodd(ll)
-                                  Hint[mm,nn] = Hint[mm,nn] +
+                               if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
+                                  Hintdown[mm,nn] = Hintdown[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                               elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
+                                  Hintup[mm,nn] = Hintup[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                               elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                               elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end
@@ -72,54 +84,12 @@ function Hintfunc(Msize0::Int64, Np::Int64, gint::Float64)
             end
 
         end
-
-
-        # free terms
-        for jj = 1:Msize
-
-            vecmbnnj = ades(jj,vecmbnn)
-            if vecmbnnj[Msize+1] == 0
-               continue
-            end
-
-            for ii = 1:Msize
-
-                vecmbnnij = acre(ii,vecmbnnj)
-
-                energyij = epsilon(ii,jj,ksoc,Omega)
-                if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
-                   continue #vecmbnnij[1+Msize] = 0
-                end
-
-                for mm = 1:nn
-
-                    vecmbmm = in2b(mm,Msize,Np)
-                    if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
-                       Hsoc[mm,nn] = Hsoc[mm,nn] + energyij*sqrt(vecmbnnij[Msize+1])
-                    end
-
-                end
-
-            end
-
-        end
-
-
-
     end
 
-    # since the Hamiltonian is helmitian
-    Hsoc = Hsoc + Hsoc' - spdiagm(diag(Hsoc))
+    Hintdown = Hintdown + Hintdown' - spdiagm(diag(Hintdown))
+    Hintup = Hintup + Hintup' - spdiagm(diag(Hintup))
+    Hintdu = Hintdu + Hintdu' - spdiagm(diag(Hintdu))
 
-    return Hsoc
-
-end
-
-function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
-
-    lambda, phi = eigs(Hsoc,nev=6,which=:SR)
-    # lambda = real(lambda)
-
-    return lambda, phi
+    return Hintdown, Hintup, Hintdu
 
 end
