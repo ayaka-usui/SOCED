@@ -34,7 +34,7 @@ function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     matA = zeros(Float64,2,maxm2,maxm3,maxm4)
 
     # m1=m2=m3=m4=1
-    matA[1,1,1,1] = exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(log.(2:n1)+log.(2:n2)+log.(2:n3)+log.(2:n4)))
+    matA[1,1,1,1] = exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4))))
 
     # m1=m2=m3=1
     for m4 = 1:maxm4-1
@@ -64,7 +64,7 @@ function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
         end
     end
 
-    sumA = sum(matA[1,m2,m3,m4])
+    sumA = sum(matA[1,:,:,:])
     for m1 = 1:maxm1-1
 
         for m234 = 1:maxm2*maxm3*maxm4 # parfor
@@ -83,7 +83,7 @@ function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
             matA[2,m2,m3,m4] = matA[1,m2,m3,m4]*recurringA1(n1,n2,n3,n4,m1,m2,m3,m4)
         end
 
-        sumA = sumA + sum(matA[2,m2,m3,m4])
+        sumA = sumA + sum(matA[2,:,:,:])
         matA[1,:,:,:] = matA[2,:,:,:]
         matA[2,:,:,:] .= 0
 
