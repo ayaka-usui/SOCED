@@ -20,18 +20,18 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
 
 end
 
-function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64,Msize::Int64)
+function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     if isodd(n1 + n2 + n3 + n4)
        return 0.0
     end
 
     M = (n1 + n2 + n3 + n4)/2
-    matA = zeros(Float64,2,Msize,Msize,Msize)
-    maxm1 = ceil(Int64,n1/2)+1
-    maxm2 = ceil(Int64,n2/2)+1
-    maxm3 = ceil(Int64,n3/2)+1
-    maxm4 = ceil(Int64,n4/2)+1
+    maxm1 = floor(Int64,n1/2)+1
+    maxm2 = floor(Int64,n2/2)+1
+    maxm3 = floor(Int64,n3/2)+1
+    maxm4 = floor(Int64,n4/2)+1
+    matA = zeros(Float64,2,maxm2,maxm3,maxm4)
 
     # m1=m2=m3=m4=1
     matA[1,1,1,1] = exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(log.(2:n1)+log.(2:n2)+log.(2:n3)+log.(2:n4)))
