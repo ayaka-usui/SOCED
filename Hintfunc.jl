@@ -7,6 +7,7 @@ include("pascaltriangle.jl")
 include("in2b.jl")
 include("b2in.jl")
 include("epsilon.jl")
+include("vijkl.jl")
 
 function Hintfunc(Msize0::Int64, Np::Int64)
 
@@ -29,7 +30,6 @@ function Hintfunc(Msize0::Int64, Np::Int64)
     for nn = 1:maxmatp
 
         vecmbnn = in2b(nn,Msize,Np)
-        # energyij = 0.
 
         # Interactions
         for ll = 1:Msize
@@ -63,14 +63,19 @@ function Hintfunc(Msize0::Int64, Np::Int64)
                             vecmbmm = in2b(mm,Msize,Np)
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
 
+                               n1 = ceil(Int64,ii/2)
+                               n2 = ceil(Int64,jj/2)
+                               n3 = ceil(Int64,kk/2)
+                               n4 = ceil(Int64,ll/2)
+
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
-                                  Hintdown[mm,nn] = Hintdown[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
-                                  Hintup[mm,nn] = Hintup[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintup[mm,nn] = Hintup[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + 1*sqrt(vecmbnnijkl[Msize+1]) #Vijkl(ii,jj,kk,ll)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end

@@ -4,7 +4,7 @@ end
 
 function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64,m3::Int64,m4::Int64)
 
-    M = (n1 + n2 + n3 + n4)/2
+    M = Int64((n1 + n2 + n3 + n4)/2)
 
     if m1 == m2 == m3 == 0
        coeff = (-1)*2*(n4-2m4+2)*(n4-2m4+1)/m4*recurringA0(M,1,1,1,m4)
@@ -20,13 +20,18 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
 
 end
 
-function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
+function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64)
+
+    n1 = copy(ii)
+    n2 = copy(jj)
+    n3 = copy(kk)
+    n4 = copy(ll)
 
     if isodd(n1 + n2 + n3 + n4)
        return 0.0
     end
 
-    M = (n1 + n2 + n3 + n4)/2
+    M = Int64((n1 + n2 + n3 + n4)/2)
     maxm1 = floor(Int64,n1/2)+1
     maxm2 = floor(Int64,n2/2)+1
     maxm3 = floor(Int64,n3/2)+1
@@ -89,7 +94,7 @@ function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     end
 
-    sumA = sumA/sqrt(2*pi)
+    sumA = sumA/sqrt(2*pi)/2
 
     return sumA
 
