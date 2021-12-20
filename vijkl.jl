@@ -44,8 +44,8 @@ function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64,Msize::Inf64)
     end
 
     sumA = sum(matA[1,m2,m3,m4])
-    for m1 = 2:maxm1
-å
+    for m1 = 1:maxm1-1
+
         for m234 = 1:maxm2*maxm3*maxm4 # parfor
             m2 = div(m234,maxm3*maxm4)+1
             m3 = div(m234 - (m2-1)*maxm3*maxm4,maxm4)+1
@@ -58,7 +58,7 @@ function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64,Msize::Inf64)
                m3 = m3-1
                m4 = maxm4
             end
-            matA[2,m2,m3,m4] = matA[1,m2,m3,m4]*
+            matA[2,m2,m3,m4] = matA[1,m2,m3,m4]*2*(n1-2m1+2)*(n1-2m1+1)/m1*(M-m1-m2-m3-m4+4)/(2M-2m1-2m2-2m3-2m4+8)/(2M-2m1-2m2-2m3-2m4+7)
         end
 
         sumA = sumA + sum(matA[2,m2,m3,m4])
@@ -66,5 +66,7 @@ function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64,Msize::Inf64)
         matA[2,:,:,:] .= 0
 
     end
+
+    return sumA
 
 end
