@@ -76,7 +76,7 @@ function Hintfunc(Msize0::Int64, Np::Int64)
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
-                               end
+                               end12
 
                             end
 
