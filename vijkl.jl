@@ -9,7 +9,7 @@ function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64,Msize::Inf64)
     end
 
     M = (n1 + n2 + n3 + n4)/2
-    matA = zeros(2,Msize,Msize,Msize)
+    matA = zeros(Float64,,Msize,Msize,Msize)
     maxm1 = ceil(Int64,n1/2)+1
     maxm2 = ceil(Int64,n2/2)+1
     maxm3 = ceil(Int64,n3/2)+1
@@ -34,25 +34,37 @@ function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64,Msize::Inf64)
     for m2 = 1:maxm2-1
         for m34 = 1:maxm3*maxm4 # parfor
             m3 = div(m34,maxm4)+1
-            m4 = mod(m34,maxm4) # m34 - div(m34,maxm4)*maxm4
+            m4 = mod(m34,maxm4) # m34-div(m34,maxm4)*maxm4
             if m4 == 0
-               m3 = m3-1 #div(m34,maxm4)
-               m4 = maxm4
+               m3 = m3-1 # div(m34,maxm4)
+               m4 = maxm4 # m34-(div(m34,maxm4)-1)*maxm4 = m34-(m3-1)*maxm4 = maxm4
             end
             matA[1,m2+1,m3,m4] = matA[1,m2,m3,m4]*2*(n2-2m2+2)*(n2-2m2+1)/m2*(M-m2-m3-m4+3)/(2M-2m2-2m3-2m4+6)/(2M-2m2-2m3-2m4+5)
         end
     end
 
-    for m1 = 1:maxm1
+    sumA = sum(matA[1,m2,m3,m4])
+    for m1 = 2:maxm1
+å
         for m234 = 1:maxm2*maxm3*maxm4 # parfor
             m2 = div(m234,maxm3*maxm4)+1
             m3 = div(m234 - (m2-1)*maxm3*maxm4,maxm4)+1
             m4 = m234 - (m2-1)*maxm3*maxm4 - (m3-1)*maxm4
-            if m4 == 0
+            if mod(m234,maxm3*maxm4) == 0
+               m2 = m2-1
+               m3 = maxm3
+               m4 = maxm4
+            elseif mod(m234 - (m2-1)*maxm3*maxm4,maxm4) == 0
                m3 = m3-1
                m4 = maxm4
             end
+            matA[2,m2,m3,m4] = matA[1,m2,m3,m4]*
         end
+
+        sumA = sumA + sum(matA[2,m2,m3,m4])
+        matA[1,:,:,:] = matA[2,:,:,:]
+        matA[2,:,:,:] .= 0
+
     end
 
 end
