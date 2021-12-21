@@ -16,7 +16,7 @@ function cutMsizeEne(Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Ene0minumhal
 
     for nn = 1:maxmatp
 
-        Enenn = in2bEne(nn,Msize,Np)
+        Enenn = in2bEne(nn,Msize,Np,matp)
 
         if Enenn <= Ene0minumhalf
            mm = mm + 1
