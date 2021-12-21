@@ -7,6 +7,7 @@ include("pascaltriangle.jl")
 include("in2b.jl")
 include("b2in.jl")
 include("epsilon.jl")
+include("Hintfunc.jl")
 
 function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
@@ -81,3 +82,5 @@ function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
     return lambda, phi
 
 end
+
+# main
