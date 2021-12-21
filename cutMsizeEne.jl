@@ -7,7 +7,7 @@ function cutMsizeEne(Msize0::Int64, Np::Int64, Ene0minumhalf::Int64)
 
     Msize = Msize0*2
 
-    matp = zeros(Int,Msize+1,Np+1)
+    matp = zeros(Int64,Msize+1,Np+1)
     pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
     maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
@@ -25,6 +25,8 @@ function cutMsizeEne(Msize0::Int64, Np::Int64, Ene0minumhalf::Int64)
 
     end
 
-    return indvec
+    indvec1 = copy(indvec[1:mm])
+
+    return indvec1
 
 end
