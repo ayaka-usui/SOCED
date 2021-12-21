@@ -23,7 +23,7 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64)
     indM = Msize-1
     indN = Np
 
-    Ene = 0
+    Eneminumhalf = 0
 
     while true
 
@@ -37,7 +37,7 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64)
              # vecmb[Msize-indM] = vecmb[Msize-indM] + 1
              indN = indN - 1
 
-             Ene = Ene + ceil(Int64,(Msize-indM)/2)-1
+             Eneminumhalf = Eneminumhalf + ceil(Int64,(Msize-indM)/2)-1
 
           else
              indM = indM - 1
@@ -49,6 +49,6 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64)
     # vecmb[Msize+1] = 1
 
     # return vecmb
-    return Ene+1/2
+    return Eneminumhalf #+1/2
 
 end

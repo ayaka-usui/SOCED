@@ -12,7 +12,9 @@ function b2in(vecmb::SparseVector{Int64})
     # Lm = mbsize+1
     # Ln = Np + 1
     indfk = 1
-    matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
+    matp = zeros(Int,Msize+1,Np+1);
+    pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
+    # matp = pascaltriangle(Msize,Np) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
 
     for jj = 1:Msize
