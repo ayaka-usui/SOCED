@@ -83,4 +83,13 @@ function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
 
 end
 
-# main
+function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64)
+
+    # Msize = Msize0*2
+    mat0 = Hsocfunc(Msize0,Np,ksoc,Omega)
+    mat1, mat2, mat3 = Hintfunc(Msize0,Np)
+    lambda, phi = diagonaliseHsoc(mat0+gdown*mat1+gup*mat2+gdu*mat3)
+
+    return lambda
+
+end
