@@ -61,12 +61,13 @@ function Hintfunc(Msize0::Int64, Np::Int64)
                         for mm = 1:nn
 
                             vecmbmm = in2b(mm,Msize,Np)
+                            
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
 
-                               n1 = ceil(Int64,ii/2)
-                               n2 = ceil(Int64,jj/2)
-                               n3 = ceil(Int64,kk/2)
-                               n4 = ceil(Int64,ll/2)
+                               n1 = ceil(Int64,ii/2)-1
+                               n2 = ceil(Int64,jj/2)-1
+                               n3 = ceil(Int64,kk/2)-1
+                               n4 = ceil(Int64,ll/2)-1
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
