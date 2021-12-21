@@ -20,13 +20,19 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
 
 end
 
-function Vijklmatfunc!(n1::Int64,n2::Int64,n3::Int64,n4::Int64,matA::Matrix{Float64})
+function Vijklmatfunc!(matV::Matrix{Float64})
 
-    if isodd(n1 + n2 + n3 + n4)
-       return 0.0
-    end
-
+    matV .= 0.0
     
+
+
+
+    vecn = [n1, n2, n3, n4]
+    sort!(vecn,rev=true)
+    n1 = vecn[1]
+    n2 = vecn[2]
+    n3 = vecn[3]
+    n4 = vecn[4]
 
     M = Int64((n1 + n2 + n3 + n4)/2)
     maxm1 = floor(Int64,n1/2)+1

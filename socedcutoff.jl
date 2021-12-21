@@ -104,11 +104,10 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
 
     # interaction Hamiltonian
 
-    # calculate and save Vijkl(n1,n2,n3,n4)
-    nmax = ceil(Int64,Msize/2)-1
-    matA = spzeros(Float64,nmax,nmax,nmax)
-
-    Vijkl(n1,n2,n3,n4)
+    # # calculate and save Vijkl(n1,n2,n3,n4)
+    # nmax = ceil(Int64,Msize/2)-1
+    # matA = spzeros(Float64,nmax,nmax,nmax)
+    # Vijkl(n1,n2,n3,n4)
 
     # mat1, mat2, mat3 = Hintfunccutoff(indvec,Msize0,Np)
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
