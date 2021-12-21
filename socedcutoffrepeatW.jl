@@ -83,10 +83,10 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
     end
 
     # since the Hamiltonian is helmitian
-    # Hsoc = Hsoc + Hsoc' - spdiagm(diag(Hsoc))
-    # matHO =
-    matSOC = matSOC + matSOC' - spdiagm(diag(matSOC))
-    matW = matW + matW' - spdiagm(diag(matW))
+    # Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
+    # matHO .=
+    matSOC .= matSOC + matSOC' - spdiagm(diag(matSOC))
+    matW .= matW + matW' - spdiagm(diag(matW))
 
     # return Hsoc
 
@@ -107,7 +107,7 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0:
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
-    Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
+    # Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
     # lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     # single-particle Hamiltonian
@@ -156,5 +156,6 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0:
     end
 
     return lambdajj, arrayOmega
+
 
 end
