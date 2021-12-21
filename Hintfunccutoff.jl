@@ -3,10 +3,10 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("ades.jl")
 include("acre.jl")
-include("pascaltriangle.jl")
+# include("pascaltriangle.jl")
 include("in2b.jl")
-include("b2in.jl")
-include("epsilon.jl")
+# include("b2in.jl")
+# include("epsilon.jl")
 include("vijkl.jl")
 
 function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})

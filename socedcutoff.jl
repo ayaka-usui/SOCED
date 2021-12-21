@@ -10,7 +10,7 @@ include("epsilon.jl")
 include("cutMsizeEne.jl")
 include("Hintfunccutoff.jl")
 
-function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, ksoc::Float64, Omega::Float64, Hsoc::SparseMatrixCSC{ComplexF64})
+function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, energyijmat::Matrix{Float64}, ksoc::Float64, Omega::Float64, Hsoc::SparseMatrixCSC{ComplexF64})
 
     Msize = Msize0*2
     maxmatpcut = length(indvec)
@@ -25,14 +25,14 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatpcut #maxmatp
 
-        vecmbnn = spzeros(Int64,Msize+1);
+        vecmbnn = spzeros(Int64,Msize+1)
         in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
         energyij = 0.
 
         # free terms
         for jj = 1:Msize
 
-            vecmbnnj = spzeros(Int64,Msize+1);
+            vecmbnnj = spzeros(Int64,Msize+1)
             ades!(jj,vecmbnn,vecmbnnj) #vecmbnnj = ades(jj,vecmbnn)
             if vecmbnnj[Msize+1] == 0
                continue
@@ -40,17 +40,18 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
             for ii = 1:Msize
 
-                vecmbnnij = spzeros(Int64,Msize+1);
+                vecmbnnij = spzeros(Int64,Msize+1)
                 acre!(ii,vecmbnnj,vecmbnnij) #vecmbnnij = acre(ii,vecmbnnj)
 
-                energyij = epsilon(ii,jj,ksoc,Omega)
+                # energyij = epsilon(ii,jj,ksoc,Omega)
+                energyij = energyijmat[ii,jj]
                 if isapprox(energyij,0) #energyij == 0 # energy is Int and zero if ii==jj
                    continue #vecmbnnij[1+Msize] = 0
                 end
 
                 for mm = 1:nn
 
-                    vecmbmm = spzeros(Int64,Msize+1);
+                    vecmbmm = spzeros(Int64,Msize+1)
                     in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                     if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
@@ -68,7 +69,6 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
         #
         # end
 
-
     end
 
     # since the Hamiltonian is helmitian
@@ -78,16 +78,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
 end
 
-function diagonaliseH(Hsoc::SparseMatrixCSC{ComplexF64},specnum::Int64)
-
-    lambda, phi = eigs(Hsoc,nev=specnum,which=:SR)
-    # lambda = real(lambda)
-
-    return lambda, phi
-
-end
-
-function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64)
+function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64, specnum::Int64)
 
     # define cutoff of energy in Fock states
     Msize = Msize0*2
@@ -98,17 +89,33 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
     maxmatpcut = length(indvec)
 
     # single-particle Hamiltonian
+
+    # calculate and save energyij
+    energyijmat = zeros(Float64,Msize,Msize);
+    for ii = 1:Msize
+        for jj = 1:Msize
+            energyij[ii,jj] = epsilon(ii,jj,ksoc,Omega)
+        end
+    end
+
     # mat0 = Hsocfunccutoff(indvec,Msize0,Np,ksoc,Omega)
     mat0 = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
-    Hsocfunccutoff!(indvec,Msize0,Np,matp,ksoc,Omega,mat0)
+    Hsocfunccutoff!(indvec,Msize0,Np,matp,energyij,ksoc,Omega,mat0)
 
     # interaction Hamiltonian
+
+    # calculate and save Vijkl(n1,n2,n3,n4)
+    nmax = ceil(Int64,Msize/2)-1
+    matA = spzeros(Float64,nmax,nmax,nmax)
+
+    Vijkl(n1,n2,n3,n4)
+
     # mat1, mat2, mat3 = Hintfunccutoff(indvec,Msize0,Np)
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
     Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
-    lambda, phi = diagonaliseH(mat0+gdown*mat1+gup*mat2+gdu*mat3,6)
+    lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     return lambda
 
