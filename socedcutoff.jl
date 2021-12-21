@@ -10,24 +10,26 @@ include("epsilon.jl")
 include("Hintfunc.jl")
 include("cutMsizeEne.jl")
 
-function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
+function Hsocfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
     Msize = Msize0*2
+    maxmatpcut = length(indvec)
 
-    matp = zeros(Int,Msize+1,Np+1);
-    pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
-    maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
+    # matp = zeros(Int,Msize+1,Np+1);
+    # pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
+    # maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # defines vectors and matrices
     vecmbnn = spzeros(Int64,Msize+1);
     vecmbnnj = spzeros(Int64,Msize+1);
     vecmbnnij = spzeros(Int64,Msize+1);
-    Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
+    Hsoc = spzeros(ComplexF64,maxmatpcut,maxmatpcut); #spzeros(ComplexF64,maxmatp,maxmatp);
 
     # define a matrix for the Hamiltonian
-    for nn = 1:maxmatp
+    for nn = 1:maxmatpcut #maxmatp
 
-        vecmbnn = in2b(nn,Msize,Np)
+
+        vecmbnn = in2b(maxmatpcut[nn],Msize,Np) #in2b(nn,Msize,Np)
         energyij = 0.
 
         # free terms
@@ -49,7 +51,7 @@ function Hsocfunc(Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
                 for mm = 1:nn
 
-                    vecmbmm = in2b(mm,Msize,Np)
+                    vecmbmm = in2b(maxmatpcut[mm],Msize,Np)
                     if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
                        Hsoc[mm,nn] = Hsoc[mm,nn] + energyij*sqrt(vecmbnnij[Msize+1])
                     end
@@ -84,14 +86,14 @@ function diagonaliseHsoc(Hsoc::SparseMatrixCSC{ComplexF64})
 
 end
 
-function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64)
+function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64)
 
     # Msize = Msize0*2
-    # indvec = cutMsizeEne(Msize0,Np,Ene0minumhalf)
+    indvec = cutMsizeEne(Msize0,Np,Ene0minumhalf)
     # Msizecut = length(indvec)
 
-    mat0 = Hsocfunc(Msize0,Np,ksoc,Omega)
-    mat1, mat2, mat3 = Hintfunc(Msize0,Np)
+    mat0 = Hsocfunccutoff(indvec,Msize0,Np,ksoc,Omega)
+    mat1, mat2, mat3 = Hintfuncutoff(indvec,Msize0,Np)
     lambda, phi = diagonaliseHsoc(mat0+gdown*mat1+gup*mat2+gdu*mat3)
 
     return lambda
