@@ -23,9 +23,9 @@ function Hintfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64)
     vecmbnnj = spzeros(Int64,Msize+1);
     vecmbnnij = spzeros(Int64,Msize+1);
     # Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
-    Hintdown = spzeros(Float64,maxmatp,maxmatp);
-    Hintup = spzeros(Float64,maxmatp,maxmatp);
-    Hintdu = spzeros(Float64,maxmatp,maxmatp);
+    Hintdown = spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintup = spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintdu = spzeros(Float64,maxmatpcut,maxmatpcut);
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatpcut #maxmatp

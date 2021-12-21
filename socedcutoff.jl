@@ -9,6 +9,7 @@ include("b2in.jl")
 include("epsilon.jl")
 include("Hintfunc.jl")
 include("cutMsizeEne.jl")
+include("Hintfunccutoff.jl")
 
 function Hsocfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ksoc::Float64, Omega::Float64)
 
@@ -28,8 +29,7 @@ function Hsocfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ksoc::F
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatpcut #maxmatp
 
-
-        vecmbnn = in2b(maxmatpcut[nn],Msize,Np) #in2b(nn,Msize,Np)
+        vecmbnn = in2b(indvec[nn],Msize,Np) #in2b(nn,Msize,Np)
         energyij = 0.
 
         # free terms
@@ -51,7 +51,7 @@ function Hsocfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ksoc::F
 
                 for mm = 1:nn
 
-                    vecmbmm = in2b(maxmatpcut[mm],Msize,Np)
+                    vecmbmm = in2b(indvec[mm],Msize,Np)
                     if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
                        Hsoc[mm,nn] = Hsoc[mm,nn] + energyij*sqrt(vecmbnnij[Msize+1])
                     end
@@ -93,7 +93,7 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
     # Msizecut = length(indvec)
 
     mat0 = Hsocfunccutoff(indvec,Msize0,Np,ksoc,Omega)
-    mat1, mat2, mat3 = Hintfuncutoff(indvec,Msize0,Np)
+    mat1, mat2, mat3 = Hintfunccutoff(indvec,Msize0,Np)
     lambda, phi = diagonaliseHsoc(mat0+gdown*mat1+gup*mat2+gdu*mat3)
 
     return lambda
