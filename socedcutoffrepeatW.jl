@@ -107,7 +107,7 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0:
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
-    # Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
+    Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
     # lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     # single-particle Hamiltonian
