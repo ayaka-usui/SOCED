@@ -9,7 +9,7 @@ include("b2in.jl")
 include("epsilon.jl")
 include("vijkl.jl")
 
-function Hintfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64)
+function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
 
     Msize = Msize0*2
     maxmatpcut = length(indvec)
@@ -19,56 +19,58 @@ function Hintfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64)
     # maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # defines vectors and matrices
-    vecmbnn = spzeros(Int64,Msize+1);
-    vecmbnnj = spzeros(Int64,Msize+1);
-    vecmbnnij = spzeros(Int64,Msize+1);
-    # Hsoc = spzeros(ComplexF64,maxmatp,maxmatp);
-    Hintdown = spzeros(Float64,maxmatpcut,maxmatpcut);
-    Hintup = spzeros(Float64,maxmatpcut,maxmatpcut);
-    Hintdu = spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 
     # define a matrix for the Hamiltonian
     for nn = 1:maxmatpcut #maxmatp
 
-        vecmbnn = in2b(indvec[nn],Msize,Np) #in2b(nn,Msize,Np)
+        vecmbnn = spzeros(Int64,Msize+1)
+        in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)
 
         # Interactions
         for ll = 1:Msize
 
-            vecmbnnl = ades(ll,vecmbnn)
+            vecmbnnl = spzeros(Int64,Msize+1);
+            ades!(ll,vecmbnn,vecmbnnl) #vecmbnnl = ades(ll,vecmbnn)
             if vecmbnnl[Msize+1] == 0
                continue
             end
 
             for kk = 1:Msize
 
-                vecmbnnkl = ades(kk,vecmbnnl)
+                vecmbnnkl = spzeros(Int64,Msize+1)
+                ades!(kk,vecmbnnl,vecmbnnkl) #vecmbnnkl = ades(kk,vecmbnnl)
                 if vecmbnnkl[Msize+1] == 0
                    continue
                 end
 
                 for jj = 1:Msize
 
-                    vecmbnnjkl = acre(jj,vecmbnnkl)
+                    vecmbnnjkl = spzeros(Int64,Msize+1)
+                    acre!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
 
                     for ii = 1:Msize
 
-                        vecmbnnijkl = acre(ii,vecmbnnjkl)
+                        vecmbnnijkl = spzeros(Int64,Msize+1)
+                        acre!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
 
-                        # if isodd(ii+jj+kk+ll)
-                        #    continue
-                        # end
+                        n1 = ceil(Int64,ii/2)-1
+                        n2 = ceil(Int64,jj/2)-1
+                        n3 = ceil(Int64,kk/2)-1
+                        n4 = ceil(Int64,ll/2)-1
+
+                        if isodd(n1+n2+n3+n4)
+                           continue
+                        end
 
                         for mm = 1:nn
 
-                            vecmbmm = in2b(indvec[mm],Msize,Np)
+                            vecmbmm = spzeros(Int64,Msize+1)
+                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
-
-                               n1 = ceil(Int64,ii/2)-1
-                               n2 = ceil(Int64,jj/2)-1
-                               n3 = ceil(Int64,kk/2)-1
-                               n4 = ceil(Int64,ll/2)-1
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
@@ -93,10 +95,10 @@ function Hintfunccutoff(indvec::Vector{Int64}, Msize0::Int64, Np::Int64)
         end
     end
 
-    Hintdown = Hintdown + Hintdown' - spdiagm(diag(Hintdown))
-    Hintup = Hintup + Hintup' - spdiagm(diag(Hintup))
-    Hintdu = Hintdu + Hintdu' - spdiagm(diag(Hintdu))
+    Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
+    Hintup .= Hintup + Hintup' - spdiagm(diag(Hintup))
+    Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
 
-    return Hintdown, Hintup, Hintdu
+    # return Hintdown, Hintup, Hintdu
 
 end

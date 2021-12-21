@@ -1,12 +1,12 @@
-include("pascaltriangle.jl") # define pascaltriangle(m,n)
+# include("pascaltriangle.jl") # define pascaltriangle(m,n)
 
-function in2bEne(jj::Int64, Msize::Int64, Np::Int64)
+function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
 
     # this function return the index of Fock state at the index of many body state
     indfk = copy(jj)
 
-    matp = zeros(Int,Msize+1,Np+1);
-    pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
+    # matp = zeros(Int,Msize+1,Np+1);
+    # pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
 
     # unlike Ponomarev's way, I count the index of Fock state in the backwards
