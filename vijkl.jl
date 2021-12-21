@@ -20,12 +20,7 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
 
 end
 
-function Vijkl(ii::Int64,jj::Int64,kk::Int64,ll::Int64)
-
-    n1 = copy(ii)
-    n2 = copy(jj)
-    n3 = copy(kk)
-    n4 = copy(ll)
+function Vijkl(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     if isodd(n1 + n2 + n3 + n4)
        return 0.0
