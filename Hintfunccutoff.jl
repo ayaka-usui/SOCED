@@ -65,12 +65,15 @@ function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
                            continue
                         end
 
-                        for mm = 1:nn
+                        for mm = 1:nn # parfor
 
                             vecmbmm = spzeros(Int64,Msize+1)
                             in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
+
+                               # prepare matA
+                               # matA =
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
