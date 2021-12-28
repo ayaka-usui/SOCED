@@ -46,7 +46,8 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     # m1=m2=1
     for m3 = 1:maxm3-1
-        Threads.@threads for m4 = 1:maxm4 # parfor
+        # Threads.@threads for m4 = 1:maxm4 # parfor
+        for m4 = 1:maxm4
             # matA[1,1,m3+1,m4] = matA[1,1,m3,m4]*(-1)*2*(n3-2m3+2)*(n3-2m3+1)/m3*(M-m3-m4+2)/(2M-2m3-2m4+4)/(2M-2m3-2m4+3)
             matA[1,1,m3+1,m4] = matA[1,1,m3,m4]*recurringA1(n1,n2,n3,n4,0,0,m3,m4)
         end
@@ -54,7 +55,8 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     # m1=1
     for m2 = 1:maxm2-1
-        Threads.@threads for m34 = 1:maxm3*maxm4 # parfor
+        # Threads.@threads for m34 = 1:maxm3*maxm4 # parfor
+        for m34 = 1:maxm3*maxm4
             m3 = div(m34,maxm4)+1
             m4 = mod(m34,maxm4) # m34-div(m34,maxm4)*maxm4
             if m4 == 0
@@ -69,7 +71,8 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     sumA = sum(matA[1,:,:,:])
     for m1 = 1:maxm1-1
 
-        Threads.@threads for m234 = 1:maxm2*maxm3*maxm4 # parfor
+        # Threads.@threads for m234 = 1:maxm2*maxm3*maxm4 # parfor
+        for m234 = 1:maxm2*maxm3*maxm4
             m2 = div(m234,maxm3*maxm4)+1
             m3 = div(m234 - (m2-1)*maxm3*maxm4,maxm4)+1
             m4 = m234 - (m2-1)*maxm3*maxm4 - (m3-1)*maxm4

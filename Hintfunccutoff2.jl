@@ -7,7 +7,7 @@ include("acre.jl")
 include("in2b.jl")
 # include("b2in.jl")
 # include("epsilon.jl")
-include("vijkl.jl")
+include("vijkl2.jl")
 
 function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
 
@@ -76,13 +76,13 @@ function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
                                # matA =
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
-                                  Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
-                                  Hintup[mm,nn] = Hintup[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end

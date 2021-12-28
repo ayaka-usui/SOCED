@@ -27,7 +27,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
         vecmbnn = spzeros(Int64,Msize+1)
         in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
-        energyij = 0.
+        # energyij = 0.
 
         # free terms
         for jj = 1:Msize
@@ -94,13 +94,13 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
     energyijmat = zeros(Float64,Msize,Msize);
     for ii = 1:Msize
         for jj = 1:Msize
-            energyij[ii,jj] = epsilon(ii,jj,ksoc,Omega)
+            energyijmat[ii,jj] = epsilon(ii,jj,ksoc,Omega)
         end
     end
 
     # mat0 = Hsocfunccutoff(indvec,Msize0,Np,ksoc,Omega)
     mat0 = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
-    Hsocfunccutoff!(indvec,Msize0,Np,matp,energyij,ksoc,Omega,mat0)
+    Hsocfunccutoff!(indvec,Msize0,Np,matp,energyijmat,ksoc,Omega,mat0)
 
     # interaction Hamiltonian
 
@@ -114,6 +114,8 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
     Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
+
+    # diagonalisation
     lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     return lambda
