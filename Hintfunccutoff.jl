@@ -24,7 +24,7 @@ function Hintfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
     Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 
     # define a matrix for the Hamiltonian
-    Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
+    for nn = 1:maxmatpcut #maxmatp # parfor
 
         vecmbnn = spzeros(Int64,Msize+1)
         in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)

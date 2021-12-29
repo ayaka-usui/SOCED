@@ -8,7 +8,7 @@ include("in2b.jl")
 # include("b2in.jl")
 include("epsilon.jl")
 include("cutMsizeEne.jl")
-include("Hintfunccutoff.jl")
+include("Hintfunccutoff2.jl")
 
 function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, energyijmat::Matrix{Float64}, ksoc::Float64, Omega::Float64, Hsoc::SparseMatrixCSC{ComplexF64})
 
@@ -78,7 +78,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
 end
 
-function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64, specnum::Int64)
+function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64, specnum::Int64)
 
     # define cutoff of energy in Fock states
     Msize = Msize0*2
@@ -114,7 +114,7 @@ function main(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
-    Hintfunccutoff!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
+    Hintfunccutoff2!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
 
     # diagonalisation
     lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
