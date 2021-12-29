@@ -4,6 +4,7 @@ include("pascaltriangle.jl") # define pascaltriangle(m,n)
 function b2in(vecmb::SparseVector{Int64})
 
     # this function return the index of many body state at the index of Fock state
+    # "b2in" means "a many-body state to an index"
 
     # ignore the last element since it is the coefficient
     Msize = length(vecmb)-1

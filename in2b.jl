@@ -3,6 +3,8 @@
 function in2b!(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64}, vecmb::SparseVector{Int64})
 
     # this function return the index of Fock state at the index of many body state
+    # "in2b" means "an index to a many-body state"
+
     indfk = jj
 
     # matp = zeros(Int,Msize+1,Np+1);

@@ -2,7 +2,8 @@
 
 function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
 
-    # this function return the index of Fock state at the index of many body state
+    # this function return the index of Fock state at the energy of many body state
+
     indfk = copy(jj)
 
     # matp = zeros(Int,Msize+1,Np+1);
@@ -50,5 +51,6 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
 
     # return vecmb
     return Eneminumhalf #+1/2
+    # Ene0minumhalf equals to "the energy cut-off" - 1/2 so that Ene0minumhalf is integer.
 
 end

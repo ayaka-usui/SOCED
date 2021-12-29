@@ -5,6 +5,9 @@ include("in2bEne.jl")
 
 function cutMsizeEne(Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Ene0minumhalf::Int64)
 
+    # this function puts the cut-off in the number of states by a given energy
+    # Ene0minumhalf equals to "the energy cut-off" - 1/2 so that Ene0minumhalf is integer. 
+
     Msize = Msize0*2
 
     # matp = zeros(Int64,Msize+1,Np+1)

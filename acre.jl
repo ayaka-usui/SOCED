@@ -1,5 +1,7 @@
 function acre!(jj::Int64, input::SparseVector{Int64}, fock::SparseVector{Int64})
 
+    # creation operator, a_{jj}^{\dagger}
+
     # fock is a fock state, a vector having integers
     # its last element is square of coefficient
     fock .= input

@@ -23,7 +23,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
     Hsoc .= 0; #Hsoc = spzeros(ComplexF64,maxmatpcut,maxmatpcut); #spzeros(ComplexF64,maxmatp,maxmatp);
 
     # define a matrix for the Hamiltonian
-    for nn = 1:maxmatpcut #maxmatp
+    for nn = 1:maxmatpcut #maxmatp # parfor
 
         vecmbnn = spzeros(Int64,Msize+1)
         in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
@@ -34,7 +34,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
             vecmbnnj = spzeros(Int64,Msize+1)
             ades!(jj,vecmbnn,vecmbnnj) #vecmbnnj = ades(jj,vecmbnn)
-            if vecmbnnj[Msize+1] == 0
+            if vecmbnnj[Msize+1] == 0 # go back if a|0> = 0
                continue
             end
 
@@ -88,8 +88,7 @@ function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega:
     indvec = cutMsizeEne(Msize0,Np,matp,Ene0minumhalf)
     maxmatpcut = length(indvec)
 
-    # single-particle Hamiltonian
-
+    # Hamiltonian
     # calculate and save energyij
     energyijmat = zeros(Float64,Msize,Msize);
     for ii = 1:Msize
@@ -98,19 +97,12 @@ function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega:
         end
     end
 
+    # construct the single-particle Hamiltonian
     # mat0 = Hsocfunccutoff(indvec,Msize0,Np,ksoc,Omega)
     mat0 = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
     Hsocfunccutoff!(indvec,Msize0,Np,matp,energyijmat,ksoc,Omega,mat0)
 
-    # interaction Hamiltonian
-
-    # # calculate and save Vijkl(n1,n2,n3,n4)
-    # nmax = ceil(Int64,Msize/2)-1
-    # matA = spzeros(Float64,nmax,nmax,nmax)
-    # Vijkl(n1,n2,n3,n4)
-
-    # mat1, mat2, mat3 = Hintfunccutoff(indvec,Msize0,Np)
-
+    # construct the interaction Hamiltonian
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
     mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)

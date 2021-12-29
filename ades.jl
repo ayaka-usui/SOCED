@@ -1,5 +1,7 @@
 function ades!(jj::Int64, input::SparseVector{Int64}, fock::SparseVector{Int64})
 
+    # anihilation operator, a_{jj}
+
     # fock is a fock state, a vector having integers
     # its last element is square of coefficient
     fock .= input
