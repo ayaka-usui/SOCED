@@ -74,6 +74,7 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     end
 
     sumA = sum(matA[1,:,:,:])
+
     for m1 = 1:maxm1-1
 
         # Threads.@threads for m234 = 1:maxm2*maxm3*maxm4 # parfor
@@ -94,12 +95,13 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
         end
 
         sumA = sumA + sum(matA[2,:,:,:])
-        matA[1,:,:,:] = matA[2,:,:,:]
+        matA[1,:,:,:] .= matA[2,:,:,:]
         matA[2,:,:,:] .= Rational(BigInt(0)) #0
 
     end
 
-    sumA = sumA*exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4))))
+    # sumA = sumA*exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4))))
+    sumA = Float64(sumA)*exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4))))
 
     # if sumA < 0
     #    sumA = -sumA
