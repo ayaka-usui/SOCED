@@ -1,6 +1,7 @@
 function recurringA0(M2::Int64,m1::Int64,m2::Int64,m3::Int64,m4::Int64)
     # return (M-m1-m2-m3-m4+4)/(2M-2m1-2m2-2m3-2m4+8)/(2M-2m1-2m2-2m3-2m4+7)
-    return BigFloat(1)/BigFloat(M2-2m1-2m2-2m3-2m4+7) #BigFloat(1/(M2-2m1-2m2-2m3-2m4+7))
+    # return BigFloat(1)/BigFloat(M2-2m1-2m2-2m3-2m4+7) #BigFloat(1/(M2-2m1-2m2-2m3-2m4+7))
+    return 1//BigInt(M2-2m1-2m2-2m3-2m4+7)
 end
 
 function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64,m3::Int64,m4::Int64)
@@ -8,13 +9,17 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
     # M = Int64((n1 + n2 + n3 + n4)/2) # integer
 
     if m1 == m2 == m3 == 0
-       coeff = (-1)*BigFloat(n4-2m4+2)*BigFloat(n4-2m4+1)/BigFloat(m4)*recurringA0(n1+n2+n3+n4,1,1,1,m4)
+       # coeff = (-1)*BigFloat(n4-2m4+2)*BigFloat(n4-2m4+1)/BigFloat(m4)*recurringA0(n1+n2+n3+n4,1,1,1,m4)
+       coeff = (-1)*BigInt(n4-2m4+2)*BigInt(n4-2m4+1)//BigInt(m4)*recurringA0(n1+n2+n3+n4,1,1,1,m4)
     elseif m1 == m2 == 0
-       coeff = (-1)*BigFloat(n3-2m3+2)*BigFloat(n3-2m3+1)/BigFloat(m3)*recurringA0(n1+n2+n3+n4,1,1,m3,m4)
+       # coeff = (-1)*BigFloat(n3-2m3+2)*BigFloat(n3-2m3+1)/BigFloat(m3)*recurringA0(n1+n2+n3+n4,1,1,m3,m4)
+       coeff = (-1)*BigInt(n3-2m3+2)*BigInt(n3-2m3+1)//BigInt(m3)*recurringA0(n1+n2+n3+n4,1,1,m3,m4)
     elseif m1 == 0
-       coeff = (-1)*BigFloat(n2-2m2+2)*BigFloat(n2-2m2+1)/BigFloat(m2)*recurringA0(n1+n2+n3+n4,1,m2,m3,m4)
+       # coeff = (-1)*BigFloat(n2-2m2+2)*BigFloat(n2-2m2+1)/BigFloat(m2)*recurringA0(n1+n2+n3+n4,1,m2,m3,m4)
+       coeff = (-1)*BigInt(n2-2m2+2)*BigInt(n2-2m2+1)//BigInt(m2)*recurringA0(n1+n2+n3+n4,1,m2,m3,m4)
     else
-       coeff = (-1)*BigFloat(n1-2m1+2)*BigFloat(n1-2m1+1)/BigFloat(m1)*recurringA0(n1+n2+n3+n4,m1,m2,m3,m4)
+       # coeff = (-1)*BigFloat(n1-2m1+2)*BigFloat(n1-2m1+1)/BigFloat(m1)*recurringA0(n1+n2+n3+n4,m1,m2,m3,m4)
+       coeff = (-1)*BigInt(n1-2m1+2)*BigInt(n1-2m1+1)//BigInt(m1)*recurringA0(n1+n2+n3+n4,m1,m2,m3,m4)
     end
 
     return coeff
@@ -32,10 +37,10 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     maxm2 = floor(Int64,n2/2)+1
     maxm3 = floor(Int64,n3/2)+1
     maxm4 = floor(Int64,n4/2)+1
-    matA = zeros(BigFloat,2,maxm2,maxm3,maxm4) #zeros(Float64,2,maxm2,maxm3,maxm4)
+    matA = zeros(Rational{BigInt},2,maxm2,maxm3,maxm4) #zeros(BigFloat,2,maxm2,maxm3,maxm4) #zeros(Float64,2,maxm2,maxm3,maxm4)
 
     # m1=m2=m3=m4=1
-    matA[1,1,1,1] = BigFloat(1.0)
+    matA[1,1,1,1] = Rational(BigInt(1)) #BigFloat(1.0)
     # matA[1,1,1,1] = exp(-2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4))))
 
     # m1=m2=m3=1
@@ -90,7 +95,7 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
         sumA = sumA + sum(matA[2,:,:,:])
         matA[1,:,:,:] = matA[2,:,:,:]
-        matA[2,:,:,:] .= 0
+        matA[2,:,:,:] .= Rational(BigInt(0)) #0
 
     end
 
