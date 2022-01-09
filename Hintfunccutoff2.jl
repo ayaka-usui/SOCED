@@ -30,7 +30,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     vecmbnnkl = spzeros(Int64,Msize+1)
     vecmbnnjkl = spzeros(Int64,Msize+1)
     vecmbnnijkl = spzeros(Int64,Msize+1)
-    vecmbmm = spzeros(Int64,Msize+1,nthreads())
+    vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
 
     # define a matrix for the Hamiltonian
     # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
@@ -82,22 +82,25 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                            continue
                         end
 
-                        Threads.@threads for mm = 1:nn
+                        # Threads.@threads for mm = 1:nn
+                        for mm = 1:nn
                             tid = Threads.threadid()
 
-                            vecmbmm[:,tid] .= spzeros(Int64,Msize+1)
-                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm[:,tid]) #vecmbmm = in2b(indvec[mm],Msize,Np)
+                            # vecmbmm[:,tid] .= spzeros(Int64,Msize+1)
+                            vec0 = spzeros(Int64,Msize+1) #copy(vecmbmm[:,tid])
+                            in2b!(indvec[mm],Msize,Np,matp,vec0)
+                            # in2b!(indvec[mm],Msize,Np,matp,vecmbmm[:,tid]) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
-                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize,tid] # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
+                            if vecmbnnijkl[1:Msize] == vec0[1:Msize] # vecmbnnijkl[1:Msize] .- vecmbmm[1:Msize,tid])) == 0 # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
-                                  Hintdown[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
-                                  Hintup[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
-                                  Hintdu[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
-                                  Hintdu[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end
@@ -113,7 +116,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
         end
     end
 
-    # use conjectures for the lower triangle elements of Hint since it is hermite 
+    # use conjectures for the lower triangle elements of Hint since it is hermite
     Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
     Hintup .= Hintup + Hintup' - spdiagm(diag(Hintup))
     Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
