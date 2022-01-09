@@ -109,9 +109,3 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     return sumA
 
 end
-
-function A0000(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
-   M = Int64((n1 + n2 + n3 + n4)/2)
-   A0 = -2M*log(2)+sum(log.(M+1:2*M))-1/2*(sum(log.(2:n1))+sum(log.(2:n2))+sum(log.(2:n3))+sum(log.(2:n4)))
-   return exp(A0)/sqrt(2*pi)/2
-end

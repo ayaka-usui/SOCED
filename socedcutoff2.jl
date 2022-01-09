@@ -1,4 +1,5 @@
 using Arpack, SparseArrays, LinearAlgebra
+using FLoops
 
 # define functions used here
 include("ades.jl")

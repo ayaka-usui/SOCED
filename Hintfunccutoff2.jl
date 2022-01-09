@@ -75,12 +75,20 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                            continue
                         end
 
-                        for mm = 1:nn
+                        @floop for mm = 1:nn
+                        # for mm = 1:nn
 
                             vecmbmm = spzeros(Int64,Msize+1)
                             in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize] # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
+
+                               vec0 = [n1,n2,n3,n4]
+                               sort!(vec0,rev=true)
+                               n1 = vec0[1]
+                               n2 = vec0[2]
+                               n3 = vec0[3]
+                               n4 = vec0[4]
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
@@ -105,7 +113,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
         end
     end
 
-    # use conjectures for the lower triangle elements of Hint since it is hermite 
+    # use conjectures for the lower triangle elements of Hint since it is hermite
     Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
     Hintup .= Hintup + Hintup' - spdiagm(diag(Hintup))
     Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
