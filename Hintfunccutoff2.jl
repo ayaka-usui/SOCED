@@ -7,7 +7,7 @@ include("acre.jl")
 include("in2b.jl")
 # include("b2in.jl")
 # include("epsilon.jl")
-include("Vijkl2.jl")
+include("vijkl2.jl")
 
 function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
 
@@ -25,19 +25,26 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     Hintup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 
+    vecmbnn = spzeros(Int64,Msize+1)
+    vecmbnnl = spzeros(Int64,Msize+1);
+    vecmbnnkl = spzeros(Int64,Msize+1)
+    vecmbnnjkl = spzeros(Int64,Msize+1)
+    vecmbnnijkl = spzeros(Int64,Msize+1)
+    vecmbmm = spzeros(Int64,Msize+1,nthreads())
+
     # define a matrix for the Hamiltonian
     # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
     for nn = 1:maxmatpcut
 
         # define ket state |n>
-        vecmbnn = spzeros(Int64,Msize+1)
+        vecmbnn .= spzeros(Int64,Msize+1)
         in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)
 
         # Interactions
         for ll = 1:Msize
 
             # apply an anhilation operator a_ll to |n>
-            vecmbnnl = spzeros(Int64,Msize+1);
+            vecmbnnl .= spzeros(Int64,Msize+1);
             ades!(ll,vecmbnn,vecmbnnl) #vecmbnnl = ades(ll,vecmbnn)
             if vecmbnnl[Msize+1] == 0 # go back if a|0> = 0
                continue
@@ -46,7 +53,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
             for kk = 1:Msize
 
                 # apply a_kk to a_ll |n>
-                vecmbnnkl = spzeros(Int64,Msize+1)
+                vecmbnnkl .= spzeros(Int64,Msize+1)
                 ades!(kk,vecmbnnl,vecmbnnkl) #vecmbnnkl = ades(kk,vecmbnnl)
                 if vecmbnnkl[Msize+1] == 0
                    continue
@@ -55,13 +62,13 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                 for jj = 1:Msize
 
                     # apply a_jj^{+} to a_kk a_ll |n>
-                    vecmbnnjkl = spzeros(Int64,Msize+1)
+                    vecmbnnjkl .= spzeros(Int64,Msize+1)
                     acre!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
 
                     for ii = 1:Msize
 
                         # apply a_ii^{+} to a_jj^{+} a_kk a_ll |n>
-                        vecmbnnijkl = spzeros(Int64,Msize+1)
+                        vecmbnnijkl .= spzeros(Int64,Msize+1)
                         acre!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
 
                         # get the index of eigenstate of harmonic oscillator
@@ -75,21 +82,22 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                            continue
                         end
 
-                        for mm = 1:nn
+                        Threads.@threads for mm = 1:nn
+                            tid = Threads.threadid()
 
-                            vecmbmm = spzeros(Int64,Msize+1)
-                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
+                            vecmbmm[:,tid] .= spzeros(Int64,Msize+1)
+                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm[:,tid]) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
-                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize] # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
+                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize,tid] # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
 
                                if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
-                                  Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdown[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
-                                  Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintup[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
-                                  Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                                  Hintdu[mm,nn] = Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end
