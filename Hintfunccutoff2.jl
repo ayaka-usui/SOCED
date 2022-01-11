@@ -75,8 +75,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                            continue
                         end
 
-                        @floop for mm = 1:nn
-                        # for mm = 1:nn
+                        # @floop for mm = 1:nn
+                        for mm = 1:nn
 
                             vecmbmm = spzeros(Int64,Msize+1)
                             in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
