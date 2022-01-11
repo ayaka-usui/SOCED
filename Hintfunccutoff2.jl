@@ -102,7 +102,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize] # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
 
                                vec0 = [n1,n2,n3,n4]
-                               sort!(vec0,rev=true)
+                               sort!(vec0)
                                n1 = vec0[1]
                                n2 = vec0[2]
                                n3 = vec0[3]
