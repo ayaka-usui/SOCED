@@ -30,11 +30,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     vecmbnnkl = spzeros(Int64,Msize+1)
     vecmbnnjkl = spzeros(Int64,Msize+1)
     vecmbnnijkl = spzeros(Int64,Msize+1)
-<<<<<<< Updated upstream
     # vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
-=======
-    vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
->>>>>>> Stashed changes
 
     # define a matrix for the Hamiltonian
     # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
@@ -102,15 +98,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                                elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
                                   Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
-<<<<<<< Updated upstream
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
-=======
-                                  Hintdu[mm,nn] =  Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
-                               elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
-                                  Hintdu[mm,nn] =  Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
->>>>>>> Stashed changes
                                end
 
                             end
