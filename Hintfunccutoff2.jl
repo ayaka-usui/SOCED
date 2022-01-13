@@ -80,6 +80,11 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
                 for jj = 1:Msize
 
+                    # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
+                    if isodd(jj+ll)
+                       continue
+                    end
+
                     # apply a_jj^{+} to a_kk a_ll |n>
                     vecmbnnjkl .= spzeros(Int64,Msize+1)
                     acre!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
@@ -89,6 +94,11 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                         # apply a_ii^{+} to a_jj^{+} a_kk a_ll |n>
                         vecmbnnijkl .= spzeros(Int64,Msize+1)
                         acre!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
+
+                        # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
+                        if isodd(ii+kk)  # || isodd(jj+ll)
+                           continue
+                        end
 
                         # get the index of eigenstate of harmonic oscillator
                         n1 = ceil(Int64,ii/2)-1
@@ -119,16 +129,16 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
                             if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize] # if vecmbnnijkl[1:Msize] == vec0[1:Msize] # vecmbnnijkl[1:Msize] .- vecmbmm[1:Msize,tid])) == 0 # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
 
-                               if isodd(ii) && isodd(jj) && isodd(kk) && isodd(ll)
+                               if isodd(ii) && isodd(jj) # && isodd(kk) && isodd(ll)
                                   # Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               elseif iseven(ii) && iseven(jj) && iseven(kk) && iseven(ll)
+                               elseif iseven(ii) && iseven(jj) # && iseven(kk) && iseven(ll)
                                   # Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                   Hintup[mm,nn] = Hintup[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               elseif isodd(ii) && iseven(jj) && isodd(kk) && iseven(ll)
+                               elseif isodd(ii) && iseven(jj) # && isodd(kk) && iseven(ll)
                                   # Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               elseif iseven(ii) && isodd(jj) && iseven(kk) && isodd(ll)
+                               elseif iseven(ii) && isodd(jj) # && iseven(kk) && isodd(ll)
                                   # Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
                                end
