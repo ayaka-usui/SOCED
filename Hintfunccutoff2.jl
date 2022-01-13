@@ -34,8 +34,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
     # calculate Vijkl in advance
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0) #spzeros(Float64,Msize0,Msize0,Msize0,Msize0)
-    Threads.@threads for nn4 = 0:Msize0-1
-    # for nn4 = 0:Msize0-1
+    # Threads.@threads for nn4 = 0:Msize0-1
+    for nn4 = 0:Msize0-1
         for nn3 = 0:nn4
             for nn2 = 0:nn3
                 for nn1 = 0:nn2
@@ -111,8 +111,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                            continue
                         end
 
-                        Threads.@threads for mm = 1:nn
-                        # for mm = 1:nn
+                        # Threads.@threads for mm = 1:nn
+                        for mm = 1:nn
                             # tid = Threads.threadid()
 
                             # vecmbmm[:,tid] .= spzeros(Int64,Msize+1)

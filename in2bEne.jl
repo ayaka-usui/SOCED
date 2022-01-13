@@ -4,7 +4,7 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
 
     # this function return the index of Fock state at the energy of many body state
 
-    indfk = copy(jj)
+    indfk = jj
 
     # matp = zeros(Int,Msize+1,Np+1);
     # pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
@@ -24,7 +24,7 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
     indM = Msize-1
     indN = Np
 
-    Eneminumhalf = 0
+    Ene = 0
 
     while true
 
@@ -38,7 +38,7 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
              # vecmb[Msize-indM] = vecmb[Msize-indM] + 1
              indN = indN - 1
 
-             Eneminumhalf = Eneminumhalf + ceil(Int64,(Msize-indM)/2)-1
+             Ene = Ene + ceil(Int64,(Msize-indM)/2)-1
 
           else
              indM = indM - 1
@@ -46,11 +46,8 @@ function in2bEne(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
 
     end
 
-    # the last element for the coefficient
-    # vecmb[Msize+1] = 1
+    Ene = Ene + Int64(Np/2)
 
-    # return vecmb
-    return Eneminumhalf #+1/2
-    # Ene0minumhalf equals to "the energy cut-off" - 1/2 so that Ene0minumhalf is integer.
+    return Ene
 
 end

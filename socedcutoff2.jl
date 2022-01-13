@@ -10,6 +10,7 @@ include("in2b.jl")
 include("epsilon.jl")
 include("cutMsizeEne.jl")
 include("Hintfunccutoff2.jl")
+include("correctionint.jl")
 
 function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, energyijmat::Matrix{Float64}, ksoc::Float64, Omega::Float64, Hsoc::SparseMatrixCSC{ComplexF64})
 
@@ -79,14 +80,15 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
 
 end
 
-function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, Ene0minumhalf::Int64, specnum::Int64)
+function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, Msize0::Int64, Np::Int64, specnum::Int64)
 
     # define cutoff of energy in Fock states
     Msize = Msize0*2
+    Enecutoff = Msize0 - 1 + Int64(Np/2)
     matp = zeros(Int64,Msize+1,Np+1)
     pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
     # note the indices are m+1 and n+1 for N^m_n
-    indvec = cutMsizeEne(Msize0,Np,matp,Ene0minumhalf)
+    indvec = cutMsizeEne(Msize0,Np,matp,Enecutoff) #Ene0minumhalf
     maxmatpcut = length(indvec)
 
     # Hamiltonian
@@ -112,6 +114,14 @@ function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega:
     # diagonalisation
     lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
-    return lambda
+    # apply Abel approach (correction of interaction strength)
+    vecg = [gdown, gup, gdu]
+    vecgind = sortperm(vecg)
+    vecg = vecg[vecgind]
+    g1corrected = correctionint(Msize0,vecg[1],real(lambda[1]))
+    g2corrected = correctionint(Msize0,vecg[2],real(lambda[1]))
+    g3corrected = correctionint(Msize0,vecg[3],real(lambda[1]))
+
+    return lambda, g1corrected, g2corrected, g3corrected, vecgind
 
 end
