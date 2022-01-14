@@ -115,7 +115,7 @@ function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega:
     lambda, phi = eigs(mat0+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     # apply Abel approach (correction of interaction strength)
-    if isapprox(ksoc,0)
+    if isapprox(ksoc,0) && isapprox(Omega,0)
        vecg = [gdown, gup, gdu]
        vecgind = sortperm(vecg)
        vecg .= vecg[vecgind]
