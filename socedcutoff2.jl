@@ -81,9 +81,7 @@ function Hsocfunccutoff!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::
     end
 
     # since the Hamiltonian is helmitian
-    Hsoc = Hsoc + Hsoc' - spdiagm(diag(Hsoc))
-
-    # return Hsoc
+    Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
 
 end
 
@@ -102,11 +100,6 @@ function main2(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega:
     # construct the single-particle Hamiltonian
     mat0 = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
     Hsocfunccutoff!(indvec,Msize0,Np,matp,ksoc,Omega,mat0)
-
-
-    # lambda, phi = eigs(mat0,nev=specnum,which=:SR)
-    # return lambda
-
 
     # construct the interaction Hamiltonian
     mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
