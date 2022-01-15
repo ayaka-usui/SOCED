@@ -75,9 +75,9 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # Hamiltonian
     # construct the single-particle Hamiltonian
     # mat0 = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
-    matho = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
+    matho = spzeros(Float64,maxmatpcut,maxmatpcut)
     matsoc = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
-    matW = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
+    matW = spzeros(Float64,maxmatpcut,maxmatpcut)
     # Hsocfunccutoff!(indvec,Msize0,Np,matp,ksoc,Omega,mat0)
     Hsocfunccutoffk1W1!(indvec,Msize0,Np,matp,matho,matsoc,matW)
 
@@ -114,6 +114,22 @@ end
 function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho,matsoc,matW,mat1,mat2,mat3 = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho+ksoc*matsoc+Omega*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
+
+    return lambda, phi
+
+end
+
+function diagonaliseHtotsinglewithdata(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+
+    # matho,matsoc,matW,mat1,mat2,mat3 = createHtotal(Msize0,Np)
+    matho = load("data_Htot_M40.jld")["matho"]
+    matsoc = load("data_Htot_M40.jld")["matsoc"]
+    matW = load("data_Htot_M40.jld")["matW"]
+    mat1 =load("data_Htot_M40.jld")["mat1"]
+    mat2 =load("data_Htot_M40.jld")["mat2"]
+    mat3 =load("data_Htot_M40.jld")["mat3"]
+
     lambda, ~ = eigs(matho+ksoc*matsoc+Omega*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
     return lambda
@@ -136,5 +152,31 @@ function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64
     save("data_arraylambda.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda)
 
     # arraylambda = load("data_arraylambda.jld")["data"]
+
+end
+
+function diagonaliseHtotWwithdata(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+
+    # matho, matsoc, matW, mat1, mat2, mat3 = createHtotal(Msize0,Np)
+    # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+
+    matho = load("data_Htot_M40.jld")["matho"]
+    matsoc = load("data_Htot_M40.jld")["matsoc"]
+    matW = load("data_Htot_M40.jld")["matW"]
+    mat1 =load("data_Htot_M40.jld")["mat1"]
+    mat2 =load("data_Htot_M40.jld")["mat2"]
+    mat3 =load("data_Htot_M40.jld")["mat3"]
+
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    arraylambda = zeros(ComplexF64,NOmega,specnum)
+
+    for jj = 1:NOmega
+        arraylambda[jj,:], ~ = eigs(matho+ksoc*matsoc+arrayOmega[jj]*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
+    end
+
+    # return arraylambda
+    # save("data_arraylambda.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda)
+
+    return arraylambda, arrayOmega
 
 end
