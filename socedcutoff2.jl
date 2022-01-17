@@ -123,12 +123,12 @@ end
 function diagonaliseHtotsinglewithdata(gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     # matho,matsoc,matW,mat1,mat2,mat3 = createHtotal(Msize0,Np)
-    matho = load("data_Htot_M50.jld")["matho"]
-    matsoc = load("data_Htot_M50.jld")["matsoc"]
-    matW = load("data_Htot_M50.jld")["matW"]
-    mat1 =load("data_Htot_M50.jld")["mat1"]
-    mat2 =load("data_Htot_M50.jld")["mat2"]
-    mat3 =load("data_Htot_M50.jld")["mat3"]
+    matho = load("data_Htot_M40.jld")["matho"]
+    matsoc = load("data_Htot_M40.jld")["matsoc"]
+    matW = load("data_Htot_M40.jld")["matW"]
+    mat1 =load("data_Htot_M40.jld")["mat1"]
+    mat2 =load("data_Htot_M40.jld")["mat2"]
+    mat3 =load("data_Htot_M40.jld")["mat3"]
 
     lambda, ~ = eigs(matho+ksoc*matsoc+Omega*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
 
