@@ -1,4 +1,4 @@
-function acre!(jj::Int64, input::SparseVector{Int64}, fock::SparseVector{Int64})
+function acre!(jj::Int64, input::Union{SparseVector{Int64},Vector{Int64}}, fock::Union{SparseVector{Int64},Vector{Int64}})
 
     # creation operator, a_{jj}^{\dagger}
 
