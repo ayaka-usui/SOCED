@@ -32,19 +32,48 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     vecmbnnijkl = zeros(Int64,Msize+1)
     # vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
 
+    # pre-calculate set of indices
+    #index_set = zeros(Int, Int(ceil(Msize0/2)^4),4)
+    index_set = zeros(Int, div(Msize0^4,2^3),4) .- 1
+    curr_index = 1
+    @time Threads.@threads for nn4 = 0:Msize0-1
+        for nn3 = 0:nn4
+            for nn2 = 0:nn3
+                for nn1 = 0:nn2
+
+                    if iseven(nn1+nn2+nn3+nn4)
+                        index_set[curr_index,1] = nn1
+                        index_set[curr_index,2] = nn2
+                        index_set[curr_index,3] = nn3
+                        index_set[curr_index,4] = nn4
+                        curr_index += 1
+                    end
+
+                end
+            end
+        end
+    end
+
     # calculate Vijkl in advance
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0) #spzeros(Float64,Msize0,Msize0,Msize0,Msize0)
+    @time Threads.@threads for i = 1:curr_index-1
+        nn1 = index_set[i,1]
+        nn2 = index_set[i,2]
+        nn3 = index_set[i,3]
+        nn4 = index_set[i,4]
+
+        matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
+    end
+#=
     @time Threads.@threads for nn4 = 0:Msize0-1
     #@time for nn4 = 0:Msize0-1
         for nn3 = 0:nn4
             for nn2 = 0:nn3
                 for nn1 = 0:nn2
 
-#=
                     if isodd(nn1+nn2+nn3+nn4)
                        continue
                     end
-=#
 
                     matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
 
@@ -52,6 +81,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
             end
         end
     end
+=#
 
     # define a matrix for the Hamiltonian
     # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor

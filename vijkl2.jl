@@ -30,7 +30,6 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
 
     # function to calculate V_{ijkl}
 
-
     if isodd(n1 + n2 + n3 + n4)
        return 0.0
     end
