@@ -30,7 +30,12 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     vecmbnnkl = zeros(Int64,Msize+1)
     vecmbnnjkl = zeros(Int64,Msize+1)
     vecmbnnijkl = zeros(Int64,Msize+1)
-    # vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
+    #vecmbnn = zeros(Int64,Msize+1, Threads.nthreads())
+    #vecmbnnl = zeros(Int64,Msize+1, Threads.nthreads());
+    #vecmbnnkl = zeros(Int64,Msize+1, Threads.nthreads())
+    #vecmbnnjkl = zeros(Int64,Msize+1, Threads.nthreads())
+    #vecmbnnijkl = zeros(Int64,Msize+1, Threads.nthreads())
+    #vecmbmm = spzeros(Int64,Msize+1,Threads.nthreads())
 
     # pre-calculate set of indices
     #index_set = zeros(Int, Int(ceil(Msize0/2)^4),4)
@@ -54,8 +59,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
         end
     end
 
-    #println(index_set)
-
     # calculate Vijkl in advance
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0) #spzeros(Float64,Msize0,Msize0,Msize0,Msize0)
     @time Threads.@threads for i = 1:curr_index-1
@@ -67,21 +70,25 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
         matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
     end
 
+    # resetting index_set
+    index_set[1:curr_index,:] .= -1
+    curr_index = 1
+
     # define a matrix for the Hamiltonian
-    # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
     println("time for for loops")
     @time for nn = 1:maxmatpcut
+        #tid = Threads.threadid()
 
         # define ket state |n>
         vecmbnn .= zeros(Int64,Msize+1)
-        in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)
+        in2b!(indvec[nn],Msize,Np,matp,vecmbnn)
 
         # Interactions
         for ll = 1:Msize
 
             # apply an anhilation operator a_ll to |n>
             vecmbnnl .= zeros(Int64,Msize+1);
-            ades!(ll,vecmbnn,vecmbnnl) #vecmbnnl = ades(ll,vecmbnn)
+            ades!(ll,vecmbnn,vecmbnnl)
             if vecmbnnl[Msize+1] == 0 # go back if a|0> = 0
                continue
             end
@@ -90,7 +97,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
                 # apply a_kk to a_ll |n>
                 vecmbnnkl .= zeros(Int64,Msize+1)
-                ades!(kk,vecmbnnl,vecmbnnkl) #vecmbnnkl = ades(kk,vecmbnnl)
+                ades!(kk,vecmbnnl,vecmbnnkl)
                 if vecmbnnkl[Msize+1] == 0
                    continue
                 end
@@ -104,16 +111,16 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
                     # apply a_jj^{+} to a_kk a_ll |n>
                     vecmbnnjkl .= zeros(Int64,Msize+1)
-                    acre!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
+                    acre!(jj,vecmbnnkl,vecmbnnjkl)
 
                     for ii = 1:Msize
 
                         # apply a_ii^{+} to a_jj^{+} a_kk a_ll |n>
                         vecmbnnijkl .= zeros(Int64,Msize+1)
-                        acre!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
+                        acre!(ii,vecmbnnjkl,vecmbnnijkl)
 
                         # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
-                        if isodd(ii+kk)  # || isodd(jj+ll)
+                        if isodd(ii+kk) 
                            continue
                         end
 
@@ -130,13 +137,10 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
                         # Threads.@threads for mm = 1:nn
                         for mm = 1:nn
-                        # for mm = 1:maxmatpcut
-                            # tid = Threads.threadid()
 
                             # vecmbmm[:,tid] .= spzeros(Int64,Msize+1)
-                            vecmbmm = zeros(Int64,Msize+1) # vec0 = spzeros(Int64,Msize+1)
-                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm) # in2b!(indvec[mm],Msize,Np,matp,vec0)
-                            # in2b!(indvec[mm],Msize,Np,matp,vecmbmm[:,tid]) #vecmbmm = in2b(indvec[mm],Msize,Np)
+                            vecmbmm = zeros(Int64,Msize+1)
+                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm)
 
                             vec0 = [n1,n2,n3,n4]
                             sort!(vec0)
@@ -145,22 +149,14 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                             n3 = vec0[3]
                             n4 = vec0[4]
 
-                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize] # if vecmbnnijkl[1:Msize] == vec0[1:Msize] # vecmbnnijkl[1:Msize] .- vecmbmm[1:Msize,tid])) == 0 # if <m| a_ii^{+} a_jj^{+} a_kk a_ll |n> is not zero
+                            if vecmbnnijkl[1:Msize] == vecmbmm[1:Msize]
 
-                               if isodd(ii) && isodd(jj) # && isodd(kk) && isodd(ll)
-                                  # Hintdown[mm,nn] = Hintdown[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
+                               if isodd(ii) && isodd(jj)
                                   Hintdown[mm,nn] = Hintdown[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
                                elseif iseven(ii) && iseven(jj) # && iseven(kk) && iseven(ll)
-                                  # Hintup[mm,nn] = Hintup[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
                                   Hintup[mm,nn] = Hintup[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               else #elseif isodd(ii+jj)
+                               else
                                   Hintdu[mm,nn] = Hintdu[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               # elseif isodd(ii) && iseven(jj) # && isodd(kk) && iseven(ll)
-                               #    # Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
-                               #    Hintdu[mm,nn] = Hintdu[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
-                               # elseif iseven(ii) && isodd(jj) # && iseven(kk) && isodd(ll)
-                               #    # Hintdu[mm,nn] = Hintdu[mm,nn] + Vijkl2(n1,n2,n3,n4)*sqrt(vecmbnnijkl[Msize+1])
-                               #    Hintdu[mm,nn] = Hintdu[mm,nn] + matV[n1+1,n2+1,n3+1,n4+1]*sqrt(vecmbnnijkl[Msize+1])
                                end
 
                             end
