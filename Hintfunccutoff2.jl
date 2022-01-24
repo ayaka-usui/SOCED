@@ -54,6 +54,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
         end
     end
 
+    #println(index_set)
+
     # calculate Vijkl in advance
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0) #spzeros(Float64,Msize0,Msize0,Msize0,Msize0)
     @time Threads.@threads for i = 1:curr_index-1
@@ -64,27 +66,10 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
         matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
     end
-#=
-    @time Threads.@threads for nn4 = 0:Msize0-1
-    #@time for nn4 = 0:Msize0-1
-        for nn3 = 0:nn4
-            for nn2 = 0:nn3
-                for nn1 = 0:nn2
-
-                    if isodd(nn1+nn2+nn3+nn4)
-                       continue
-                    end
-
-                    matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
-
-                end
-            end
-        end
-    end
-=#
 
     # define a matrix for the Hamiltonian
     # Threads.@threads for nn = 1:maxmatpcut #maxmatp # parfor
+    println("time for for loops")
     @time for nn = 1:maxmatpcut
 
         # define ket state |n>
