@@ -36,14 +36,14 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ma
     for nn = 1:maxmatpcut #maxmatp # parfor
 
         vecmbnn .= spzeros(Int64,Msize+1)
-        in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
+        in2b!(indvec[nn],Msize,Np,matp,vecmbnn,1) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
         # energyij = 0.
 
         # free terms
         for jj = 1:Msize
 
             vecmbnnj .= spzeros(Int64,Msize+1)
-            ades!(jj,vecmbnn,vecmbnnj) #vecmbnnj = ades(jj,vecmbnn)
+            ades!(jj,vecmbnn,vecmbnnj,1) #vecmbnnj = ades(jj,vecmbnn)
             if vecmbnnj[Msize+1] == 0 # go back if a|0> = 0
                continue
             end
@@ -51,7 +51,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ma
             for ii = 1:Msize
 
                 vecmbnnij .= spzeros(Int64,Msize+1)
-                acre!(ii,vecmbnnj,vecmbnnij) #vecmbnnij = acre(ii,vecmbnnj)
+                acre!(ii,vecmbnnj,vecmbnnij,1) #vecmbnnij = acre(ii,vecmbnnj)
 
                 # energyij = epsilon(ii,jj,ksoc,Omega)
                 energyij = energyijmat[ii,jj]
@@ -62,7 +62,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ma
                 for mm = 1:nn
 
                     vecmbmm .= spzeros(Int64,Msize+1)
-                    in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
+                    in2b!(indvec[mm],Msize,Np,matp,vecmbmm,1) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                     if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
 
