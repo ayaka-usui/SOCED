@@ -36,7 +36,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     #index_set = zeros(Int, Int(ceil(Msize0/2)^4),4)
     index_set = zeros(Int, div(Msize0^4,2^3),4) .- 1
     curr_index = 1
-    @time Threads.@threads for nn4 = 0:Msize0-1
+    @time for nn4 = 0:Msize0-1
         for nn3 = 0:nn4
             for nn2 = 0:nn3
                 for nn1 = 0:nn2
@@ -55,7 +55,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     end
 
     # calculate Vijkl in advance
-    matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0) #spzeros(Float64,Msize0,Msize0,Msize0,Msize0)
+    matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0)
     @time Threads.@threads for i = 1:curr_index-1
         nn1 = index_set[i,1]
         nn2 = index_set[i,2]
