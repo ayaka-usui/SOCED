@@ -90,9 +90,9 @@ function createHtotal(Msize0::Int64, Np::Int64)
     println("time to construct interaction Hamiltonian")
     @time begin
         # construct the interaction Hamiltonian
-        mat1 = spzeros(Float64,maxmatpcut,maxmatpcut)
-        mat2 = spzeros(Float64,maxmatpcut,maxmatpcut)
-        mat3 = spzeros(Float64,maxmatpcut,maxmatpcut)
+        mat1 = zeros(Float64,maxmatpcut,maxmatpcut)
+        mat2 = zeros(Float64,maxmatpcut,maxmatpcut)
+        mat3 = zeros(Float64,maxmatpcut,maxmatpcut)
         Hintfunccutoff2!(indvec,Msize0,Np,matp,mat1,mat2,mat3)
     end
 

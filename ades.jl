@@ -7,7 +7,7 @@ function ades!(jj::Int64, input::Union{SparseVector{Int64},Vector{Int64}}, fock:
     fock[:,tid] .= input
     focksize = size(fock)[1]
 
-    fock[jj,tid] = fock[jj]-1
+    fock[jj,tid] = fock[jj,tid]-1
     fock[focksize,tid] = input[focksize]*(fock[jj,tid]+1)
 
     if fock[jj,tid] < 0
