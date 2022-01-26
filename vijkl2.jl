@@ -26,8 +26,8 @@ function recurringA1(n1::Int64,n2::Int64,n3::Int64,n4::Int64,m1::Int64,m2::Int64
 
 end
 
-function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
-
+function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64,
+                matA::Array{Rational{BigInt},4})
     # function to calculate V_{ijkl}
 
     if isodd(n1 + n2 + n3 + n4)
@@ -39,7 +39,8 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     maxm2 = floor(Int64,n2/2)+1
     maxm3 = floor(Int64,n3/2)+1
     maxm4 = floor(Int64,n4/2)+1
-    matA = zeros(Rational{BigInt},2,maxm2,maxm3,maxm4) #zeros(BigFloat,2,maxm2,maxm3,maxm4) #zeros(Float64,2,maxm2,maxm3,maxm4)
+    matA[1:2,1:maxm2,1:maxm3,1:maxm4] .= 0
+    #matA = zeros(Rational{BigInt},2,maxm2,maxm3,maxm4) #zeros(BigFloat,2,maxm2,maxm3,maxm4) #zeros(Float64,2,maxm2,maxm3,maxm4)
 
     # m1=m2=m3=m4=1
     matA[1,1,1,1] = Rational(BigInt(1)) #BigFloat(1.0)
@@ -75,7 +76,7 @@ function Vijkl2(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
         end
     end
 
-    sumA = sum(matA[1,:,:,:])
+    sumA = sum(matA[1,:,:,:,:])
 
     for m1 = 1:maxm1-1
 
