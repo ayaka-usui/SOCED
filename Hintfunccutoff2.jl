@@ -56,13 +56,26 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
     # calculate Vijkl in advance
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0)
+    matA = zeros(Rational{BigInt},2,Msize0,
+                 Msize0,Msize0,Threads.nthreads())
     @time Threads.@threads for i = 1:curr_index-1
+        tid = Threads.threadid()
         nn1 = index_set[i,1]
         nn2 = index_set[i,2]
         nn3 = index_set[i,3]
         nn4 = index_set[i,4]
 
-        matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
+        maxm1 = floor(Int64,nn1/2)+1
+        maxm2 = floor(Int64,nn2/2)+1
+        maxm3 = floor(Int64,nn3/2)+1
+        maxm4 = floor(Int64,nn4/2)+1
+
+
+        matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4, matA[1:2,
+                                                                     1:maxm2,
+                                                                     1:maxm3,
+                                                                     1:maxm4,
+                                                                     tid])
     end
 
     # resetting index_set
