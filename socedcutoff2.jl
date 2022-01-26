@@ -1,6 +1,5 @@
 using Arpack, SparseArrays, LinearAlgebra
 using JLD
-# using FLoops
 
 # define functions used here
 include("ades.jl")

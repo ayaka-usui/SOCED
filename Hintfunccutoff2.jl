@@ -1,4 +1,5 @@
 using Arpack, SparseArrays, LinearAlgebra
+using FLoops
 
 # define functions used here
 include("ades.jl")
@@ -58,7 +59,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0)
     matA = zeros(Rational{BigInt},2,Msize0,
                  Msize0,Msize0,Threads.nthreads())
-    @time Threads.@threads for i = 1:curr_index-1
+    @time @floop for i = 1:curr_index-1
+    # @time Threads.@threads for i = 1:curr_index-1
         tid = Threads.threadid()
         nn1 = index_set[i,1]
         nn2 = index_set[i,2]
@@ -84,8 +86,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
     # define a matrix for the Hamiltonian
     println("time for for loops")
-    @time Threads.@threads for nn = 1:maxmatpcut
-    #@time for nn = 1:maxmatpcut
+    @time @floop for nn = 1:maxmatpcut
+    # @time Threads.@threads for nn = 1:maxmatpcut
+    # @time for nn = 1:maxmatpcut
         tid = Threads.threadid()
 
         # define ket state |n>
@@ -130,7 +133,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                         acre!(ii,vecmbnnjkl[:,tid],vecmbnnijkl,tid)
 
                         # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
-                        if isodd(ii+kk) 
+                        if isodd(ii+kk)
                            continue
                         end
 
