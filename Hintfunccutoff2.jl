@@ -34,7 +34,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
     # pre-calculate set of indices
     #index_set = zeros(Int, Int(ceil(Msize0/2)^4),4)
-    index_set = zeros(Int, maxmatpcut*Msize0^3,4) .- 1
+    index_set = zeros(Int, maxmatpcut*Msize0^4,5) .- 1
     curr_index = 1
     @time for nn4 = 0:Msize0-1
         for nn3 = 0:nn4
@@ -86,7 +86,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     println("time for for loops")
     println(maxmatpcut)
     @time for nn = 1:maxmatpcut
-    #@time for nn = 1:maxmatpcut
         tid = Threads.threadid()
 
         # define ket state |n>
@@ -133,10 +132,11 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                         # V_{ijkl}=0 if n1+n2+n3+n4 is odd
                         if iseven(n1+n2+n3+n4)
 
-                            index_set[curr_index, 1] = ii
-                            index_set[curr_index, 2] = jj
+                            index_set[curr_index, 1] = nn
+                            index_set[curr_index, 2] = ll
                             index_set[curr_index, 3] = kk
-                            index_set[curr_index, 4] = ll
+                            index_set[curr_index, 4] = jj
+                            index_set[curr_index, 5] = ii
 
                             curr_index += 1
                         end
@@ -155,10 +155,11 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     println("time for for loops")
     @time Threads.@threads for nn = 1:curr_index-1
 
-        ii = index_set[nn,1]
-        jj = index_set[nn,2]
+        nn = index_set[nn,1]
+        ll = index_set[nn,2]
         kk = index_set[nn,3]
-        ll = index_set[nn,4]
+        jj = index_set[nn,4]
+        ii = index_set[nn,5]
 
         tid = Threads.threadid()
 
