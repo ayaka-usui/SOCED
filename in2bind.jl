@@ -1,6 +1,6 @@
 # include("pascaltriangle.jl") # define pascaltriangle(m,n)
 
-function in2b(jj::Int64, Msize0::Int64, Np::Int64, matp::Matrix{Int64})
+function in2bind(jj::Int64, Msize0::Int64, Np::Int64, matp::Matrix{Int64})
 
     # this function return the index of Fock state at the index of many body state
     # "in2b" means "an index to a many-body state"
@@ -14,7 +14,9 @@ function in2b(jj::Int64, Msize0::Int64, Np::Int64, matp::Matrix{Int64})
     end
 
     indfk = indfk - 1
-    vecmb = spzeros(Int64,Msize0+1)
+    # vecmb = spzeros(Int64,Msize0+1)
+    vecmbind = spzeros(Int64,Np)
+    nn = 0
 
     indM = Msize0-1
     indN = Np
@@ -27,7 +29,9 @@ function in2b(jj::Int64, Msize0::Int64, Np::Int64, matp::Matrix{Int64})
 
           if indfk >= matp[indM+1,indN+1]
              indfk = indfk - matp[indM+1,indN+1] # the indices are m+1 and n+1 for N^m_n
-             vecmb[Msize0-indM] = vecmb[Msize0-indM] + 1
+             # vecmb[Msize0-indM] = vecmb[Msize0-indM] + 1
+             nn = nn + 1
+             vecmbind[nn] = Msize0 - indM
              indN = indN - 1
           else
              indM = indM - 1
@@ -36,8 +40,8 @@ function in2b(jj::Int64, Msize0::Int64, Np::Int64, matp::Matrix{Int64})
     end
 
     # the last element for the coefficient
-    vecmb[Msize0+1] = 1
+    # vecmb[Msize0+1] = 1
 
-    return vecmb
+    return vecmbind
 
 end

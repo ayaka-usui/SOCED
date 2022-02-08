@@ -1,38 +1,49 @@
+include("epsilon.jl")
+include("in2b.jl")
+
 include("ades.jl")
 include("acre.jl")
-# include("pascaltriangle.jl")
-include("in2b.jl")
-# include("b2in.jl")
-include("epsilon.jl")
 
 function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
 
-    Msize = Msize0*2
     maxmatpcut = length(indvec)
-    # matp = zeros(Int,Msize+1,Np+1);
-    # pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
-    # maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # calculate and save energyij
-    energyijmat = zeros(ComplexF64,Msize,Msize); #zeros(Float64,Msize,Msize);
-    for ii = 1:Msize
-        for jj = 1:Msize
+    energyijmat = zeros(ComplexF64,Msize0,Msize0);
+    for ii = 1:Msize0
+        for jj = 1:Msize0
             energyijmat[ii,jj] = epsilon(ii,jj,1.0,1.0)
         end
     end
 
     # reset matrices
     Hho .= 0
-    Hsoc .= 0 #Hsoc = spzeros(ComplexF64,maxmatpcut,maxmatpcut); #spzeros(ComplexF64,maxmatp,maxmatp);
+    Hsoc .= 0
     HW .= 0
 
     # defines vectors
-    vecmbnn = spzeros(Int64,Msize+1)
-    vecmbnnj = spzeros(Int64,Msize+1)
-    vecmbnnij = spzeros(Int64,Msize+1)
-    vecmbmm = spzeros(Int64,Msize+1)
+    # vecmbnn = spzeros(Int64,Msize0+1)
+    # vecmbnnj = spzeros(Int64,Msize0+1)
+    # vecmbnnij = spzeros(Int64,Msize0+1)
+    # vecmbmm = spzeros(Int64,Msize0+1)
 
     # define a matrix for the Hamiltonian
+    for nn = 1:maxmatpcut # parfor
+        for mm = 1:nn
+
+            in2b!(indvec[nn],Msize0,Np,matp,vecmbnn)
+
+        end
+    end
+
+
+
+
+
+
+
+
+
     for nn = 1:maxmatpcut #maxmatp # parfor
 
         vecmbnn .= spzeros(Int64,Msize+1)
