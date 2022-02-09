@@ -22,10 +22,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, ma
     HW .= 0
 
     # defines vectors
-    # vecmbnn = spzeros(Int64,Msize0+1)
-    # vecmbnnj = spzeros(Int64,Msize0+1)
-    # vecmbnnij = spzeros(Int64,Msize0+1)
-    # vecmbmm = spzeros(Int64,Msize0+1)
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
 

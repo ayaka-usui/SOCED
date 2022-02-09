@@ -11,7 +11,7 @@ include("Hintfunccutoff2.jl")
 include("epsilon.jl")
 include("correctionint.jl")
 
-function createHtotaltest(Msize0::Int64, Np::Int64)
+function createHtotal(Msize0::Int64, Np::Int64)
 
     # create Fock basis
     Enecutoff = Msize0 - 1 + Np/2
@@ -27,16 +27,25 @@ function createHtotaltest(Msize0::Int64, Np::Int64)
     Hsocfunccutoffk1W1!(indvec,Msize0,Np,matp,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
-    matdowndown = zeros(Float64,maxmatpcut,maxmatpcut)
-    matupup = zeros(Float64,maxmatpcut,maxmatpcut)
-    matdownup = zeros(Float64,maxmatpcut,maxmatpcut)
+    matdowndown = spzeros(Float64,maxmatpcut,maxmatpcut)
+    matupup = spzeros(Float64,maxmatpcut,maxmatpcut)
+    matdownup = spzeros(Float64,maxmatpcut,maxmatpcut)
     Hintfunccutoff2!(indvec,Msize0,Np,matp,matdowndown,matupup,matdownup)
 
-    # return matho
+    return matho, matdowndown
 
 end
 
-function createHtotal(Msize0::Int64, Np::Int64)
+function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, specnum::Int64)
+
+    matho, matdowndown = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown,nev=specnum,which=:SR)
+
+    return lambda
+
+end
+
+function createHtotal0(Msize0::Int64, Np::Int64)
 # gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64,
 # specnum::Int64
 
@@ -94,15 +103,6 @@ function createHtotal(Msize0::Int64, Np::Int64)
    # end
 
    return matho,matsoc,matW,mat1,mat2,mat3
-
-end
-
-function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
-
-    matho,matsoc,matW,mat1,mat2,mat3 = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho+ksoc*matsoc+Omega*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
-
-    return lambda, phi
 
 end
 
