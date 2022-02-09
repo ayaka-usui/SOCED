@@ -13,7 +13,7 @@ function cutMsizeEnespinless(Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Enec
 
         Enenn = in2bEnespinless(nn,Msize0,Np,matp)
 
-        if Enenn <= Enecutoff
+        if Enenn < Enecutoff || isapprox(Enenn,Enecutoff) # Enenn <= Enecutoff
            mm = mm + 1
            indvec[mm] = nn
         end

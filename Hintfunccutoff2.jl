@@ -1,6 +1,8 @@
 using Arpack, SparseArrays, LinearAlgebra
 
 # define functions used here
+include("vijkl.jl")
+
 include("ades.jl")
 include("acre.jl")
 # include("pascaltriangle.jl")
@@ -12,25 +14,32 @@ include("vijkl2.jl")
 function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
 
     # construct a matrix for the interaction Hamiltonian
-
-    Msize = Msize0*2
     maxmatpcut = length(indvec)
-
-    # matp = zeros(Int,Msize+1,Np+1);
-    # pascaltriangle!(Msize,Np,matp) # the size is Msize+1 times Np+1
-    # maxmatp = matp[Msize+1,Np+1] # the indices are m+1 and n+1 for N^m_ns
 
     # defines vectors and matrices
     Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 
-    vecmbnn = zeros(Int64,Msize+1, Threads.nthreads())
-    vecmbnnl = zeros(Int64,Msize+1, Threads.nthreads());
-    vecmbnnkl = zeros(Int64,Msize+1, Threads.nthreads())
-    vecmbnnjkl = zeros(Int64,Msize+1, Threads.nthreads())
-    vecmbnnijkl = zeros(Int64,Msize+1, Threads.nthreads())
-    vecmbmm = zeros(Int64,Msize+1,Threads.nthreads())
+    # calculate Vijkl in advance
+    matV = zeros(Float64,Msize0,Msize0,Msize0,Msize0)
+    for n1 = 1:Msize0
+        for n2 = 1:Msize0
+            matV[n1+1,n2+1,n3+1,n4+1] = vijkl(n1,n2,n3,n4)
+        end
+    end
+
+
+
+
+
+
+
+
+
+
+
+
 
     # pre-calculate set of indices
     #index_set = zeros(Int, Int(ceil(Msize0/2)^4),4)
@@ -130,7 +139,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
                         acre!(ii,vecmbnnjkl[:,tid],vecmbnnijkl,tid)
 
                         # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
-                        if isodd(ii+kk) 
+                        if isodd(ii+kk)
                            continue
                         end
 

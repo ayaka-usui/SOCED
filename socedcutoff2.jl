@@ -6,9 +6,9 @@ using JLD
 include("pascaltriangle.jl")
 include("cutMsizeEnespinless.jl")
 include("Hsocfunccutoffk1W1.jl")
+include("Hintfunccutoff2.jl")
 
 include("epsilon.jl")
-include("Hintfunccutoff2.jl")
 include("correctionint.jl")
 
 function createHtotaltest(Msize0::Int64, Np::Int64)
@@ -25,6 +25,14 @@ function createHtotaltest(Msize0::Int64, Np::Int64)
     matsoc = spzeros(ComplexF64,maxmatpcut,maxmatpcut)
     matW = spzeros(Float64,maxmatpcut,maxmatpcut)
     Hsocfunccutoffk1W1!(indvec,Msize0,Np,matp,matho,matsoc,matW)
+
+    # construct interaction Hamiltonian
+    matdowndown = zeros(Float64,maxmatpcut,maxmatpcut)
+    matupup = zeros(Float64,maxmatpcut,maxmatpcut)
+    matdownup = zeros(Float64,maxmatpcut,maxmatpcut)
+    Hintfunccutoff2!(indvec,Msize0,Np,matp,matdowndown,matupup,matdownup)
+
+    # return matho
 
 end
 
