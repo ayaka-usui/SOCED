@@ -41,14 +41,14 @@ function createHtotal(Msize0::Int64, Np::Int64)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp2,matdowndown,matupup,matdownup)
 
-    return matho, matdowndown, matupup, matdownup
+    return matho, matdowndown, matupup, matdownup, matsoc
 
 end
 
-function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, specnum::Int64)
+function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, specnum::Int64)
 
-    matho, matdowndown, matupup, matdownup = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+    matho, matdowndown, matupup, matdownup, matsoc = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc,nev=specnum,which=:SR)
 
     return lambda
 
