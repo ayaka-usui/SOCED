@@ -47,26 +47,36 @@ function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Fl
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
     lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
-    return lambda
+    spect = real(lambda .- lambda[1])
+
+    return lambda, spect
 
 end
 
 function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
-
-    arrayOmega = LinRange(Omega0,Omega1,NOmega)
-    arraylambda = zeros(ComplexF64,NOmega,specnum)
-    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
-
-    for jj = 1:NOmega
-        arraylambda[jj,:], ~ = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + arrayOmega[jj]*matW,nev=specnum,which=:SR)
-        arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+    println("constructoing the Hamiltonian ...")
+    @time begin
+        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
     end
 
+    println("diagonalising the Hamiltonian for different Omega ...")
+    @time begin
+        arrayOmega = LinRange(Omega0,Omega1,NOmega)
+        arraylambda = zeros(ComplexF64,NOmega,specnum)
+        arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+
+        for jj = 1:NOmega
+            arraylambda[jj,:], ~ = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+            arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+            println(jj)
+        end
+    end
+
+    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect)
+
     return arrayOmega, arraylambda, arrayspect
-    # save("data_arraylambda.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda)
 
 end
 
