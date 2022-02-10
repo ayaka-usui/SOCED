@@ -2,7 +2,6 @@ using Arpack, SparseArrays, LinearAlgebra
 
 # define functions used here
 include("vijkl.jl")
-# include("in2b.jl")
 
 function Hinttest0(Msize0::Int64)
 
@@ -31,9 +30,10 @@ function indtest0(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
     return binomial(n1+3,4)+binomial(n2+2,3)+binomial(n3+1,2)+binomial(n4+0,1)+1
 end
 
-function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp2::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
 
     maxmatpcut = length(indvec)
+    maxmatpcut2 = length(indvec2)
 
     # register data of Vijkl in a vector
     ind0 = 0
@@ -66,12 +66,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
 
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-
             ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
             sort!(ind1,rev=true)
             ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
-            # println(ind2)
-            # println(length(vecV))
 
             if vecmbindnn[1] == vecmbindnn[2]
                if vecmbindmm[1] == vecmbindmm[2]
@@ -102,18 +99,51 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, Msize0::Int64, Np::Int64, matp:
     # use conjectures for the lower triangle elements of Hint since it is hermite
     Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
 
-    # adjust the size of Hintdown to the size of total Hamiltonian
-    Hintdown2 = spzeros(maxmatpcut,maxmatpcut)
-    Hintdown2[1:maxmatpcut,1:maxmatpcut] = Hintdown
-
     # define Hintup
-    Hintup2 = spzeros(maxmatpcut,maxmatpcut)
-    Hintup2[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown
+    Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
 
+    # define Hintdu
+    vecmbindnn2 = zeros(Int64,Np)
 
+    for nn = 1:maxmatpcut2 # parfor
 
+        # ket
+        indket2 = mod(indvec2[nn],Msize0)
+        if indket2 != 0
+           indket1 = div(indvec2[nn],Msize0)+1
+        else
+           indket1 = div(indvec2[nn],Msize0)
+           indket2 = Msize0
+        end
+        in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
+        vecmbindnn[1] = vecmbindnn2[1]
+        in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
+        vecmbindnn[2] = vecmbindnn2[1]
 
+        for mm = 1:nn
 
+            # bra
+            indbra2 = mod(indvec2[mm],Msize0)
+            if indbra2 != 0
+               indbra1 = div(indvec2[mm],Msize0)+1
+            else
+               indbra1 = div(indvec2[mm],Msize0)
+               indbra2 = Msize0
+            end
+            in2bind!(indbra1,Msize0,Np-1,matp2,vecmbindnn2)
+            vecmbindmm[1] = vecmbindnn2[1]
+            in2bind!(indbra2,Msize0,Np-1,matp2,vecmbindnn2)
+            vecmbindmm[2] = vecmbindnn2[1]
+
+            ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
+            sort!(ind1,rev=true)
+            ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+
+            Hintdu[maxmatpcut+mm,maxmatpcut+nn] = vecV[ind2]*2
+
+        end
+
+    end
 
     # use conjectures for the lower triangle elements of Hint since it is hermite
     Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
