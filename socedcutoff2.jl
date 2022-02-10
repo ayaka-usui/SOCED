@@ -62,13 +62,14 @@ function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64
     end
 
     println("diagonalising the Hamiltonian for different Omega ...")
-    @time begin
-        arrayOmega = LinRange(Omega0,Omega1,NOmega)
-        arraylambda = zeros(ComplexF64,NOmega,specnum)
-        arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    arraylambda = zeros(ComplexF64,NOmega,specnum)
+    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+    mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc
 
-        for jj = 1:NOmega
-            arraylambda[jj,:], ~ = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+    for jj = 1:NOmega
+        @time begin
+            arraylambda[jj,:], _ = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
             println(jj)
         end
