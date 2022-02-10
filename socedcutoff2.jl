@@ -53,20 +53,20 @@ end
 
 function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    matho, matsoc, matW, mat1, mat2, mat3 = createHtotal(Msize0,Np)
-    save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
     arraylambda = zeros(ComplexF64,NOmega,specnum)
+    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
 
     for jj = 1:NOmega
-        arraylambda[jj,:], ~ = eigs(matho+ksoc*matsoc+arrayOmega[jj]*matW+gdown*mat1+gup*mat2+gdu*mat3,nev=specnum,which=:SR)
+        arraylambda[jj,:], ~ = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+        arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
     end
 
-    # return arraylambda
-    save("data_arraylambda.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda)
-
-    # arraylambda = load("data_arraylambda.jld")["data"]
+    return arrayOmega, arraylambda, arrayspect
+    # save("data_arraylambda.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda)
 
 end
 
