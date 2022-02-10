@@ -29,6 +29,22 @@ function epsilonsoctest(ii::Int64,jj::Int64,ksoc::Float64) # for down down
     return (-1im)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1))
 end
 
+function epsilonW(ii::Int64,common::Int64,Np::Int64,Omega::Float64)
+
+    # a|1> = |0>
+
+    if ii == common # a^+|1> = sqrt(2)|2>
+       epsilpn = sqrt(Np)
+    else
+       epsilpn = 1.0
+    end
+
+    epsilpn = epsilpn*Omega/2
+
+    return epsilpn
+
+end
+
 function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp2::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
 
     maxmatpcut = length(indvec)
@@ -166,6 +182,96 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         end
 
     end
+
+    # HW for <down,down|mixed>
+    for nn = 1:maxmatpcut2
+
+        # ket having mixed spins
+        indket2 = mod(indvec2[nn],Msize0)
+        if indket2 != 0
+           indket1 = div(indvec2[nn],Msize0)+1
+        else
+           indket1 = div(indvec2[nn],Msize0)
+           indket2 = Msize0
+        end
+        in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
+        vecmbindnn[1] = vecmbindnn2[1] # down
+        in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
+        vecmbindnn[2] = vecmbindnn2[1] # up
+
+        for mm = 1:maxmatpcut
+
+            # bra having down down
+            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+            # HW
+            if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
+
+               common = vecmbindnn[1]
+               # jj = vecmbindnn[2]
+               ii = vecmbindmm[2]
+               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+               break
+
+            elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
+
+               common = vecmbindnn[1]
+               # jj = vecmbindnn[2]
+               ii = vecmbindmm[1]
+               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+               break
+
+            end
+
+        end
+
+    end
+
+    # HW for <up,up|mixed>
+
+    # But the construction given below is the same as <down,down|mixed>, and so skip it and copy HW for <down,down|mixed>.
+    HW[maxmatpcut+maxmatpcut2+1:end,maxmatpcut+1:maxmatpcut+maxmatpcut2] = HW[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+
+    # for nn = 1:maxmatpcut2
+    #
+    #     # ket having mixed spins
+    #     indket2 = mod(indvec2[nn],Msize0)
+    #     if indket2 != 0
+    #        indket1 = div(indvec2[nn],Msize0)+1
+    #     else
+    #        indket1 = div(indvec2[nn],Msize0)
+    #        indket2 = Msize0
+    #     end
+    #     in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
+    #     vecmbindnn[1] = vecmbindnn2[1] # down
+    #     in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
+    #     vecmbindnn[2] = vecmbindnn2[1] # up
+    #
+    #     for mm = 1:maxmatpcut
+    #
+    #         # bra having up up
+    #         in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+    #
+    #         # HW
+    #         if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
+    #
+    #            common = vecmbindnn[2]
+    #            # jj = vecmbindnn[1]
+    #            ii = vecmbindmm[1]
+    #            HW[maxmatpcut+maxmatpcut2+mm,maxmatpcut+nn] = epsilonW(ii,common,Np,Omega)
+    #
+    #         elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
+    #
+    #            common = vecmbindnn[2]
+    #            # jj = vecmbindnn[1]
+    #            ii = vecmbindmm[2]
+    #            HW[maxmatpcut+maxmatpcut2+mm,maxmatpcut+nn] = epsilonW(ii,common,Np,Omega)
+    #
+    #         end
+    #
+    #     end
+    #
+    # end
 
     # since the Hamiltonian is helmitian
     Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
