@@ -114,6 +114,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
 
     # define Hintdu
     vecmbindnn2 = zeros(Int64,Np)
+    indnn = 0
+    indnn2 = 0
 
     for nn = 1:maxmatpcut2 # parfor
 
@@ -131,15 +133,33 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
         vecmbindnn[2] = vecmbindnn2[1]
 
         # since the matrix Hint is perforated
-        if nn <= Msize0
-
-        if isodd(nn)
-           mmini = 1 # for mm = 1:2:nn
-        else # iseven(nn)
-           mmini = 2 # for mm = 2:2:nn
+        indnn += 1
+        if indnn > Msize0-indnn2
+           indnn = 1
+           indnn2 += 1
+        end
+        if iseven(indnn2)
+           if isodd(indnn)
+              mmini = 1
+           else # iseven(indnn)
+              mmini = 2
+           end
+        else # isodd(indnn2)
+           if isodd(indnn)
+              mmini = 2
+           else # iseven(indnn)
+              mmini = 1
+           end
         end
 
-        for mm = mmini:2:nn
+        mm = mmini
+        indmm = 0
+
+        while mm <= nn
+        # for mm = mmini:2:nn
+        # for mm = 1:nn
+
+            println(mm)
 
             # bra
             indbra2 = mod(indvec2[mm],Msize0)
@@ -160,6 +180,16 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
 
             Hintdu[maxmatpcut+mm,maxmatpcut+nn] = vecV[ind2]*2
+
+            mm += 2
+            if mm > (indmm+1)/2*(2*Msize0-indmm)
+               indmm += 1
+               if isodd(indmm)
+                  mm = mm - 1
+               else # iseven(indmm)
+                  mm = mm + 1
+               end
+            end
 
         end
 
