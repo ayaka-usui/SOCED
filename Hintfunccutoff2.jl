@@ -2,6 +2,7 @@ using Arpack, SparseArrays, LinearAlgebra
 
 # define functions used here
 include("vijkl.jl")
+include("in2bind.jl")
 
 function Hinttest0(Msize0::Int64)
 
