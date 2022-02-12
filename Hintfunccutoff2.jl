@@ -63,10 +63,19 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
         # ket
         in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
 
-        for mm = 1:nn
+        # since the matrix Hint is perforated
+        if isodd(nn)
+           mmini = 1 # for mm = 1:2:nn
+        else # iseven(nn)
+           mmini = 2 # for mm = 2:2:nn
+        end
+
+        for mm = mmini:2:nn
 
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+            # indices for Vijkl
             ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
             sort!(ind1,rev=true)
             ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
@@ -121,7 +130,16 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
         in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
         vecmbindnn[2] = vecmbindnn2[1]
 
-        for mm = 1:nn
+        # since the matrix Hint is perforated
+        if nn <= Msize0
+
+        if isodd(nn)
+           mmini = 1 # for mm = 1:2:nn
+        else # iseven(nn)
+           mmini = 2 # for mm = 2:2:nn
+        end
+
+        for mm = mmini:2:nn
 
             # bra
             indbra2 = mod(indvec2[mm],Msize0)
@@ -136,6 +154,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             in2bind!(indbra2,Msize0,Np-1,matp2,vecmbindnn2)
             vecmbindmm[2] = vecmbindnn2[1]
 
+            # indices for Vijkl
             ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
             sort!(ind1,rev=true)
             ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
