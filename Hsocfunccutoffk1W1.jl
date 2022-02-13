@@ -66,7 +66,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # define vectors
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
-    indmm1 = zeros(Int64,2)
     indmm2 = 1
 
     # define a matrix for the Hamiltonian for down down
@@ -86,25 +85,22 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
            Hho[nn,nn] = (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2)
         end
 
-        #
-        indmm1 .= 0
+        # find valid indices for Hsoc
+        indmm1 = zeros(Int64,2) # indmm1 .= 0
         indmm3 = indmm2*(1-indmm2+Msize0)
-        # indmm4 = nn-(Msize0-indmm2)
-        # indmm5 = (indmm2-1)*(2-indmm2+Msize0)
         if nn <= indmm3
            indmm1[1] = nn-1
            if nn > Msize0
-              indmm1[2] = nn-(Msize0-2*(indmm2-2)-(indmm2-1))
+              indmm1[2] = nn-(Msize0-2*(indmm2-2)-1)
            end
         elseif nn == indmm3 + 1
-           indmm1[1] = nn-(Msize0-2*(indmm2-1)-indmm2)
+           indmm1[1] = nn-(Msize0-2*(indmm2-1)-1)
            indmm2 += 1
         end
+        filter!(x->x!=0,indmm1)
 
-        println(indmm1)
-
-
-        for mm = 1:nn-1
+        for mm in indmm1
+        # for mm = 1:nn-1
 
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
