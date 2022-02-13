@@ -113,9 +113,49 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
 
     # define Hintdu
+
+    # find vaild indices since the matrix Hint is perforated
+    indmm = Array(1:maxmatpcut2)
+    indmmeven = zeros(Int64,maxmatpcut2)
+    indmmodd = zeros(Int64,maxmatpcut2)
+    jjeven = 0
+    jjodd = 0
+    indmm1 = 0
+    indnn = zeros(Int64,maxmatpcut2)
+    for jj = 1:maxmatpcut2
+
+        if indmm[jj] <= Int64(indmm1/2*(2*Msize0-1-indmm1))+Msize0
+           if isodd(jj+ceil(Int64,indmm1/2))
+              jjeven += 1
+              indmmeven[jjeven] = indmm[jj]
+              indnn[jj] = 1
+           else # iseven(jj+indmm1)
+              jjodd += 1
+              indmmodd[jjodd] = indmm[jj]
+           end
+
+        else # indmm[jj] > Int64(indmm1/2*(2*Msize0-1-indmm1))+Msize0
+           indmm1 += 1
+           if isodd(indmm1)
+              jjodd += 1
+              indmmodd[jjodd] = indmm[jj]
+           else # iseven(indmm1)
+              jjeven += 1
+              indmmeven[jjeven] = indmm[jj]
+              indnn[jj] = 1
+           end
+        end
+
+    end
+    indmmeven = indmmeven[1:jjeven]
+    indmmodd = indmmodd[1:jjodd]
+
+    println(indmmeven)
+    println(indmmodd)
+    println(indnn)
+
+    # distribute elements
     vecmbindnn2 = zeros(Int64,Np)
-    indnn = 0
-    indnn2 = 0
 
     for nn = 1:maxmatpcut2 # parfor
 
@@ -132,34 +172,15 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
         in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
         vecmbindnn[2] = vecmbindnn2[1]
 
-        # since the matrix Hint is perforated
-        indnn += 1
-        if indnn > Msize0-indnn2
-           indnn = 1
-           indnn2 += 1
-        end
-        if iseven(indnn2)
-           if isodd(indnn)
-              mmini = 1
-           else # iseven(indnn)
-              mmini = 2
-           end
-        else # isodd(indnn2)
-           if isodd(indnn)
-              mmini = 2
-           else # iseven(indnn)
-              mmini = 1
-           end
+        # arrange the indices obtained before
+        if indnn[nn] == 1
+           indmm2 = indmmeven[1:findfirst(x->x==nn,indmmeven)]
+        else # indnn[nn] == 0
+           indmm2 = indmmodd[1:findfirst(x->x==nn,indmmodd)]
         end
 
-        mm = mmini
-        indmm = 0
-
-        while mm <= nn
-        # for mm = mmini:2:nn
+        for mm in indmm2
         # for mm = 1:nn
-
-            println(mm)
 
             # bra
             indbra2 = mod(indvec2[mm],Msize0)
@@ -180,16 +201,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
 
             Hintdu[maxmatpcut+mm,maxmatpcut+nn] = vecV[ind2]*2
-
-            mm += 2
-            if mm > (indmm+1)/2*(2*Msize0-indmm)
-               indmm += 1
-               if isodd(indmm)
-                  mm = mm - 1
-               else # iseven(indmm)
-                  mm = mm + 1
-               end
-            end
 
         end
 
