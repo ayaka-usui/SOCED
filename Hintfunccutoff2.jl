@@ -149,11 +149,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     end
     indmmeven = indmmeven[1:jjeven]
     indmmodd = indmmodd[1:jjodd]
-
-    println(indmmeven)
-    println(indmmodd)
-    println(indnn)
-
+    
     # distribute elements
     vecmbindnn2 = zeros(Int64,Np)
 
