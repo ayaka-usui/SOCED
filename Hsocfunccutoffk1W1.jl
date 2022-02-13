@@ -251,37 +251,61 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         if nn == indmm3 + 1
            mm = indmm2 + 1
            indmm2 += 1
+           indmm5 = 1
         elseif indmm2 >= 3 && nn >= indmm4 + 1 && nn < indmm4 + indmm2
-           # mm = nn - (Msize0-(indmm2-2)) + 1
+           mm = indmm2 + Int64((nn - indmm4 - 1)/2*(2*Msize0+1-(nn - indmm4 - 1))) # sum(Msize0 - (jj - 1), for jj = 1:nn - indmm4 - 1)
+           indmm5 = nn - indmm4
         else
            mm = nn
+           indmm5 = indmm2
+        end
+        mm = mm - binomial(indmm5,2) # translate indices of spinmixed to those of spinless
+
+        # bra having down down
+        in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+        # HW
+        if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
+
+           common = vecmbindnn[1]
+           # jj = vecmbindnn[2]
+           ii = vecmbindmm[2]
+           HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+
+        elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
+
+           common = vecmbindnn[1]
+           # jj = vecmbindnn[2]
+           ii = vecmbindmm[1]
+           HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+
         end
 
-        for mm = 1:maxmatpcut
-
-            # bra having down down
-            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-
-            # HW
-            if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
-
-               common = vecmbindnn[1]
-               # jj = vecmbindnn[2]
-               ii = vecmbindmm[2]
-               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
-               break
-
-            elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
-
-               common = vecmbindnn[1]
-               # jj = vecmbindnn[2]
-               ii = vecmbindmm[1]
-               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
-               break
-
-            end
-
-        end
+        # for mm = 1:maxmatpcut
+        #
+        #     # bra having down down
+        #     in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+        #
+        #     # HW
+        #     if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
+        #
+        #        common = vecmbindnn[1]
+        #        # jj = vecmbindnn[2]
+        #        ii = vecmbindmm[2]
+        #        HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+        #        break
+        #
+        #     elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
+        #
+        #        common = vecmbindnn[1]
+        #        # jj = vecmbindnn[2]
+        #        ii = vecmbindmm[1]
+        #        HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+        #        break
+        #
+        #     end
+        #
+        # end
 
     end
 
