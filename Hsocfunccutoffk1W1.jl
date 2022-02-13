@@ -228,6 +228,8 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     end
 
     # HW for <down,down|mixed>
+    indmm2 = 1
+
     for nn = 1:maxmatpcut2
 
         # ket having mixed spins
@@ -242,6 +244,18 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         vecmbindnn[1] = vecmbindnn2[1] # down
         in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
         vecmbindnn[2] = vecmbindnn2[1] # up
+
+        # find valid indices for HW
+        indmm3 = Int64(indmm2/2*(2*Msize0+1-indmm2))
+        indmm4 = Int64((indmm2-1)/2*(2*Msize0+1-(indmm2-1)))
+        if nn == indmm3 + 1
+           mm = indmm2 + 1
+           indmm2 += 1
+        elseif indmm2 >= 3 && nn >= indmm4 + 1 && nn < indmm4 + indmm2
+           # mm = nn - (Msize0-(indmm2-2)) + 1
+        else
+           mm = nn
+        end
 
         for mm = 1:maxmatpcut
 

@@ -43,7 +43,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp2,matdowndown,matupup,matdownup)
 
     # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matsoc
+    return matW
 
 end
 
