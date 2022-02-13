@@ -42,8 +42,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp2,matdowndown,matupup,matdownup)
 
-    # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matW
+    return matho, matdowndown, matupup, matdownup, matsoc, matW
 
 end
 
