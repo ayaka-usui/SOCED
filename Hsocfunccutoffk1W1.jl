@@ -71,34 +71,16 @@ include("delta.jl")
 #
 # end
 
-function epsilonsoc(ii::Int64,jj::Int64,common1::Int64,common2::Int64,Np::Int64,ksoc::Float64)
+function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,Np::Int64,ksoc::Float64)
 
-    if abs(jj-ii) != 1
-       return 0.0
-    end
+    # if abs(jj-ii) != 1
+       # return 0.0
+    # end
 
-    # jj != ii
+    # Note jj != ii
 
-    # a|3> = sqrt(3)|3-1>
-    # a|2> = sqrt(2)|2-1>
-    # a|1> = sqrt(1)|1-1>
-
-    if jj == common1
-       if jj == common2
-          epsilpn = sqrt(Np)
-       else # jj != common2
-          epsilpn = sqrt(Np-1)
-       end
-    elseif ii == common1
-       if ii == common2
-       end
-    end
-
-    elseif ii == common # a^+|Np-1> = sqrt(Np)|Np>
-       epsilpn = sqrt(Np)
-    else
-       epsilpn = 1.0
-    end
+    epsilpn = sqrt(commonjj+1) # a|n> = sqrt(n)|n-1>
+    epsilpn = epsilpn*sqrt(commonii+1) # a^+|n> = sqrt(n+1)|n+1>
 
     njj = jj - 1
     nii = ii - 1
@@ -108,7 +90,7 @@ function epsilonsoc(ii::Int64,jj::Int64,common1::Int64,common2::Int64,Np::Int64,
 
 end
 
-function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},hist::Vector{Int64},Np::Int64,ksoc::Float64)
+function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},Np::Int64,ksoc::Float64)
 
    # bra and ket have to be the same except for one element, i.e. two elements have to be the same
 
@@ -119,66 +101,40 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},hist::V
    # end
 
    ind0 = 0
+   ind1 = 0
+   ind2 = 0
 
    for kk = 1:Np
-       for ll = 1:Np
-           if vecmbindnn[kk] == vecmbindmm[ll]
-              ind0 += 1
-              common[ind0] = vecmbindnn[kk]
-           end
+       if vecmbindnn[kk] == vecmbindmm[kk]
+          ind0 += 1
+       elseif abs(vecmbindnn[kk] - vecmbindmm[kk]) == 1
+          ind1 = kk
        end
    end
 
-
-
-
-
-
-
-
-   vecmbindnn2 .= vecmbindnn
-   vecmbindmm2 .= vecmbindmm
-   common .= 0
-
-   for kk = 1:Np-1
-
-       indcommon = findfirst(isequal(vecmbindmm[kk]), vecmbindnn)
-
-       if indcommon >= 1 # if the element in vecmbindmm is the same as one element in vecmbindnn
-
-          vecmbindnn2[indcommon] = 0
-          vecmbindmm2[kk] = 0
-
-          for ll = kk+1:Np
-
-              indcommon2 = findfirst(isequal(vecmbindmm[ll]), vecmbindnn2)
-
-              if indcommon2 >= 1 # if two elements in vecmbindmm are the same as two lements in vecmbindnn
-
-                 common1 = vecmbindnn[indcommon]
-                 common2 = vecmbindnn[indcommon2]
-
-                 vecmbindnn2[indcommon2] = 0
-                 jj = findfirst(x->x!=0,vecmbindnn2)
-                 # for Np = 4
-                 # vecmbindnn2[jj] = 0
-                 # jj2 = findfirst(x->x!=0,vecmbindnn2)
-
-                 vecmbindmm2[ll] = 0
-                 ii = findfirst(x->x!=0,vecmbindmm2) # ii != jj
-
-                 # jj = filter(x->x!=common2,filter(x->x!=common1,vecmbindnn))[1]
-                 # ii = filter(x->x!=common2,filter(x->x!=common1,vecmbindmm))[1]
-
-                 return epsilonsoc(ii,jj,common1,common2,Np,1.0)
-
-              end
-
-          end
-
-       end
-
+   if ind0 == Np-1
+      common .= vecmbindnn[findall(x->x!=ind1,1:Np)]
+      jj = vecmbindnn[ind1]
+      ii = vecmbindmm[ind1]
+   else
+      return 0.0
    end
+
+   a = findlast(x->x==jj,common))
+   if !isa(a,Nothing)
+      commonjj = a-findfirst(x->x==jj,common)) + 1
+   else
+      commonjj = 0
+   end
+
+   a = findlast(x->x==ii,common))
+   if !isa(a,Nothing)
+      commonii = a-findfirst(x->x==ii,common)) + 1
+   else
+      commonii = 0
+   end
+
+   return epsilonsoc(ii,jj,commonii,commonjj,Np,1.0)
 
 end
 
@@ -219,7 +175,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # define vectors
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
-    hist = zeros(Int64,Msize0)
+    common = zeros(Int64,Np-1)
 
     # define a matrix for the Hamiltonian for down down
     for nn = 1:maxmatpcut # parfor
