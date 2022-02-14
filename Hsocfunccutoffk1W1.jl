@@ -1,6 +1,76 @@
 include("in2bind.jl")
 include("delta.jl")
 
+function check_duplicates(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+
+    if Np != 3
+       error("This function is for Np=3 but can be extended for any particle number.")
+    end
+
+    hist .= 0 # hist = zeros(Int64,Msize0)
+
+    for jj = 1:Np
+        hist[vecmbindnn[jj]] += 1
+    end
+
+    for jj = 1:Msize0
+        if hist[jj] == Np
+           return -1 #1
+        elseif hist[jj] == Np-1
+           return jj #2
+        end
+    end
+
+    return 0 # if hist[jj] == Np-2 = 1
+
+end
+
+# function epsilonHO(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+#
+#     # This function is for Np=3 but can be extended for any particle number
+#
+#     case = check_duplicates(vecmbindnn,Np,hist,Msize0)
+#
+#     if case == Msize0+1
+#        return (vecmbindnn[1]-1+1/2)*Np
+#     elseif case != 0 # case <= Msize0 && case > 0
+#        return (vecmbindnn[case]-1+1/2)*(Np-1) + (vecmbindnn[2]-1+1/2)
+#     else
+#        return (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
+#     end
+#
+#     # if vecmbindnn[1] == vecmbindnn[2]
+#     #    Hho[nn,nn] = (vecmbindnn[1]-1+1/2)*Np
+#     # else
+#     #    Hho[nn,nn] = (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2)
+#     # end
+#
+# end
+
+function check_duplicates_soc(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+
+    if Np != 3
+       error("This function is for Np=3 but can be extended for any particle number.")
+    end
+
+    hist .= 0 # hist = zeros(Int64,Msize0)
+
+    for jj = 1:Np
+        hist[vecmbindnn[jj]] += 1
+    end
+
+    for jj = 1:Msize0
+        if hist[jj] == Np
+           return -1 #1
+        elseif hist[jj] == Np-1
+           return jj #2
+        end
+    end
+
+    return 0 # if hist[jj] == Np-2 = 1
+
+end
+
 function epsilonsoc(ii::Int64,jj::Int64,common::Int64,Np::Int64,ksoc::Float64)
 
     if abs(jj-ii) != 1
@@ -23,10 +93,81 @@ function epsilonsoc(ii::Int64,jj::Int64,common::Int64,Np::Int64,ksoc::Float64)
 
 end
 
-function epsilonsoctest(ii::Int64,jj::Int64,ksoc::Float64) # for down down
+function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},hist::Vector{Int64},Np::Int64,ksoc::Float64)
+
+   for kk = 1:Np
+
+       indcommon = findfirst(isequal(vecmbindmm[kk]), vecmbindnn)
+
+       if indcommon >= 1
+
+          common = vecmbindmm[kk]
+          jj = vecmbindnn[]
+
+       end
+
+   end
+
+   if casenn == 0 && casemm == 0
+
+      return 0.0
+
+   elseif
+
+   end
+
+   if vecmbindnn[1] == vecmbindmm[1]
+
+      common = vecmbindnn[1]
+      jj = vecmbindnn[2]
+      ii = vecmbindmm[2] # ii != jj
+      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
+
+   elseif vecmbindnn[1] == vecmbindmm[2]
+
+      common = vecmbindnn[1]
+      jj = vecmbindnn[2]
+      ii = vecmbindmm[1] # ii != jj
+      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
+
+   elseif vecmbindnn[2] == vecmbindmm[1]
+
+      common = vecmbindnn[2]
+      jj = vecmbindnn[1]
+      ii = vecmbindmm[2] # ii != jj
+      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
+
+   elseif vecmbindnn[2] == vecmbindmm[2]
+
+      common = vecmbindnn[2]
+      jj = vecmbindnn[1]
+      ii = vecmbindmm[1] # ii != jj
+      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
+
+
+
+
+
+
+    #
+    if abs(jj-ii) != 1
+       return 0.0
+    end
+
+    if jj == common # a|2> = sqrt(2)|1>
+       epsilpn = sqrt(Np)
+    elseif ii == common # a^+|1> = sqrt(2)|2>
+       epsilpn = sqrt(Np)
+    else
+       epsilpn = 1.0
+    end
+
     njj = jj - 1
     nii = ii - 1
-    return (-1im)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1))
+    epsilpn = epsilpn*(-1im)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1)) # for down down
+
+    return epsilpn
+
 end
 
 function epsilonW(ii::Int64,common::Int64,Np::Int64,Omega::Float64)
@@ -66,6 +207,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # define vectors
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
+    hist = zeros(Int64,Msize0)
 
     # define a matrix for the Hamiltonian for down down
     for nn = 1:maxmatpcut # parfor
@@ -75,14 +217,12 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
         # bra
         # in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-        vecmbindmm .= vecmbindnn
+        # vecmbindmm .= vecmbindnn
 
-        # Hho
-        if vecmbindnn[1] == vecmbindnn[2]
-           Hho[nn,nn] = (vecmbindnn[1]-1+1/2)*Np
-        else
-           Hho[nn,nn] = (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2)
-        end
+        # Hho for Np=3
+        Hho[nn,nn] = sum(vecmbindnn[:]) - Np/2
+        # (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
+        # epsilonHO(vecmbindnn,Np,hist,Msize0)
 
         for mm = 1:nn-1
 
@@ -90,6 +230,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             # Hsoc
+            Hsoc[mm,nn] =
+
+            #
             if vecmbindnn[1] == vecmbindmm[1]
 
                common = vecmbindnn[1]
