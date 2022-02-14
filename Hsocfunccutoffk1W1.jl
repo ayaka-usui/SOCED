@@ -78,9 +78,8 @@ function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,Np::Int6
     # end
 
     # Note jj != ii
-
-    epsilpn = sqrt(commonjj+1) # a|n> = sqrt(n)|n-1>
-    epsilpn = epsilpn*sqrt(commonii+1) # a^+|n> = sqrt(n+1)|n+1>
+    epsilpn = sqrt(commonjj+1)
+    epsilpn = epsilpn*sqrt(commonii+1)
 
     njj = jj - 1
     nii = ii - 1
@@ -103,6 +102,7 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
    ind0 = 0
    ind1 = 0
    ind2 = 0
+   # common .= 0
 
    for kk = 1:Np
        if vecmbindnn[kk] == vecmbindmm[kk]
@@ -120,16 +120,16 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
       return 0.0
    end
 
-   a = findlast(x->x==jj,common))
+   a = findlast(x->x==jj,common)
    if !isa(a,Nothing)
-      commonjj = a-findfirst(x->x==jj,common)) + 1
+      commonjj = a-findfirst(x->x==jj,common) + 1
    else
       commonjj = 0
    end
 
-   a = findlast(x->x==ii,common))
+   a = findlast(x->x==ii,common)
    if !isa(a,Nothing)
-      commonii = a-findfirst(x->x==ii,common)) + 1
+      commonii = a-findfirst(x->x==ii,common) + 1
    else
       commonii = 0
    end
@@ -198,38 +198,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             # Hsoc
-            Hsoc[mm,nn] =
-
-            #
-            if vecmbindnn[1] == vecmbindmm[1]
-
-               common = vecmbindnn[1]
-               jj = vecmbindnn[2]
-               ii = vecmbindmm[2] # ii != jj
-               Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-            elseif vecmbindnn[1] == vecmbindmm[2]
-
-               common = vecmbindnn[1]
-               jj = vecmbindnn[2]
-               ii = vecmbindmm[1] # ii != jj
-               Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-            elseif vecmbindnn[2] == vecmbindmm[1]
-
-               common = vecmbindnn[2]
-               jj = vecmbindnn[1]
-               ii = vecmbindmm[2] # ii != jj
-               Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-            elseif vecmbindnn[2] == vecmbindmm[2]
-
-               common = vecmbindnn[2]
-               jj = vecmbindnn[1]
-               ii = vecmbindmm[1] # ii != jj
-               Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-            end
+            Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,Np,1.0)
 
         end
 
