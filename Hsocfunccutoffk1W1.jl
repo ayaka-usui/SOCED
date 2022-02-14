@@ -1,29 +1,29 @@
 include("in2bind.jl")
 include("delta.jl")
 
-function check_duplicates(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
-
-    if Np != 3
-       error("This function is for Np=3 but can be extended for any particle number.")
-    end
-
-    hist .= 0 # hist = zeros(Int64,Msize0)
-
-    for jj = 1:Np
-        hist[vecmbindnn[jj]] += 1
-    end
-
-    for jj = 1:Msize0
-        if hist[jj] == Np
-           return -1 #1
-        elseif hist[jj] == Np-1
-           return jj #2
-        end
-    end
-
-    return 0 # if hist[jj] == Np-2 = 1
-
-end
+# function check_duplicates(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+#
+#     if Np != 3
+#        error("This function is for Np=3 but can be extended for any particle number.")
+#     end
+#
+#     hist .= 0 # hist = zeros(Int64,Msize0)
+#
+#     for jj = 1:Np
+#         hist[vecmbindnn[jj]] += 1
+#     end
+#
+#     for jj = 1:Msize0
+#         if hist[jj] == Np
+#            return -1 #1
+#         elseif hist[jj] == Np-1
+#            return jj #2
+#         end
+#     end
+#
+#     return 0 # if hist[jj] == Np-2 = 1
+#
+# end
 
 # function epsilonHO(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
 #
@@ -47,39 +47,54 @@ end
 #
 # end
 
-function check_duplicates_soc(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+# function check_duplicates_soc(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
+#
+#     if Np != 3
+#        error("This function is for Np=3 but can be extended for any particle number.")
+#     end
+#
+#     hist .= 0 # hist = zeros(Int64,Msize0)
+#
+#     for jj = 1:Np
+#         hist[vecmbindnn[jj]] += 1
+#     end
+#
+#     for jj = 1:Msize0
+#         if hist[jj] == Np
+#            return -1 #1
+#         elseif hist[jj] == Np-1
+#            return jj #2
+#         end
+#     end
+#
+#     return 0 # if hist[jj] == Np-2 = 1
+#
+# end
 
-    if Np != 3
-       error("This function is for Np=3 but can be extended for any particle number.")
-    end
-
-    hist .= 0 # hist = zeros(Int64,Msize0)
-
-    for jj = 1:Np
-        hist[vecmbindnn[jj]] += 1
-    end
-
-    for jj = 1:Msize0
-        if hist[jj] == Np
-           return -1 #1
-        elseif hist[jj] == Np-1
-           return jj #2
-        end
-    end
-
-    return 0 # if hist[jj] == Np-2 = 1
-
-end
-
-function epsilonsoc(ii::Int64,jj::Int64,common::Int64,Np::Int64,ksoc::Float64)
+function epsilonsoc(ii::Int64,jj::Int64,common1::Int64,common2::Int64,Np::Int64,ksoc::Float64)
 
     if abs(jj-ii) != 1
        return 0.0
     end
 
-    if jj == common # a|2> = sqrt(2)|1>
-       epsilpn = sqrt(Np)
-    elseif ii == common # a^+|1> = sqrt(2)|2>
+    # jj != ii
+
+    # a|3> = sqrt(3)|3-1>
+    # a|2> = sqrt(2)|2-1>
+    # a|1> = sqrt(1)|1-1>
+
+    if jj == common1
+       if jj == common2
+          epsilpn = sqrt(Np)
+       else # jj != common2
+          epsilpn = sqrt(Np-1)
+       end
+    elseif ii == common1
+       if ii == common2
+       end
+    end
+
+    elseif ii == common # a^+|Np-1> = sqrt(Np)|Np>
        epsilpn = sqrt(Np)
     else
        epsilpn = 1.0
@@ -95,78 +110,75 @@ end
 
 function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},hist::Vector{Int64},Np::Int64,ksoc::Float64)
 
+   # bra and ket have to be the same except for one element, i.e. two elements have to be the same
+
+   # vecmbindnn_tot = sum(vecmbindnn)
+   # vecmbindmm_tot = sum(vecmbindmm)
+   # if abs(vecmbindnn_tot - vecmbindmm_tot) == 1 # avoid some states very diffrent from each other (but cannot be all of them)
+   #    return 0.0
+   # end
+
+   ind0 = 0
+
    for kk = 1:Np
+       for ll = 1:Np
+           if vecmbindnn[kk] == vecmbindmm[ll]
+              ind0 += 1
+              common[ind0] = vecmbindnn[kk]
+           end
+       end
+   end
+
+
+
+
+
+
+
+
+   vecmbindnn2 .= vecmbindnn
+   vecmbindmm2 .= vecmbindmm
+   common .= 0
+
+   for kk = 1:Np-1
 
        indcommon = findfirst(isequal(vecmbindmm[kk]), vecmbindnn)
 
-       if indcommon >= 1
+       if indcommon >= 1 # if the element in vecmbindmm is the same as one element in vecmbindnn
 
-          common = vecmbindmm[kk]
-          jj = vecmbindnn[]
+          vecmbindnn2[indcommon] = 0
+          vecmbindmm2[kk] = 0
+
+          for ll = kk+1:Np
+
+              indcommon2 = findfirst(isequal(vecmbindmm[ll]), vecmbindnn2)
+
+              if indcommon2 >= 1 # if two elements in vecmbindmm are the same as two lements in vecmbindnn
+
+                 common1 = vecmbindnn[indcommon]
+                 common2 = vecmbindnn[indcommon2]
+
+                 vecmbindnn2[indcommon2] = 0
+                 jj = findfirst(x->x!=0,vecmbindnn2)
+                 # for Np = 4
+                 # vecmbindnn2[jj] = 0
+                 # jj2 = findfirst(x->x!=0,vecmbindnn2)
+
+                 vecmbindmm2[ll] = 0
+                 ii = findfirst(x->x!=0,vecmbindmm2) # ii != jj
+
+                 # jj = filter(x->x!=common2,filter(x->x!=common1,vecmbindnn))[1]
+                 # ii = filter(x->x!=common2,filter(x->x!=common1,vecmbindmm))[1]
+
+                 return epsilonsoc(ii,jj,common1,common2,Np,1.0)
+
+              end
+
+          end
 
        end
 
    end
-
-   if casenn == 0 && casemm == 0
-
-      return 0.0
-
-   elseif
-
-   end
-
-   if vecmbindnn[1] == vecmbindmm[1]
-
-      common = vecmbindnn[1]
-      jj = vecmbindnn[2]
-      ii = vecmbindmm[2] # ii != jj
-      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-   elseif vecmbindnn[1] == vecmbindmm[2]
-
-      common = vecmbindnn[1]
-      jj = vecmbindnn[2]
-      ii = vecmbindmm[1] # ii != jj
-      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-   elseif vecmbindnn[2] == vecmbindmm[1]
-
-      common = vecmbindnn[2]
-      jj = vecmbindnn[1]
-      ii = vecmbindmm[2] # ii != jj
-      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-   elseif vecmbindnn[2] == vecmbindmm[2]
-
-      common = vecmbindnn[2]
-      jj = vecmbindnn[1]
-      ii = vecmbindmm[1] # ii != jj
-      Hsoc[mm,nn] = epsilonsoc(ii,jj,common,Np,1.0)
-
-
-
-
-
-
-    #
-    if abs(jj-ii) != 1
-       return 0.0
-    end
-
-    if jj == common # a|2> = sqrt(2)|1>
-       epsilpn = sqrt(Np)
-    elseif ii == common # a^+|1> = sqrt(2)|2>
-       epsilpn = sqrt(Np)
-    else
-       epsilpn = 1.0
-    end
-
-    njj = jj - 1
-    nii = ii - 1
-    epsilpn = epsilpn*(-1im)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1)) # for down down
-
-    return epsilpn
 
 end
 
