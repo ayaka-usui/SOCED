@@ -240,37 +240,51 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         # Hho
         Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
 
-        ##########
-
         for mm = 1:nn-1
 
             # bra
-            indbra2 = mod(indvec2[mm],Msize0)
-            if indbra2 != 0
-               indbra1 = div(indvec2[mm],Msize0)+1
-            else
-               indbra1 = div(indvec2[mm],Msize0)
-               indbra2 = Msize0
+            # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
+            indbraup = mod(indvec2[mm],maxmatp21)
+            if indbraup != 0
+               indbradown = div(indvec2[mm],maxmatp21) + 1
+            else # indketup == 0
+               indbradown = div(indvec2[mm],maxmatp21)
+               indbraup = maxmatp21
             end
-            in2bind!(indbra1,Msize0,Np-1,matp2,vecmbindnn2)
-            vecmbindmm[1] = vecmbindnn2[1]
-            in2bind!(indbra2,Msize0,Np-1,matp2,vecmbindnn2)
-            vecmbindmm[2] = vecmbindnn2[1]
+
+            # indbra2 = mod(indvec2[mm],Msize0)
+            # if indbra2 != 0
+            #    indbra1 = div(indvec2[mm],Msize0)+1
+            # else
+            #    indbra1 = div(indvec2[mm],Msize0)
+            #    indbra2 = Msize0
+            # end
+
+            in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindnn2)
+            vecmbindmm[1:Np-1] = vecmbindnn2[1:Np-1]
+            in2bind!(indbraup,Msize0,1,matp21,vecmbindnn2)
+            vecmbindmm[Np:Np] = vecmbindnn2[1:1]
 
             # Hsoc
-            if vecmbindnn[1] == vecmbindmm[1]
-
-               jj = vecmbindnn[2]
-               ii = vecmbindmm[2] # ii != jj
-               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0)*(-1) # up up
-
-            elseif vecmbindnn[2] == vecmbindmm[2]
-
-               jj = vecmbindnn[1]
-               ii = vecmbindmm[1] # ii != jj
-               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0) # down down
-
+            if vecmbindnn[Np:Np] .== vecmbindmm[Np:Np]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-1],vecmbindmm[1:Np-1],common[1:Np-1],Np-1,1.0) # down down
+            elseif vecmbindnn[1:Np-1] .== vecmbindmm[1:Np-1]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common[Np:Np],1,1.0)*(-1) # up up
             end
+
+            # if vecmbindnn[1] == vecmbindmm[1]
+            #
+            #    jj = vecmbindnn[2]
+            #    ii = vecmbindmm[2] # ii != jj
+            #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0)*(-1) # up up
+            #
+            # elseif vecmbindnn[2] == vecmbindmm[2]
+            #
+            #    jj = vecmbindnn[1]
+            #    ii = vecmbindmm[1] # ii != jj
+            #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0) # down down
+            #
+            # end
 
         end
 
@@ -280,17 +294,27 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     for nn = 1:maxmatpcut2
 
         # ket having mixed spins
-        indket2 = mod(indvec2[nn],Msize0)
-        if indket2 != 0
-           indket1 = div(indvec2[nn],Msize0)+1
-        else
-           indket1 = div(indvec2[nn],Msize0)
-           indket2 = Msize0
+        # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+        indketup = mod(indvec2[nn],maxmatp21)
+        if indketup != 0
+           indketdown = div(indvec2[nn],maxmatp21) + 1
+        else # indketup == 0
+           indketdown = div(indvec2[nn],maxmatp21)
+           indketup = maxmatp21
         end
-        in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
-        vecmbindnn[1] = vecmbindnn2[1] # down
-        in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
-        vecmbindnn[2] = vecmbindnn2[1] # up
+
+        # indket2 = mod(indvec2[nn],Msize0)
+        # if indket2 != 0
+        #    indket1 = div(indvec2[nn],Msize0)+1
+        # else
+        #    indket1 = div(indvec2[nn],Msize0)
+        #    indket2 = Msize0
+        # end
+
+        in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+        vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1] # down
+        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
+        vecmbindnn[Np:Np] = vecmbindnn2[Np:Np] # up
 
         for mm = 1:maxmatpcut
 
@@ -298,6 +322,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             # HW
+            HW[mm,maxmatpcut+nn] =
+
+            ##
             if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
 
                common = vecmbindnn[1]
