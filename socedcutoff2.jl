@@ -12,7 +12,7 @@ include("Hintfunccutoff2.jl")
 function createHtotal(Msize0::Int64, Np::Int64)
 
     if Np != 3
-       error("This code may be specific for Np=3.")
+       error("This code is specific for Np=3.")
     end
 
     # create Fock basis
@@ -25,19 +25,19 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
     # for down up
     # Enecutoff = Msize0 - 1 + Np/2
-    # matp2 = zeros(Int64,Msize0+1,Np,Np/2)
-    # matp2 = zeros(Int64,Msize0+1,Np)
     # matp2 = zeros(Int64,Msize0+1,Np-1)
-
-    pascaltriangle!(Msize0,Np-1,matp2) # note the indices are m+1 and n+1 for N^m_n
-    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp2,Enecutoff)
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff)
     maxmatpcut2 = length(indvec2)
 
     # construct single particle Hamiltonian
     matho = spzeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)
     matsoc = spzeros(ComplexF64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)
     matW = spzeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)
-    Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp2,matho,matsoc,matW)
+    Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
     matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut)

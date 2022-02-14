@@ -109,10 +109,11 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
           ind0 += 1
        elseif abs(vecmbindnn[kk] - vecmbindmm[kk]) == 1
           ind1 = kk
+          ind2 += 1
        end
    end
 
-   if ind0 == Np-1
+   if ind0 == Np-1 && ind2 == 1
       common .= vecmbindnn[findall(x->x!=ind1,1:Np)]
       jj = vecmbindnn[ind1]
       ii = vecmbindmm[ind1]
@@ -154,7 +155,7 @@ function epsilonW(ii::Int64,common::Int64,Np::Int64,Omega::Float64)
 
 end
 
-function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp2::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
+function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
@@ -214,20 +215,32 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     for nn = 1:maxmatpcut2
 
         # ket
-        indket2 = mod(indvec2[nn],Msize0)
-        if indket2 != 0
-           indket1 = div(indvec2[nn],Msize0)+1
-        else
-           indket1 = div(indvec2[nn],Msize0)
-           indket2 = Msize0
+        # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+        indketup = mod(indvec2[nn],maxmatp21)
+        if indketup != 0
+           indketdown = div(indvec2[nn],maxmatp21) + 1
+        else # indketup == 0
+           indketdown = div(indvec2[nn],maxmatp21)
+           indketup = maxmatp21
         end
-        in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
-        vecmbindnn[1] = vecmbindnn2[1]
-        in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
-        vecmbindnn[2] = vecmbindnn2[1]
+
+        # indket2 = mod(indvec2[nn],Msize0)
+        # if indket2 != 0
+        #    indket1 = div(indvec2[nn],Msize0)+1
+        # else
+        #    indket1 = div(indvec2[nn],Msize0)
+        #    indket2 = Msize0
+        # end
+
+        in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+        vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
+        in2bind!(indketup,Msize0,1,matp20,vecmbindnn2)
+        vecmbindnn[Np:Np] = vecmbindnn2[1:1]
 
         # Hho
-        Hho[maxmatpcut+nn,maxmatpcut+nn] = (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2)
+        Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
+
+        ##########
 
         for mm = 1:nn-1
 
