@@ -3,37 +3,67 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("vijkl.jl")
 
-function Hinttest0(Msize0::Int64)
+function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn2::Vector{Int64},vecmbindmm2::Vector{Int64}Np::Int64)
 
-    matind = zeros(Int64,binomial(Msize0+3,4),4)
-    ind0 = 0
+    # vecmbindnn2 = zeros(Int64,2)
+    # vecmbindmm2 = zeros(Int64,2)
 
-    for n1 = 0:Msize0-1
-        for n2 = 0:n1
-            for n3 = 0:n2
-                for n4 = 0:n3
-                    ind0 += 1
-                    matind[ind0,1] = n1
-                    matind[ind0,2] = n2
-                    matind[ind0,3] = n3
-                    matind[ind0,4] = n4
-                end
+    for kk = 1:Np
+        for ll = 1:Np
+            if vecmbindnn[kk] == vecmbindmm[ll]
+
+               vecmbindnn2 .= vecmbindnn[filter(x->x!=kk,1:Np)]
+               vecmbindmm2 .= vecmbindmm[filter(x->x!=ll,1:Np)]
+
+               
+
+
             end
         end
     end
 
-    return matind
+
+    # indices for Vijkl
+    ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
+    sort!(ind1,rev=true)
+    ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+
+
+    ind0 = 0
+    for kk = 1:Np-1
+        for ll = kk+1:Np
+            if vecmbindnn[kk] == vecmbindnn[ll]
+               ind0 += 1
+            end
+        end
+    end
+
+
+
+
+
+
+    if vecmbindnn[1] == vecmbindnn[2]
+       if vecmbindmm[1] == vecmbindmm[2]
+          Hintdown[mm,nn] = vecV[ind2]*factorial(Np)
+       else
+          Hintdown[mm,nn] = vecV[ind2]*sqrt(factorial(Np))*2
+       end
+    else
+       if vecmbindmm[1] == vecmbindmm[2]
+          Hintdown[mm,nn] = vecV[ind2]*sqrt(factorial(Np))*2
+       else
+          Hintdown[mm,nn] = vecV[ind2]*4
+       end
+    end
 
 end
 
-function indtest0(n1::Int64,n2::Int64,n3::Int64,n4::Int64)
-    return binomial(n1+3,4)+binomial(n2+2,3)+binomial(n3+1,2)+binomial(n4+0,1)+1
-end
-
-function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp2::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, indvec3::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, matp30::Matrix{Int64}, matp31::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
+    # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
 
     # register data of Vijkl in a vector
     ind0 = 0
@@ -56,7 +86,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
 
-    # define a matrix for the Hamiltonian for down down
+    # define a matrix for the Hamiltonian for down down down
     for nn = 1:maxmatpcut # parfor
 
         # ket
@@ -66,9 +96,13 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
 
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-            ind1 = [vecmbindnn[1]-1, vecmbindnn[2]-1, vecmbindmm[1]-1, vecmbindmm[2]-1]
-            sort!(ind1,rev=true)
-            ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+
+            ind,coeff = coefficientInt(vecmbindnn,vecmbindmm,Np)
+            Hintdown[mm,nn] = vecV[ind]*coeff
+
+
+
+
 
             if vecmbindnn[1] == vecmbindnn[2]
                if vecmbindmm[1] == vecmbindmm[2]
@@ -83,14 +117,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
                   Hintdown[mm,nn] = vecV[ind2]*4
                end
             end
-
-            # if vecmbindnn[1] == vecmbindnn[2] && vecmbindmm[1] == vecmbindmm[2]
-            #    Hintdown[nn,mm] = vecV[ind2]*factorial(Np)
-            # elseif vecmbindnn[1] == vecmbindnn[2] || vecmbindmm[1] == vecmbindmm[2]
-            #    Hintdown[nn,mm] = vecV[ind2]*sqrt(factorial(Np))*2
-            # else
-            #    Hintdown[nn,mm] = vecV[ind2]*4
-            # end
 
         end
 

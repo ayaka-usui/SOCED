@@ -139,34 +139,216 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
 
 end
 
-function epsilonW(ii::Int64,common::Int64,Np::Int64,Omega::Float64)
+function epsilonW(ii::Int64,common::Vector{Int64},Np::Int64,Omega::Float64)
 
-    # a|1> = |0>
+    # a^+|n> = sqrt(n+1)|n+1>
 
-    if ii == common # a^+|1> = sqrt(2)|2>
-       epsilpn = sqrt(Np)
-    else
-       epsilpn = 1.0
+    ind0 = 0
+
+    for kk = 1:length(common)
+        if ii == common[kk]
+           ind0 += 1
+        end
     end
 
-    epsilpn = epsilpn*Omega/2
+    epsilpn = sqrt(ind0+1)*Omega/2
+
+    return epsilpn
+
+    # if ii == common # a^+|1> = sqrt(2)|2>
+    #    epsilpn = sqrt(Np)
+    # else
+    #    epsilpn = 1.0
+    # end
+    #
+    # epsilpn = epsilpn*Omega/2
+    #
+    # return epsilpn
+
+end
+
+function epsilonW0_3(ii::Int64,common::Vector{Int64},Np::Int64,Omega::Float64)
+
+    # a|n> = sqrt(n)|n-1>
+    # a^+|n> = sqrt(n+1)|n+1>
+
+    epsilpn = 1.0
+
+    for kk = 1:length(common)
+       ind0 = 0
+       if ii == common[kk]
+          ind0 += 1
+       end
+       epsilpn = sqrt(ind0+1)*epsilpn
+    end
+
+    # ind0 = 0
+    # if ii == common[1]
+    #    ind0 += 1
+    # end
+    # epsilpn = sqrt(ind0+1)
+    #
+    # ind0 = 0
+    # if ii == common[2]
+    #    ind0 += 1
+    # end
+    # epsilpn = sqrt(ind0+1)*epsilpn
+
+    epsilpn = Omega/2*epsilpn
 
     return epsilpn
 
 end
 
-function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
+function epsilonW2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},Np::Int64,Omega::Float64)
+
+   # ket nn is down down up
+   # bra mm is down down down
+
+   # vecmbindnn2 is down down up, down up down, or up down down
+
+   # if vecmbindnn2 != vecmbindmm
+   #    return 0.0
+   # end
+
+   ind0 = 0
+   common .= 0 # zeros(Int64,Np-1)
+
+   for kk = 1:Np-1
+       for ll = ind0+1:Np
+           if vecmbindnn[kk] == vecmbindmm[ll]
+              common[kk] = ll
+              ind0 = ll
+              break
+           end
+       end
+   end
+
+   ii = vecmbindnn[end]
+
+   return epsilonW(ii,common,Np,1.0)
+
+   # if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
+   #
+   #    common = vecmbindnn[1]
+   #    # jj = vecmbindnn[2]
+   #    ii = vecmbindmm[2]
+   #    HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+   #    break
+   #
+   # elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
+   #
+   #    common = vecmbindnn[1]
+   #    # jj = vecmbindnn[2]
+   #    ii = vecmbindmm[1]
+   #    HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
+   #    break
+   #
+   # end
+
+end
+
+function epsilonW3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},Np::Int64,Omega::Float64)
+
+   # ket nn is down up up
+   # bra mm is down down up
+
+   ind0 = 0
+   common .= 0 # zeros(Int64,Np-1)
+
+   # for ll = 1:2
+   #     if vecmbindnn[1] == vecmbindmm[ll]
+   #        for qq = 2:3
+   #            if vecmbindnn[qq] == vecmbindmm[3]
+   #               if vecmbindnn[3] == vecmbindmm[2]
+   #               end
+   #               break
+   #            end
+   #            break
+   #        end
+   #        break
+   #     end
+   # end
+
+   if vecmbindnn[1] == vecmbindmm[1]
+
+      if vecmbindnn[2] == vecmbindmm[3]
+
+         if vecmbindnn[3] == vecmbindmm[2]
+            ii = vecmbindnn[3]
+            common[1] = vecmbindnn[2]
+            common[2] = vecmbindnn[1]
+            return epsilonW0_3(ii,common,Np,1.0)
+         end
+
+      elseif vecmbindnn[3] == vecmbindmm[3]
+
+         if vecmbindnn[2] == vecmbindmm[2]
+            ii = vecmbindnn[2]
+            common[1] = vecmbindnn[3]
+            common[2] = vecmbindnn[1]
+            return epsilonW0_3(ii,common,Np,1.0)
+         end
+
+      end
+
+   elseif vecmbindnn[1] == vecmbindmm[2]
+
+      if vecmbindnn[2] == vecmbindmm[3]
+
+         if vecmbindnn[3] == vecmbindmm[1]
+            ii = vecmbindnn[3]
+            common[1] = vecmbindnn[2]
+            common[2] = vecmbindnn[1]
+            return epsilonW0_3(ii,common,Np,1.0)
+         end
+
+      elseif vecmbindnn[3] == vecmbindmm[3]
+
+         if vecmbindnn[2] == vecmbindmm[1]
+            ii = vecmbindnn[2]
+            common[1] = vecmbindnn[3]
+            common[1] = vecmbindnn[2]
+            return epsilonW0_3(ii,common,Np,1.0)
+         end
+
+      end
+
+   end
+
+   return 0.0
+
+end
+
+function epsilonW4(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},Np::Int64,Omega::Float64)
+
+   # ket nn is down up up
+   # bra mm is up up up
+
+   ind0 = 0
+   common .= 0 # zeros(Int64,Np-1)
+
+   for kk = 2:Np
+       for ll = ind0+1:Np
+           if vecmbindnn[kk] == vecmbindmm[ll]
+              common[kk-1] = ll
+              ind0 = ll
+              break
+           end
+       end
+   end
+
+   ii = vecmbindnn[1]
+
+   return epsilonW(ii,common,Np,1.0)
+
+end
+
+function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, indvec3::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, matp30::Matrix{Int64}, matp31::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
-
-    # # calculate and save energyij
-    # energyijmat = zeros(ComplexF64,Msize0,Msize0);
-    # for ii = 1:Msize0
-    #     for jj = 1:Msize0
-    #         energyijmat[ii,jj] = epsilon(ii,jj,1.0,1.0)
-    #     end
-    # end
+    # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
 
     # reset matrices
     Hho .= 0
@@ -178,7 +360,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     vecmbindmm = zeros(Int64,Np)
     common = zeros(Int64,Np-1)
 
-    # define a matrix for the Hamiltonian for down down
+    # define a matrix for the Hamiltonian for down down down
     for nn = 1:maxmatpcut # parfor
 
         # ket
@@ -205,12 +387,14 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
     end
 
-    # define the Hamiltonian for up up
+    # define the Hamiltonian for up up up
     Hho[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hho[1:maxmatpcut,1:maxmatpcut]
     Hsoc[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hsoc[1:maxmatpcut,1:maxmatpcut]*(-1) # due to up up
 
-    # define the Hamiltonian for down up
+    # define the Hamiltonian for down down up
     vecmbindnn2 = zeros(Int64,Np)
+    vecmbindmm2 = zeros(Int64,Np)
+    maxmatp21 = matp21[Msize0+1,1+1]
 
     for nn = 1:maxmatpcut2
 
@@ -234,7 +418,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
         in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
         vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
-        in2bind!(indketup,Msize0,1,matp20,vecmbindnn2)
+        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
         vecmbindnn[Np:Np] = vecmbindnn2[1:1]
 
         # Hho
@@ -252,18 +436,10 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                indbraup = maxmatp21
             end
 
-            # indbra2 = mod(indvec2[mm],Msize0)
-            # if indbra2 != 0
-            #    indbra1 = div(indvec2[mm],Msize0)+1
-            # else
-            #    indbra1 = div(indvec2[mm],Msize0)
-            #    indbra2 = Msize0
-            # end
-
-            in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindnn2)
-            vecmbindmm[1:Np-1] = vecmbindnn2[1:Np-1]
-            in2bind!(indbraup,Msize0,1,matp21,vecmbindnn2)
-            vecmbindmm[Np:Np] = vecmbindnn2[1:1]
+            in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
+            vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
+            in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
+            vecmbindmm[Np:Np] = vecmbindmm2[1:1]
 
             # Hsoc
             if vecmbindnn[Np:Np] .== vecmbindmm[Np:Np]
@@ -290,7 +466,60 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
     end
 
-    # HW for <down,down|mixed>
+    # define the Hamiltonian for down up up
+    maxmatp31 = matp31[Msize0+1,2+1]
+    indNp = 2
+
+    for nn = 1:maxmatpcut2
+
+        # ket
+        # indvec3[nn] = (nndown-1)*maxmatp31 + nnup
+        indketup = mod(indvec3[nn],maxmatp31)
+        if indketup != 0
+           indketdown = div(indvec3[nn],maxmatp31) + 1
+        else # indketup == 0
+           indketdown = div(indvec3[nn],maxmatp31)
+           indketup = maxmatp31
+        end
+
+        in2bind!(indketdown,Msize0,Np-indNp,matp30,vecmbindnn2)
+        vecmbindnn[1:Np-indNp] = vecmbindnn2[1:Np-indNp]
+        in2bind!(indketup,Msize0,indNp,matp31,vecmbindnn2)
+        vecmbindnn[Np-indNp+1:Np] = vecmbindnn2[1:indNp]
+
+        # Hho
+        Hho[maxmatpcut+maxmatpcut2+nn,maxmatpcut+maxmatpcut2+nn] = sum(vecmbindnn[:]) - Np/2
+
+        for mm = 1:nn-1
+
+            # bra
+            # indvec2[mm] = (mmdown-1)*maxmatp31 + mmup
+            indbraup = mod(indvec3[mm],maxmatp31)
+            if indbraup != 0
+               indbradown = div(indvec3[mm],maxmatp31) + 1
+            else # indketup == 0
+               indbradown = div(indvec3[mm],maxmatp31)
+               indbraup = maxmatp31
+            end
+
+            in2bind!(indbradown,Msize0,Np-indNp,matp30,vecmbindmm2)
+            vecmbindmm[1:Np-indNp] = vecmbindmm2[1:Np-indNp]
+            in2bind!(indbraup,Msize0,indNp,matp31,vecmbindmm2)
+            vecmbindmm[Np-indNp+1:Np] = vecmbindmm2[1:indNp]
+
+            # Hsoc
+            if vecmbindnn[Np-indNp+1:Np] == vecmbindmm[Np-indNp+1:Np]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-indNp],vecmbindmm[1:Np-indNp],common[1:Np-indNp],Np-indNp,1.0) # down
+            elseif vecmbindnn[1:Np-indNp] == vecmbindmm[1:Np-indNp]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np-indNp+1:Np],vecmbindmm[Np-indNp+1:Np],common[Np-indNp+1:Np],indNp,1.0)*(-1) # up
+            end
+
+        end
+
+    end
+
+    # HW for <down,down,down|down,down,up>
+
     for nn = 1:maxmatpcut2
 
         # ket having mixed spins
@@ -303,95 +532,117 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
            indketup = maxmatp21
         end
 
-        # indket2 = mod(indvec2[nn],Msize0)
-        # if indket2 != 0
-        #    indket1 = div(indvec2[nn],Msize0)+1
-        # else
-        #    indket1 = div(indvec2[nn],Msize0)
-        #    indket2 = Msize0
-        # end
-
         in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
         vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1] # down
         in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
         vecmbindnn[Np:Np] = vecmbindnn2[Np:Np] # up
+        vecmbindnn2 .= vecmbindnn
+
+        # sort vecmbindnn2 so note vecmbindnn can be not only down down up, down up down, up down down
+        sort!(vecmbindnn2)
 
         for mm = 1:maxmatpcut
 
-            # bra having down down
+            # bra having down down down
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             # HW
-            HW[mm,maxmatpcut+nn] =
-
-            ##
-            if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
-
-               common = vecmbindnn[1]
-               # jj = vecmbindnn[2]
-               ii = vecmbindmm[2]
-               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
-               break
-
-            elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
-
-               common = vecmbindnn[1]
-               # jj = vecmbindnn[2]
-               ii = vecmbindmm[1]
-               HW[mm,maxmatpcut+nn] = epsilonW(ii,common,Np,1.0)
-               break
-
+            if vecmbindnn2 == vecmbindmm
+               HW[mm,maxmatpcut+nn] = epsilonW2(vecmbindnn,vecmbindmm,common[1:Np-1],Np,1.0)
             end
 
         end
 
     end
 
-    # HW for <up,up|mixed>
+    # HW for <down,down,up|down,up,up>
 
-    # But the construction given below is the same as <down,down|mixed>, and so skip it and copy HW for <down,down|mixed>.
-    HW[maxmatpcut+maxmatpcut2+1:end,maxmatpcut+1:maxmatpcut+maxmatpcut2] = HW[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+    for nn = 1:maxmatpcut2
 
-    # for nn = 1:maxmatpcut2
-    #
-    #     # ket having mixed spins
-    #     indket2 = mod(indvec2[nn],Msize0)
-    #     if indket2 != 0
-    #        indket1 = div(indvec2[nn],Msize0)+1
-    #     else
-    #        indket1 = div(indvec2[nn],Msize0)
-    #        indket2 = Msize0
-    #     end
-    #     in2bind!(indket1,Msize0,Np-1,matp2,vecmbindnn2)
-    #     vecmbindnn[1] = vecmbindnn2[1] # down
-    #     in2bind!(indket2,Msize0,Np-1,matp2,vecmbindnn2)
-    #     vecmbindnn[2] = vecmbindnn2[1] # up
-    #
-    #     for mm = 1:maxmatpcut
-    #
-    #         # bra having up up
-    #         in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-    #
-    #         # HW
-    #         if vecmbindnn[1] == vecmbindmm[1] && vecmbindnn[2] == vecmbindmm[2]
-    #
-    #            common = vecmbindnn[2]
-    #            # jj = vecmbindnn[1]
-    #            ii = vecmbindmm[1]
-    #            HW[maxmatpcut+maxmatpcut2+mm,maxmatpcut+nn] = epsilonW(ii,common,Np,Omega)
-    #
-    #         elseif vecmbindnn[1] == vecmbindmm[2] && vecmbindnn[2] == vecmbindmm[1]
-    #
-    #            common = vecmbindnn[2]
-    #            # jj = vecmbindnn[1]
-    #            ii = vecmbindmm[2]
-    #            HW[maxmatpcut+maxmatpcut2+mm,maxmatpcut+nn] = epsilonW(ii,common,Np,Omega)
-    #
-    #         end
-    #
-    #     end
-    #
-    # end
+        # ket having down up up
+        indNp = 2
+
+        # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+        indketup = mod(indvec3[nn],maxmatp31)
+        if indketup != 0
+           indketdown = div(indvec3[nn],maxmatp31) + 1
+        else # indketup == 0
+           indketdown = div(indvec3[nn],maxmatp31)
+           indketup = maxmatp31
+        end
+
+        in2bind!(indketdown,Msize0,Np-indNp,matp30,vecmbindnn2)
+        vecmbindnn[1:Np-indNp] = vecmbindnn2[1:Np-indNp] # down
+        in2bind!(indketup,Msize0,indNp,matp31,vecmbindnn2)
+        vecmbindnn[Np-indNp+1:Np] = vecmbindnn2[Np-indNp+1:Np] # up
+        # vecmbindnn2 .= vecmbindnn
+        # sort!(vecmbindnn2)
+
+        for mm = 1:maxmatpcut2
+
+            # bra having down down up
+            indNp = 1
+
+            # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+            indbraup = mod(indvec2[mm],maxmatp21)
+            if indbraup != 0
+               indbradown = div(indvec2[mm],maxmatp21) + 1
+            else # indketup == 0
+               indbradown = div(indvec2[mm],maxmatp21)
+               indbraup = maxmatp21
+            end
+
+            in2bind!(indbradown,Msize0,Np-indNp,matp20,vecmbindmm2)
+            vecmbindmm[1:Np-indNp] = vecmbindmm2[1:Np-indNp] # down
+            in2bind!(indbraup,Msize0,indNp,matp21,vecmbindmm2)
+            vecmbindmm[Np-indNp+1:Np] = vecmbindmm2[Np-indNp+1:Np] # up
+            # vecmbindmm2 .= vecmbindmm
+            # sort!(vecmbindmm2)
+
+            # HW
+            HW[maxmatpcut+mm,maxmatpcut+maxmatpcut2+nn] = epsilonW3(vecmbindnn,vecmbindmm,common[1:Np-1],Np,1.0)
+
+        end
+
+    end
+
+    # HW for <up,up,up|down,up,up>
+    indNp = 2
+
+    for nn = 1:maxmatpcut2
+
+        # ket having mixed spins
+        # indvec3[nn] = (nndown-1)*maxmatp31 + nnup
+        indketup = mod(indvec3[nn],maxmatp31)
+        if indketup != 0
+           indketdown = div(indvec3[nn],maxmatp31) + 1
+        else # indketup == 0
+           indketdown = div(indvec3[nn],maxmatp31)
+           indketup = maxmatp31
+        end
+
+        in2bind!(indketdown,Msize0,Np-indNp,matp30,vecmbindnn2)
+        vecmbindnn[1:Np-indNp] = vecmbindnn2[1:Np-indNp] # down
+        in2bind!(indketup,Msize0,indNp,matp31,vecmbindnn2)
+        vecmbindnn[Np-indNp+1:Np] = vecmbindnn2[Np-indNp+1:Np] # up
+        vecmbindnn2 .= vecmbindnn
+
+        # sort vecmbindnn2
+        sort!(vecmbindnn2)
+
+        for mm = 1:maxmatpcut
+
+            # bra having up up up
+            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+            # HW
+            if vecmbindnn2 == vecmbindmm
+               HW[end-(maxmatpcut-mm),maxmatpcut+maxmatpcut2+nn] = epsilonW4(vecmbindnn,vecmbindmm,common[1:Np-1],Np,1.0)
+            end
+
+        end
+
+    end
 
     # since the Hamiltonian is helmitian
     Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
