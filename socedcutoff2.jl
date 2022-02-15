@@ -34,27 +34,26 @@ function createHtotal(Msize0::Int64, Np::Int64)
     maxmatpcut2 = length(indvec2)
 
     # for up up down
-    matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
-    matp31 = zeros(Int64,Msize0+1,2+1)
-    pascaltriangle!(Msize0,Np-2,matp30)
-    pascaltriangle!(Msize0,2,matp31)
-    indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp30,matp31,Enecutoff,2)
+    # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
+    # matp31 = zeros(Int64,Msize0+1,2+1)
+    # pascaltriangle!(Msize0,Np-2,matp30)
+    # pascaltriangle!(Msize0,2,matp31)
+    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp30,matp31,Enecutoff,2)
     # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
 
     # construct single particle Hamiltonian
     matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matsoc = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matW = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    Hsocfunccutoffk1W1!(indvec,indvec2,indvec3,Msize0,Np,matp,matp20,matp21,matp30,matp31,matho,matsoc,matW)
+    Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
     matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matupup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    Hintfunccutoff2!(indvec,indvec2,indvec3,Msize0,Np,matp,matp20,matp21,matp30,matp31,matdowndown,matupup,matdownup)
+    Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
 
-    # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matho, matsoc
+    return matho, matdowndown, matupup, matdownup, matsoc, matW
 
 end
 
