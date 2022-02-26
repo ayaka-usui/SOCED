@@ -13,8 +13,15 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
 
     vecindcoeff .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
+    vecmbind0 = 0
 
     for pp = 1:Np
+
+        # consider to edit when parfor is inplemented
+        if vecmbindnn[pp] == vecmbind0
+           continue
+        end
+
         for qq = 1:Np
 
             if vecmbindnn[pp] == vecmbindmm[qq]
@@ -69,6 +76,8 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
                ind0 += 1
                vecindcoeff[ind0,1] = ind2
                vecindcoeff[ind0,2] = element
+
+               vecmbind0 = vecmbindnn[pp]
 
                break
 
@@ -195,53 +204,53 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     # define Hintup
     Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
 
-    # define Hint for down down up
-    maxmatp21 = matp21[Msize0+1,1+1]
-    vecmbindnn2 = zeros(Int64,Np)
-    vecmbindmm2 = zeros(Int64,Np)
+    # # define Hint for down down up
+    # maxmatp21 = matp21[Msize0+1,1+1]
+    # vecmbindnn2 = zeros(Int64,Np)
+    # vecmbindmm2 = zeros(Int64,Np)
+    #
+    # for nn = 1:maxmatpcut2 # parfor
+    #
+    #     # ket
+    #     # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+    #     indketup = mod(indvec2[nn],maxmatp21)
+    #     if indketup != 0
+    #        indketdown = div(indvec2[nn],maxmatp21) + 1
+    #     else # indketup == 0
+    #        indketdown = div(indvec2[nn],maxmatp21)
+    #        indketup = maxmatp21
+    #     end
+    #     in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+    #     vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
+    #     in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
+    #     vecmbindnn[Np:Np] = vecmbindnn2[1:1]
+    #
+    #     for mm = 1:nn
+    #
+    #         # bra
+    #         # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
+    #         indbraup = mod(indvec2[mm],maxmatp21)
+    #         if indbraup != 0
+    #            indbradown = div(indvec2[mm],maxmatp21) + 1
+    #         else # indketup == 0
+    #            indbradown = div(indvec2[mm],maxmatp21)
+    #            indbraup = maxmatp21
+    #         end
+    #         in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
+    #         vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
+    #         in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
+    #         vecmbindmm[Np:Np] = vecmbindmm2[1:1]
+    #
+    #         vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,common[1:Np-2],vecindcoeff,Np)
+    #         ind2 = Int64.(vecindcoeff[1:ind0,1])
+    #         Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+    #
+    #     end
+    #
+    # end
 
-    for nn = 1:maxmatpcut2 # parfor
-
-        # ket
-        # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
-        indketup = mod(indvec2[nn],maxmatp21)
-        if indketup != 0
-           indketdown = div(indvec2[nn],maxmatp21) + 1
-        else # indketup == 0
-           indketdown = div(indvec2[nn],maxmatp21)
-           indketup = maxmatp21
-        end
-        in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
-        vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
-        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
-        vecmbindnn[Np:Np] = vecmbindnn2[1:1]
-
-        for mm = 1:nn
-
-            # bra
-            # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
-            indbraup = mod(indvec2[mm],maxmatp21)
-            if indbraup != 0
-               indbradown = div(indvec2[mm],maxmatp21) + 1
-            else # indketup == 0
-               indbradown = div(indvec2[mm],maxmatp21)
-               indbraup = maxmatp21
-            end
-            in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
-            vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
-            in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
-            vecmbindmm[Np:Np] = vecmbindmm2[1:1]
-
-            vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,common[1:Np-2],vecindcoeff,Np)
-            ind2 = Int64.(vecindcoeff[1:ind0,1])
-            Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
-
-        end
-
-    end
-
-    # define Hint for up up down
-    Hintdu[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+    # # define Hint for up up down
+    # Hintdu[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
 
     # define Hint for down up up
     # indNp = 2
@@ -288,6 +297,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     # end
 
     # use conjectures for the lower triangle elements of Hint since it is hermite
-    Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
+    # Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
 
 end
