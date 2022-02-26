@@ -42,22 +42,19 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
 
     # construct single particle Hamiltonian
-    # matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    matho = spzeros(Float64,maxmatpcut+maxmatpcut,maxmatpcut+maxmatpcut)
+    matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matsoc = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matW = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
-    # matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    # matupup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    matupup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut,maxmatpcut+maxmatpcut)
-    matupup = spzeros(Float64,maxmatpcut+maxmatpcut,maxmatpcut+maxmatpcut)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
 
     # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matho, matdowndown, matupup
+    return matho, matdowndown, matupup, matdownup
     # return matho
 
 end
@@ -67,8 +64,8 @@ function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Fl
     # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
-    matho, matdowndown, matupup = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup,nev=specnum,which=:SR)
+    matho, matdowndown, matupup, matdownup = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
 
     spect = real(lambda .- lambda[1])
 

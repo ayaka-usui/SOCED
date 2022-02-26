@@ -479,74 +479,74 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     Hho[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hho[1:maxmatpcut,1:maxmatpcut]
     # Hsoc[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hsoc[1:maxmatpcut,1:maxmatpcut]*(-1) # due to up up
 
-    # # define the Hamiltonian for down down up
-    # vecmbindnn2 = zeros(Int64,Np)
-    # vecmbindmm2 = zeros(Int64,Np)
-    # maxmatp21 = matp21[Msize0+1,1+1]
-    #
-    # for nn = 1:maxmatpcut2
-    #
-    #     # ket
-    #     # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
-    #     indketup = mod(indvec2[nn],maxmatp21)
-    #     if indketup != 0
-    #        indketdown = div(indvec2[nn],maxmatp21) + 1
-    #     else # indketup == 0
-    #        indketdown = div(indvec2[nn],maxmatp21)
-    #        indketup = maxmatp21
-    #     end
-    #
-    #     in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
-    #     vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
-    #     in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
-    #     vecmbindnn[Np:Np] = vecmbindnn2[1:1]
-    #
-    #     # Hho
-    #     Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
-    #
-    #     # for mm = 1:nn-1
-    #     #
-    #     #     # bra
-    #     #     # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
-    #     #     indbraup = mod(indvec2[mm],maxmatp21)
-    #     #     if indbraup != 0
-    #     #        indbradown = div(indvec2[mm],maxmatp21) + 1
-    #     #     else # indketup == 0
-    #     #        indbradown = div(indvec2[mm],maxmatp21)
-    #     #        indbraup = maxmatp21
-    #     #     end
-    #     #     in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
-    #     #     vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
-    #     #     in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
-    #     #     vecmbindmm[Np:Np] = vecmbindmm2[1:1]
-    #     #
-    #     #     # Hsoc
-    #     #     if vecmbindnn[Np:Np] == vecmbindmm[Np:Np]
-    #     #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-1],vecmbindmm[1:Np-1],common,Np-1,1.0) # down down
-    #     #     elseif vecmbindnn[1:Np-1] == vecmbindmm[1:Np-1]
-    #     #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common,1,1.0)*(-1) # up up
-    #     #     end
-    #     #
-    #     #     # if vecmbindnn[1] == vecmbindmm[1]
-    #     #     #
-    #     #     #    jj = vecmbindnn[2]
-    #     #     #    ii = vecmbindmm[2] # ii != jj
-    #     #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0)*(-1) # up up
-    #     #     #
-    #     #     # elseif vecmbindnn[2] == vecmbindmm[2]
-    #     #     #
-    #     #     #    jj = vecmbindnn[1]
-    #     #     #    ii = vecmbindmm[1] # ii != jj
-    #     #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0) # down down
-    #     #     #
-    #     #     # end
-    #     #
-    #     # end
-    #
-    # end
+    # define the Hamiltonian for down down up
+    vecmbindnn2 = zeros(Int64,Np)
+    vecmbindmm2 = zeros(Int64,Np)
+    maxmatp21 = matp21[Msize0+1,1+1]
+
+    for nn = 1:maxmatpcut2
+
+        # ket
+        # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
+        indketup = mod(indvec2[nn],maxmatp21)
+        if indketup != 0
+           indketdown = div(indvec2[nn],maxmatp21) + 1
+        else # indketup == 0
+           indketdown = div(indvec2[nn],maxmatp21)
+           indketup = maxmatp21
+        end
+
+        in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+        vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
+        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
+        vecmbindnn[Np:Np] = vecmbindnn2[1:1]
+
+        # Hho
+        Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
+
+        # for mm = 1:nn-1
+        #
+        #     # bra
+        #     # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
+        #     indbraup = mod(indvec2[mm],maxmatp21)
+        #     if indbraup != 0
+        #        indbradown = div(indvec2[mm],maxmatp21) + 1
+        #     else # indketup == 0
+        #        indbradown = div(indvec2[mm],maxmatp21)
+        #        indbraup = maxmatp21
+        #     end
+        #     in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
+        #     vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
+        #     in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
+        #     vecmbindmm[Np:Np] = vecmbindmm2[1:1]
+        #
+        #     # Hsoc
+        #     if vecmbindnn[Np:Np] == vecmbindmm[Np:Np]
+        #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-1],vecmbindmm[1:Np-1],common,Np-1,1.0) # down down
+        #     elseif vecmbindnn[1:Np-1] == vecmbindmm[1:Np-1]
+        #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common,1,1.0)*(-1) # up up
+        #     end
+        #
+        #     # if vecmbindnn[1] == vecmbindmm[1]
+        #     #
+        #     #    jj = vecmbindnn[2]
+        #     #    ii = vecmbindmm[2] # ii != jj
+        #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0)*(-1) # up up
+        #     #
+        #     # elseif vecmbindnn[2] == vecmbindmm[2]
+        #     #
+        #     #    jj = vecmbindnn[1]
+        #     #    ii = vecmbindmm[1] # ii != jj
+        #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0) # down down
+        #     #
+        #     # end
+        #
+        # end
+
+    end
 
     # define the Hamiltonian for up up down
-    # Hho[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hho[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+    Hho[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hho[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
     # Hsoc[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hsoc[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]*(-1) # due to up up down
 
     # # define the Hamiltonian for down up up
