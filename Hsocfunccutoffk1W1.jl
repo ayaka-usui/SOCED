@@ -71,7 +71,7 @@ include("delta.jl")
 #
 # end
 
-function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,Np::Int64,ksoc::Float64)
+function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,ksoc::Float64)
 
     # if abs(jj-ii) != 1
        # return 0.0
@@ -89,7 +89,7 @@ function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,Np::Int6
 
 end
 
-function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},Np::Int64,ksoc::Float64)
+function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::Vector{Int64},ksoc::Float64)
 
    # bra and ket have to be the same except for one element, i.e. two elements have to be the same
 
@@ -100,7 +100,8 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
    ind2 = 0
    common .= 0
 
-   for kk = 1:Np
+   # for kk = 1:Np
+   for kk = 1:indNp
        if vecmbindnn[kk] == vecmbindmm[kk]
           ind0 += 1
        elseif abs(vecmbindnn[kk] - vecmbindmm[kk]) == 1
@@ -109,7 +110,8 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
        end
    end
 
-   if ind0 == Np-1 && ind2 == 1
+   # if ind0 == Np-1 && ind2 == 1
+   if ind0 == indNp-1 && ind2 == 1
       # common .= vecmbindnn[findall(x->x!=ind1,1:Np)]
       if indNp > 1
          common[1:indNp-1] .= vecmbindnn[findall(x->x!=ind1,1:indNp)]
@@ -134,7 +136,7 @@ function epsilonsoc2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common:
       commonii = 0
    end
 
-   return epsilonsoc(ii,jj,commonii,commonjj,Np,1.0)
+   return epsilonsoc(ii,jj,commonii,commonjj,1.0)
 
 end
 
@@ -463,21 +465,21 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         Hho[nn,nn] = sum(vecmbindnn[:]) - Np/2
         # (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
 
-        # for mm = 1:nn-1
-        #
-        #     # bra
-        #     in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-        #
-        #     # Hsoc
-        #     Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,Np,1.0)
-        #
-        # end
+        for mm = 1:nn-1
+
+            # bra
+            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+            # Hsoc
+            Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
+
+        end
 
     end
 
     # define the Hamiltonian for up up up
     Hho[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hho[1:maxmatpcut,1:maxmatpcut]
-    # Hsoc[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hsoc[1:maxmatpcut,1:maxmatpcut]*(-1) # due to up up
+    Hsoc[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hsoc[1:maxmatpcut,1:maxmatpcut]*(-1) # due to up up
 
     # define the Hamiltonian for down down up
     vecmbindnn2 = zeros(Int64,Np)
@@ -495,7 +497,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
            indketdown = div(indvec2[nn],maxmatp21)
            indketup = maxmatp21
         end
-
         in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
         vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
         in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
@@ -504,50 +505,36 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         # Hho
         Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
 
-        # for mm = 1:nn-1
-        #
-        #     # bra
-        #     # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
-        #     indbraup = mod(indvec2[mm],maxmatp21)
-        #     if indbraup != 0
-        #        indbradown = div(indvec2[mm],maxmatp21) + 1
-        #     else # indketup == 0
-        #        indbradown = div(indvec2[mm],maxmatp21)
-        #        indbraup = maxmatp21
-        #     end
-        #     in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
-        #     vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
-        #     in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
-        #     vecmbindmm[Np:Np] = vecmbindmm2[1:1]
-        #
-        #     # Hsoc
-        #     if vecmbindnn[Np:Np] == vecmbindmm[Np:Np]
-        #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-1],vecmbindmm[1:Np-1],common,Np-1,1.0) # down down
-        #     elseif vecmbindnn[1:Np-1] == vecmbindmm[1:Np-1]
-        #        Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common,1,1.0)*(-1) # up up
-        #     end
-        #
-        #     # if vecmbindnn[1] == vecmbindmm[1]
-        #     #
-        #     #    jj = vecmbindnn[2]
-        #     #    ii = vecmbindmm[2] # ii != jj
-        #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0)*(-1) # up up
-        #     #
-        #     # elseif vecmbindnn[2] == vecmbindmm[2]
-        #     #
-        #     #    jj = vecmbindnn[1]
-        #     #    ii = vecmbindmm[1] # ii != jj
-        #     #    Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc(ii,jj,0,Np,1.0) # down down
-        #     #
-        #     # end
-        #
-        # end
+        for mm = 1:nn-1
+
+            # bra
+            # indvec2[mm] = (mmdown-1)*maxmatp21 + mmup
+            indbraup = mod(indvec2[mm],maxmatp21)
+            if indbraup != 0
+               indbradown = div(indvec2[mm],maxmatp21) + 1
+            else # indketup == 0
+               indbradown = div(indvec2[mm],maxmatp21)
+               indbraup = maxmatp21
+            end
+            in2bind!(indbradown,Msize0,Np-1,matp20,vecmbindmm2)
+            vecmbindmm[1:Np-1] = vecmbindmm2[1:Np-1]
+            in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
+            vecmbindmm[Np:Np] = vecmbindmm2[1:1]
+
+            # Hsoc
+            if vecmbindnn[Np:Np] == vecmbindmm[Np:Np]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[1:Np-1],vecmbindmm[1:Np-1],common,1.0) # down down
+            elseif vecmbindnn[1:Np-1] == vecmbindmm[1:Np-1]
+               Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common,1.0)*(-1) # up up
+            end
+
+        end
 
     end
 
     # define the Hamiltonian for up up down
     Hho[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hho[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
-    # Hsoc[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hsoc[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]*(-1) # due to up up down
+    Hsoc[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hsoc[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]*(-1) # due to up up down
 
     # # define the Hamiltonian for down up up
     # maxmatp31 = matp31[Msize0+1,2+1]

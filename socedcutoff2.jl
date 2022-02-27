@@ -54,7 +54,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
 
     # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matho, matdowndown, matupup, matdownup
+    return matho, matdowndown, matupup, matdownup, matsoc
     # return matho
 
 end
@@ -64,8 +64,8 @@ function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Fl
     # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
-    matho, matdowndown, matupup, matdownup = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+    matho, matdowndown, matupup, matdownup, matsoc = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc,nev=specnum,which=:SR)
 
     spect = real(lambda .- lambda[1])
 
