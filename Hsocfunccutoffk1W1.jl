@@ -254,7 +254,7 @@ function epsilonW2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},common::V
    for kk = 1:Np-1
        for ll = ind0+1:Np
            if vecmbindnn[kk] == vecmbindmm[ll]
-              common[kk] = ll
+              common[kk] = vecmbindnn[kk]
               ind0 = ll
               break
            end

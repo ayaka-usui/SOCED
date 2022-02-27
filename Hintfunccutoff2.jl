@@ -106,7 +106,7 @@ function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
     for pp = 1:Np-1
 
-        # consider to edit when parfor is inplemented
+        # consider to edit when parfor is implemented
         if vecmbindnn[pp] == vecmbind0
            continue
         end
