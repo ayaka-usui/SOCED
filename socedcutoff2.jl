@@ -53,19 +53,14 @@ function createHtotal(Msize0::Int64, Np::Int64)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
 
-    # return matho, matdowndown, matupup, matdownup, matsoc, matW
-    return matho, matdowndown, matupup, matdownup, matsoc
-    # return matho
+    return matho, matdowndown, matupup, matdownup, matsoc, matW
 
 end
 
 function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
-    # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
-
-    matho, matdowndown, matupup, matdownup, matsoc = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc,nev=specnum,which=:SR)
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
     spect = real(lambda .- lambda[1])
 
