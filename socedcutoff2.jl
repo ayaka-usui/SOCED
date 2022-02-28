@@ -69,6 +69,15 @@ function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Fl
 
 end
 
+function saveHtot(Msize0::Int64, Np::Int64)
+
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+
+    # save
+    save("data_Htot80_Np3.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
+
+end
+
 function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
     println("constructoing the Hamiltonian ...")
