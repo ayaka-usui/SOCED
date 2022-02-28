@@ -83,7 +83,8 @@ function epsilonsoc(ii::Int64,jj::Int64,commonii::Int64,commonjj::Int64,ksoc::Fl
 
     njj = jj - 1
     nii = ii - 1
-    epsilpn = epsilpn*(-1im)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1)) # for down down
+    epsilpn = epsilpn*(-1)*ksoc/sqrt(2)*(sqrt(njj+1)*delta(nii-njj-1) - sqrt(njj)*delta(nii-njj+1)) # for down down
+    # epsilpn = epsilpn*(1im)
 
     return epsilpn
 
@@ -439,7 +440,7 @@ end
 #
 # end
 
-function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{ComplexF64}, HW::SparseMatrixCSC{Float64})
+function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{Float64}, HW::SparseMatrixCSC{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
@@ -711,7 +712,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # end
 
     # since the Hamiltonian is helmitian
-    Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
-    HW .= HW + HW' - spdiagm(diag(HW))
+    # Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
+    Hsoc .= Hsoc + (-1)*Hsoc' # Hsco is an imaginary off-diagonal matrix for the reality
+    # HW .= HW + HW' - spdiagm(diag(HW))
+    HW .= HW + HW' # HW is an off-diagonal matrix
 
 end
