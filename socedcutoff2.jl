@@ -74,7 +74,7 @@ function saveHtot(Msize0::Int64, Np::Int64)
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # save
-    save("data_Htot90_Np3.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
+    save("data_Htot100_Np3_real.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
 
 end
 
