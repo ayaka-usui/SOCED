@@ -6,6 +6,7 @@ using JLD
 include("pascaltriangle.jl")
 include("cutMsizeEnespinless.jl")
 include("cutMsizeEnespinmixed.jl")
+include("cutMsizeEnespinmixed2.jl")
 include("Hsocfunccutoffk1W1.jl")
 include("Hintfunccutoff2.jl")
 
@@ -24,14 +25,17 @@ function createHtotal(Msize0::Int64, Np::Int64)
     maxmatpcut = length(indvec)
 
     # for down down up
-    # Enecutoff = Msize0 - 1 + Np/2
+    # Enecutoff2 = Msize0 - 1 + (Np-1)/2
     # matp2 = zeros(Int64,Msize0+1,Np-1)
     matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
     matp21 = zeros(Int64,Msize0+1,1+1)
     pascaltriangle!(Msize0,Np-1,matp20)
     pascaltriangle!(Msize0,1,matp21)
     indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    # indvec2 = cutMsizeEnespinmixed2(Msize0,Np,matp20,matp21,Enecutoff2,1)
+    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
+    # maxmatpcut3 = length(indvec3)
 
     # for up up down
     # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
@@ -60,7 +64,8 @@ end
 function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
 
     spect = real(lambda .- lambda[1])
 
@@ -74,15 +79,15 @@ function saveHtot(Msize0::Int64, Np::Int64)
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # save
-    save("data_Htot100_Np3_real.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
+    save("data_Htot90_Np3_real.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
 
 end
 
 function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, matW, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
     spect = real(lambda .- lambda[1])
 
@@ -105,7 +110,7 @@ function diagonaliseHtotW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64
     arrayspect = zeros(ComplexF64,NOmega,specnum-1)
     mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + ksoc*matsoc
 
-    for jj = 1:NOmega
+    for jj = 1:NOmega # parfor
         @time begin
             arraylambda[jj,:], _ = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]

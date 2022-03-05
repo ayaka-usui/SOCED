@@ -3,7 +3,7 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("vijkl.jl")
 
-function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},common::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
 
     # vecmbindnn3 = zeros(Int64,2)
     # vecmbindmm3 = zeros(Int64,2)
@@ -14,6 +14,7 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
     vecindcoeff .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
     vecmbind0 = 0
+    # common = 0
 
     for pp = 1:Np
 
@@ -28,40 +29,40 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
 
                vecmbindnn3 .= vecmbindnn[findall(x->x!=pp,1:Np)] # ll kk
                vecmbindmm3 .= vecmbindmm[findall(x->x!=qq,1:Np)] # jj ii
-               common .= vecmbindnn[pp]
+               common = vecmbindnn[pp]
 
                element = 1.0
 
                # coefficients of operators for ket
                if vecmbindnn3[1] == vecmbindnn3[2] # a_{kk} a_{kk}
-                  if common[1] == vecmbindnn3[1]
+                  if common == vecmbindnn3[1]
                      element = sqrt(Np*(Np-1))*element
                   else
                      element = sqrt(2*1)*element
                   end
                else # vecmbindnn3[1] != vecmbindnn3[2]
-                     element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
-                     if common[1] == vecmbindnn3[1]
-                        element = sqrt(2)*element
-                     elseif common[1] == vecmbindnn3[2]
-                        element = sqrt(2)*element
-                     else
-                        element = 1.0*element
-                     end
+                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
+                  if common == vecmbindnn3[1]
+                     element = sqrt(2)*element
+                  elseif common == vecmbindnn3[2]
+                     element = sqrt(2)*element
+                  else
+                     element = 1.0*element
+                  end
                end
 
                # coefficients of operators for bra
                if vecmbindmm3[1] == vecmbindmm3[2] # a_{ii} a_{ii}
-                  if common[1] == vecmbindmm3[1]
+                  if common == vecmbindmm3[1]
                      element = sqrt(2*3)*element
                   else
                      element = sqrt(1*2)*element
                   end
                else # vecmbindmm3[1] != vecmbindmm3[2]
                   element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
-                  if common[1] == vecmbindmm3[1]
+                  if common == vecmbindmm3[1]
                      element = sqrt(2)*element
-                  elseif common[1] == vecmbindnn3[2]
+                  elseif common == vecmbindnn3[2]
                      element = sqrt(2)*element
                   else
                      element = 1.0*element
@@ -90,7 +91,7 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
 
 end
 
-function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},common::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
 
     # down down up for g12
 
@@ -103,6 +104,7 @@ function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
     vecindcoeff .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
     vecmbind0 = 0
+    # common = 0
 
     for pp = 1:Np-1
 
@@ -117,19 +119,19 @@ function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
                vecmbindnn3 .= vecmbindnn[findall(x->x!=pp,1:Np)] # ll kk
                vecmbindmm3 .= vecmbindmm[findall(x->x!=qq,1:Np)] # jj ii
-               common .= vecmbindnn[pp]
+               common = vecmbindnn[pp]
 
                element = 1.0
 
                # coefficients of operators for ket
-               if common[1] == vecmbindnn3[1]
+               if common == vecmbindnn3[1]
                   element = sqrt(2)*element
                # else
                #    element = 1.0*element
                end
 
                # coefficients of operators for bra
-               if common[1] == vecmbindmm3[1]
+               if common == vecmbindmm3[1]
                   element = sqrt(2)*element
                # else
                #    element = 1.0*element
@@ -160,7 +162,7 @@ function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
 end
 
-function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},common::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
 
     # down down up for g
 
@@ -173,6 +175,7 @@ function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
     vecindcoeff .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
     # vecmbind0 = 0
+    # common = 0
 
     if vecmbindnn[end] != vecmbindmm[end]
        return vecindcoeff, ind0
@@ -211,7 +214,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
-    # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
+    # maxmatpcut3 = length(indvec3)
 
     # register data of Vijkl in a vector
     ind0 = 0
@@ -236,7 +239,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecmbindnn3 = zeros(Int64,2)
     vecmbindmm3 = zeros(Int64,2)
     vecindcoeff = zeros(Float64,3,2)
-    common = zeros(Int64,Np-1)
 
     # define a matrix for the Hamiltonian for down down down
     for nn = 1:maxmatpcut # parfor
@@ -249,7 +251,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
-            vecindcoeff, ind0 = coefficientInt(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,common[1:Np-2],vecindcoeff,Np)
+            vecindcoeff, ind0 = coefficientInt(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             ind2 = Int64.(vecindcoeff[1:ind0,1])
             Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
@@ -278,6 +280,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
         in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
         vecmbindnn[Np:Np] = vecmbindnn2[1:1]
 
+        # a = findfirst(x->x==indvec2[nn],indvec3)
+
         for mm = 1:nn # down down up for bra
 
             # bra
@@ -294,13 +298,27 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             in2bind!(indbraup,Msize0,1,matp21,vecmbindmm2)
             vecmbindmm[Np:Np] = vecmbindmm2[1:1]
 
-            vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,common[1:Np-2],vecindcoeff,Np)
+            # b = findfirst(x->x==indvec2[mm],indvec3)
+
+            vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             ind2 = Int64.(vecindcoeff[1:ind0,1])
             Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
-            vecindcoeff, ind0 = coefficientInt3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,common[1:Np-2],vecindcoeff,Np)
+            vecindcoeff, ind0 = coefficientInt3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             ind2 = Int64.(vecindcoeff[1:ind0,1])
             Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+            
+            # if !isa(a,Nothing) && !isa(b,Nothing)
+            #    vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
+            #    ind2 = Int64.(vecindcoeff[1:ind0,1])
+            #    Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+            # end
+            #
+            # if (!isa(a,Nothing) && !isa(b,Nothing)) || (isa(a,Nothing) && isa(a,Nothing))
+            #    vecindcoeff, ind0 = coefficientInt3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
+            #    ind2 = Int64.(vecindcoeff[1:ind0,1])
+            #    Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+            # end
 
         end
 
