@@ -219,7 +219,7 @@ function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, ma
     popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
-    results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
+    results = [lambda popdown3 popdown2up1 popdown1up2 popup3 norm]
 
     # return lambda, spect
     return results
