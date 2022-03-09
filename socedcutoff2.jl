@@ -196,10 +196,33 @@ function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, ma
     lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
-    spect = real(lambda .- lambda[1])
+    # spect = real(lambda .- lambda[1])
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    norm = popdown3 + popdown2up1 + popdown1up2 + popup3
+
+    results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
 
     # return lambda, spect
-    return lambda
+    return results
 
 end
 
