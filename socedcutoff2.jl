@@ -1,5 +1,6 @@
-using Arpack, SparseArrays, LinearAlgebra
+using ArnoldiMethod, SparseArrays, LinearAlgebra
 using JLD
+using Arpack
 # using FLoops
 
 # define functions used here
@@ -67,10 +68,116 @@ function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Fl
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
     lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
 
-    spect = real(lambda .- lambda[1])
+    # decomp, history = partialschur(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=SR())
 
-    # return lambda, spect
+    # spect = real(lambda .- lambda[1])
+
     return lambda
+    # return decomp
+
+end
+
+function diagonaliseHtotspinpop_eigs(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    norm = popdown3 + popdown2up1 + popdown1up2 + popup3
+
+    results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
+
+    return results
+
+end
+
+function diagonaliseHtotspinpop_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    mattot = Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup)
+    mattot1 = Hermitian(mattot[1:maxmatpcut,1:maxmatpcut])
+    mattot2 = Hermitian(mattot[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2])
+    mattot3 = Hermitian(mattot[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2])
+    mattot4 = Hermitian(mattot[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut])
+    lambda1, phi1 = eigen(mattot1,1:specnum)
+    lambda2, phi2 = eigen(mattot2,1:specnum)
+    lambda3, phi3 = eigen(mattot3,1:specnum)
+    lambda4, phi4 = eigen(mattot4,1:specnum)
+
+    results = [lambda1 lambda2 lambda3 lambda4]
+
+    return results
+
+end
+
+function diagonaliseHtotspinpop(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+    mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup))
+    lambda, phi = eigen(mattot,1:specnum)
+    # lambda, phi = eigs(mattot,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    norm = popdown3 + popdown2up1 + popdown1up2 + popup3
+
+    results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
+
+    return results
 
 end
 

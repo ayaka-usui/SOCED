@@ -16,6 +16,9 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
     vecmbind0 = 0
     # common = 0
 
+    vecmbindnn3 .= 0
+    vecmbindmm3 .= 0
+
     for pp = 1:Np
 
         # consider to edit when parfor is inplemented
@@ -105,6 +108,9 @@ function coefficientInt2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
     ind0 = 0
     vecmbind0 = 0
     # common = 0
+
+    vecmbindnn3 .= 0
+    vecmbindmm3 .= 0
 
     for pp = 1:Np-1
 
@@ -307,7 +313,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             vecindcoeff, ind0 = coefficientInt3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             ind2 = Int64.(vecindcoeff[1:ind0,1])
             Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
-            
+
             # if !isa(a,Nothing) && !isa(b,Nothing)
             #    vecindcoeff, ind0 = coefficientInt2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             #    ind2 = Int64.(vecindcoeff[1:ind0,1])
