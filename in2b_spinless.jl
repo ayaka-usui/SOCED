@@ -1,8 +1,9 @@
 # include("pascaltriangle.jl") # define pascaltriangle(m,n)
 
-function in2bEne2(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
+function in2b_spinless!(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64}, vecmb::Union{SparseVector{Int64},Array{Int64}})
 
-    # this function return the index of Fock state at the energy of many body state
+    # this function return the index of Fock state at the index of many body state
+    # "in2b" means "an index to a many-body state"
 
     indfk = jj
 
@@ -19,12 +20,11 @@ function in2bEne2(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
     end
 
     indfk = indfk - 1
+    vecmb[:] .= 0
     # vecmb = spzeros(Int64,Msize+1) #spzeros(Int64,Msize+1)
 
     indM = Msize-1
     indN = Np
-
-    Ene = 0
 
     while true
 
@@ -33,21 +33,18 @@ function in2bEne2(jj::Int64, Msize::Int64, Np::Int64, matp::Matrix{Int64})
           end
 
           if indfk >= matp[indM+1,indN+1]
-
              indfk = indfk - matp[indM+1,indN+1] # the indices are m+1 and n+1 for N^m_n
-             # vecmb[Msize-indM] = vecmb[Msize-indM] + 1
+             vecmb[Msize-indM] = vecmb[Msize-indM] + 1
              indN = indN - 1
-
-             Ene = Ene + (Msize-indM)-1 #ceil(Int64,(Msize-indM)/2)-1
-
           else
              indM = indM - 1
           end
 
     end
 
-    Ene = Ene + Np/2
+    # the last element for the coefficient
+    vecmb[Msize+1] = 1
 
-    return Ene
+    # return vecmb
 
 end

@@ -4,10 +4,10 @@ using Arpack, SparseArrays, LinearAlgebra
 include("ades.jl")
 include("acre.jl")
 # include("pascaltriangle.jl")
-include("in2b.jl")
+include("in2b_spinless.jl")
 # include("b2in.jl")
 # include("epsilon.jl")
-include("vijkl2.jl")
+include("vijkl_spinless.jl")
 
 function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int64, matp::Matrix{Int64}, Hint::SparseMatrixCSC{Float64})
 
@@ -26,7 +26,7 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
     # Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 
     vecmbnn = spzeros(Int64,Msize+1)
-    vecmbnnl = spzeros(Int64,Msize+1);
+    vecmbnnl = spzeros(Int64,Msize+1)
     vecmbnnkl = spzeros(Int64,Msize+1)
     vecmbnnjkl = spzeros(Int64,Msize+1)
     vecmbnnijkl = spzeros(Int64,Msize+1)
@@ -43,7 +43,7 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
                        continue
                     end
 
-                    matV[nn1+1,nn2+1,nn3+1,nn4+1] = Vijkl2(nn1,nn2,nn3,nn4)
+                    matV[nn1+1,nn2+1,nn3+1,nn4+1] = vijkl_spinless(nn1,nn2,nn3,nn4) #Vijkl2(nn1,nn2,nn3,nn4)
 
                 end
             end
@@ -55,13 +55,13 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
 
         # define ket state |n>
         vecmbnn .= spzeros(Int64,Msize+1)
-        in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)
+        in2b_spinless!(indvec[nn],Msize,Np,matp,vecmbnn) #in2b(nn,Msize,Np)
 
         for ll = 1:Msize
 
             # apply an anhilation operator a_ll to |n>
             vecmbnnl .= spzeros(Int64,Msize+1);
-            ades!(ll,vecmbnn,vecmbnnl) #vecmbnnl = ades(ll,vecmbnn)
+            ades_spinless!(ll,vecmbnn,vecmbnnl) #vecmbnnl = ades(ll,vecmbnn)
             if vecmbnnl[Msize+1] == 0 # go back if a|0> = 0
                continue
             end
@@ -70,7 +70,7 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
 
                 # apply a_kk to a_ll |n>
                 vecmbnnkl .= spzeros(Int64,Msize+1)
-                ades!(kk,vecmbnnl,vecmbnnkl) #vecmbnnkl = ades(kk,vecmbnnl)
+                ades_spinless!(kk,vecmbnnl,vecmbnnkl) #vecmbnnkl = ades(kk,vecmbnnl)
                 if vecmbnnkl[Msize+1] == 0
                    continue
                 end
@@ -84,13 +84,13 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
 
                     # apply a_jj^{+} to a_kk a_ll |n>
                     vecmbnnjkl .= spzeros(Int64,Msize+1)
-                    acre!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
+                    acre_spinless!(jj,vecmbnnkl,vecmbnnjkl) #vecmbnnjkl = acre(jj,vecmbnnkl)
 
                     for ii = 1:Msize
 
                         # apply a_ii^{+} to a_jj^{+} a_kk a_ll |n>
                         vecmbnnijkl .= spzeros(Int64,Msize+1)
-                        acre!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
+                        acre_spinless!(ii,vecmbnnjkl,vecmbnnijkl) #vecmbnnijkl = acre(ii,vecmbnnjkl)
 
                         # # take interactions between (down, down), (up,up), (down,up), or (up,down) and skip other things
                         # if isodd(ii+kk)  # || isodd(jj+ll)
@@ -114,7 +114,7 @@ function Hintfunccutoff2_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int6
 
                             # vecmbmm[:,tid] .= spzeros(Int64,Msize+1)
                             vecmbmm = spzeros(Int64,Msize+1) # vec0 = spzeros(Int64,Msize+1)
-                            in2b!(indvec[mm],Msize,Np,matp,vecmbmm) # in2b!(indvec[mm],Msize,Np,matp,vec0)
+                            in2b_spinless!(indvec[mm],Msize,Np,matp,vecmbmm) # in2b!(indvec[mm],Msize,Np,matp,vec0)
                             # in2b!(indvec[mm],Msize,Np,matp,vecmbmm[:,tid]) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                             vec0 = [n1,n2,n3,n4]

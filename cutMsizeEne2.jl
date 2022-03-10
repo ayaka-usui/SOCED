@@ -3,7 +3,7 @@
 # include("b2in.jl")
 include("in2bEne2.jl")
 
-function cutMsizeEne2(Msize::Int64, Np::Int64, matp::Matrix{Int64}, Enecutoff::Int64)
+function cutMsizeEne2(Msize::Int64, Np::Int64, matp::Matrix{Int64}, Enecutoff::Float64)
 
     # this function puts the cut-off in the number of states by a given energy
 

@@ -1,7 +1,7 @@
-include("ades.jl")
-include("acre.jl")
+include("ades_spinless.jl")
+include("acre_spinless.jl")
 # include("pascaltriangle.jl")
-include("in2b.jl")
+include("in2b_spinless.jl")
 # include("b2in.jl")
 include("epsilon2.jl")
 
@@ -32,14 +32,14 @@ function Hsocfunccutoff_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int64
     for nn = 1:maxmatpcut #maxmatp # parfor
 
         vecmbnn .= spzeros(Int64,Msize+1)
-        in2b!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
+        in2b_spinless!(indvec[nn],Msize,Np,matp,vecmbnn) #vecmbnn = in2b(indvec[nn],Msize,Np,matp) #in2b(nn,Msize,Np)
         # energyij = 0.
 
         # free terms
         for jj = 1:Msize
 
             vecmbnnj .= spzeros(Int64,Msize+1)
-            ades!(jj,vecmbnn,vecmbnnj) #vecmbnnj = ades(jj,vecmbnn)
+            ades_spinless!(jj,vecmbnn,vecmbnnj) #vecmbnnj = ades(jj,vecmbnn)
             if vecmbnnj[Msize+1] == 0 # go back if a|0> = 0
                continue
             end
@@ -47,7 +47,7 @@ function Hsocfunccutoff_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int64
             for ii = 1:Msize
 
                 vecmbnnij .= spzeros(Int64,Msize+1)
-                acre!(ii,vecmbnnj,vecmbnnij) #vecmbnnij = acre(ii,vecmbnnj)
+                acre_spinless!(ii,vecmbnnj,vecmbnnij) #vecmbnnij = acre(ii,vecmbnnj)
 
                 # energyij = epsilon(ii,jj,ksoc,Omega)
                 energyij = energyijmat[ii,jj]
@@ -58,7 +58,7 @@ function Hsocfunccutoff_spinless!(indvec::Vector{Int64}, Msize::Int64, Np::Int64
                 for mm = 1:nn
 
                     vecmbmm .= spzeros(Int64,Msize+1)
-                    in2b!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
+                    in2b_spinless!(indvec[mm],Msize,Np,matp,vecmbmm) #vecmbmm = in2b(indvec[mm],Msize,Np)
 
                     if vecmbnnij[1:Msize] == vecmbmm[1:Msize]
                        Hsoc[mm,nn] = Hsoc[mm,nn] + energyij*sqrt(vecmbnnij[Msize+1])
