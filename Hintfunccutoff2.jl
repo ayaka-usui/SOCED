@@ -60,7 +60,7 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
                      element = sqrt(1*2)*element
                   end
                else # vecmbindmm3[1] != vecmbindmm3[2] # a^+_{ii} a^+_{jj}
-                  if common == vecmbindmm3[1] || common == vecmbindnn3[2]
+                  if common == vecmbindmm3[1] || common == vecmbindmm3[2]
                      element = sqrt(2)*element
                   # else
                      # element = 1.0*element
