@@ -43,33 +43,29 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
                   else
                      element = sqrt(2*1)*element
                   end
-               else # vecmbindnn3[1] != vecmbindnn3[2]
-                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
-                  if common == vecmbindnn3[1]
+               else # vecmbindnn3[1] != vecmbindnn3[2] # a_{kk} a_{ll}
+                  if common == vecmbindnn3[1] || common == vecmbindnn3[2]
                      element = sqrt(2)*element
-                  elseif common == vecmbindnn3[2]
-                     element = sqrt(2)*element
-                  else
-                     element = 1.0*element
+                  # else
+                     # element = 1.0*element
                   end
+                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
                end
 
                # coefficients of operators for bra
-               if vecmbindmm3[1] == vecmbindmm3[2] # a_{ii} a_{ii}
+               if vecmbindmm3[1] == vecmbindmm3[2] # a^+_{ii} a^+_{ii}
                   if common == vecmbindmm3[1]
                      element = sqrt(2*3)*element
                   else
                      element = sqrt(1*2)*element
                   end
-               else # vecmbindmm3[1] != vecmbindmm3[2]
-                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
-                  if common == vecmbindmm3[1]
+               else # vecmbindmm3[1] != vecmbindmm3[2] # a^+_{ii} a^+_{jj}
+                  if common == vecmbindmm3[1] || common == vecmbindnn3[2]
                      element = sqrt(2)*element
-                  elseif common == vecmbindnn3[2]
-                     element = sqrt(2)*element
-                  else
-                     element = 1.0*element
+                  # else
+                     # element = 1.0*element
                   end
+                  element = element*2 # a^+_{ii} a^+_{jj} + a^+_{jj} a^+_{ii}
                end
 
                # indices for Vijkl

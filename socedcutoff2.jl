@@ -20,6 +20,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # create Fock basis
     # for down down and up up
     Enecutoff = Msize0 - 1 + Np/2
+    # Enecutoff = 13.5
     matp = zeros(Int64,Msize0+1,Np+1)
     pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
     indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
@@ -186,11 +187,11 @@ function saveHtot(Msize0::Int64, Np::Int64)
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # save
-    save("data_Htot90_Np3_real.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
+    save("data_Htot90_Np3_real_ver2.jld", "Msize0", Msize0, "matho", matho, "matdowndown", matdowndown, "matupup", matupup, "matdownup", matdownup, "matsoc", matsoc, "matW", matW)
 
 end
 
-function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, matW, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, matW, Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
     lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
