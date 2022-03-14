@@ -66,8 +66,8 @@ end
 function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
 
     # decomp, history = partialschur(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=SR())
 
@@ -81,8 +81,8 @@ end
 function diagonaliseHtotspinpop_eigs(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
 
     # for down3
     Enecutoff = Msize0 - 1 + Np/2
@@ -129,7 +129,8 @@ function diagonaliseHtotspinpop_test(Msize0::Int64, Np::Int64, gdown::Float64, g
     maxmatpcut2 = length(indvec2)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    mattot = Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup)
+    mattot = Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW)
+    # mattot = Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup)
     mattot1 = Hermitian(mattot[1:maxmatpcut,1:maxmatpcut])
     mattot2 = Hermitian(mattot[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2])
     mattot3 = Hermitian(mattot[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2])
@@ -148,8 +149,8 @@ end
 function diagonaliseHtotspinpop(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-    mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup))
+    mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+    # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup))
     lambda, phi = eigen(mattot,1:specnum)
     # lambda, phi = eigs(mattot,nev=specnum,which=:SR)
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
@@ -194,8 +195,8 @@ end
 function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, matW, Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
-    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
+    # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
+    lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
     # spect = real(lambda .- lambda[1])
 
