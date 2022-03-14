@@ -236,6 +236,21 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
     # end
 
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
     arraylambda = zeros(ComplexF64,NOmega,specnum)
     arrayspect = zeros(ComplexF64,NOmega,specnum-1)
@@ -244,14 +259,24 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     println("diagonalising the Hamiltonian for different Omega ...")
     for jj = 1:NOmega # parfor
         @time begin
-            arraylambda[jj,:], _ = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+
+            arraylambda[jj,:], phi = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+
+            popdown3 = sum(real(abs.(phi[1:maxmatpcut,:]).^2),dims=1)'
+            popdown2up1 = sum(real(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2),dims=1)'
+            popdown1up2 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2),dims=1)'
+            popup3 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2),dims=1)'
+
             println(jj)
+
         end
     end
 
-    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect)
+    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "popdown3", popdown3, "popdown2up1", popdown2up1, "popdown1up2", popdown1up2, "popup3", popup3)
 
-    return arrayOmega, arraylambda, arrayspect
+    results = [arrayOmega arraylambda arrayspect popdown3 popdown2up1 popdown1up2 popup3]
+
+    return results
 
 end
