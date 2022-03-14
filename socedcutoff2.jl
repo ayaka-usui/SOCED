@@ -99,10 +99,10 @@ function diagonaliseHtotspinpop_eigs(Msize0::Int64, Np::Int64, gdown::Float64, g
     indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
 
-    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
-    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
-    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
-    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    popdown3 = sum(real(abs.(phi[1:maxmatpcut,:]).^2),dims=1)'
+    popdown2up1 = sum(real(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2),dims=1)'
+    popdown1up2 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2),dims=1)'
+    popup3 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2),dims=1)'
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
@@ -171,10 +171,10 @@ function diagonaliseHtotspinpop(Msize0::Int64, Np::Int64, gdown::Float64, gup::F
     indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
 
-    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
-    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
-    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
-    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    popdown3 = sum(real(abs.(phi[1:maxmatpcut,:]).^2),dims=1)'
+    popdown2up1 = sum(real(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2),dims=1)'
+    popdown1up2 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2),dims=1)'
+    popup3 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2),dims=1)'
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
@@ -215,10 +215,10 @@ function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, ma
     indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
 
-    popdown3 = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
-    popdown2up1 = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
-    popdown1up2 = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
-    popup3 = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+    popdown3 = sum(real(abs.(phi[1:maxmatpcut,:]).^2),dims=1)'
+    popdown2up1 = sum(real(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2),dims=1)'
+    popdown1up2 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2),dims=1)'
+    popup3 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2),dims=1)'
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3 norm]
