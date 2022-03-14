@@ -237,15 +237,15 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     # end
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
-    arraylambda = zeros(ComplexF64,NOmega,specnum)
-    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+    arraylambda = zeros(ComplexF64,specnum,NOmega)
+    arrayspect = zeros(ComplexF64,specnum-1,NOmega)
     mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
 
     println("diagonalising the Hamiltonian for different Omega ...")
     @time begin
     for jj = 1:NOmega # parfor
-        arraylambda[jj,:], _ = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
-        arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+        arraylambda[:,jj], _ = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+        arrayspect[:,jj] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
         println(jj)
     end
     end
