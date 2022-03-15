@@ -254,28 +254,32 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
     arraylambda = zeros(ComplexF64,NOmega,specnum)
     arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+    arraypopdown3 = zeros(Float64,NOmega,specnum)
+    arraypopdown2up1 = zeros(Float64,NOmega,specnum)
+    arraypopdown1up2 = zeros(Float64,NOmega,specnum)
+    arraypopup3 = zeros(Float64,NOmega,specnum)
     mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
 
     println("diagonalising the Hamiltonian for different Omega ...")
     for jj = 1:NOmega # parfor
-        @time begin
+        # @time begin
 
             arraylambda[jj,:], phi = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
 
-            popdown3 = sum(real(abs.(phi[1:maxmatpcut,:]).^2),dims=1)'
-            popdown2up1 = sum(real(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2),dims=1)'
-            popdown1up2 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2),dims=1)'
-            popup3 = sum(real(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2),dims=1)'
+            arraypopdown3[jj,:] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+            arraypopdown2up1[jj,:] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+            arraypopdown1up2[jj,:] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+            arraypopup3[jj,:] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
             println(jj)
 
-        end
+        # end
     end
 
     save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "popdown3", popdown3, "popdown2up1", popdown2up1, "popdown1up2", popdown1up2, "popup3", popup3)
 
-    results = [arrayOmega arraylambda arrayspect popdown3 popdown2up1 popdown1up2 popup3]
+    results = [arrayOmega arraylambda arrayspect arraypopdown3 arraypopdown2up1 arraypopdown1up2 arraypopup3]
 
     return results
 
