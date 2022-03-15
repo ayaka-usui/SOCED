@@ -262,7 +262,7 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
 
     println("diagonalising the Hamiltonian for different Omega ...")
     for jj = 1:NOmega # parfor
-        # @time begin
+        @time begin
 
             arraylambda[jj,:], phi = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
@@ -274,13 +274,9 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
 
             println(jj)
 
-        # end
+        end
     end
 
-    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "popdown3", popdown3, "popdown2up1", popdown2up1, "popdown1up2", popdown1up2, "popup3", popup3)
-
-    results = [arrayOmega arraylambda arrayspect arraypopdown3 arraypopdown2up1 arraypopdown1up2 arraypopup3]
-
-    return results
+    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
 end
