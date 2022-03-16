@@ -228,13 +228,20 @@ function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, ma
 
 end
 
-function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matsoc, matW, Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+function diagonalisesavedHtotdiffW(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
     # println("constructoing the Hamiltonian ...")
     # @time begin
     #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
     #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
     # end
+
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
 
     # for down3
     Enecutoff = Msize0 - 1 + Np/2
@@ -259,12 +266,15 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     arraypopdown1up2 = zeros(Float64,NOmega,specnum)
     arraypopup3 = zeros(Float64,NOmega,specnum)
     mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    phi = zeros(Float64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     println("diagonalising the Hamiltonian for different Omega ...")
     for jj = 1:NOmega # parfor
         @time begin
 
-            arraylambda[jj,:], phi = eigs(mat0 + arrayOmega[jj]*matW,nev=specnum,which=:SR)
+            mat1 .= mat0 + arrayOmega[jj]*matW
+            arraylambda[jj,:], phi .= eigs(mat1,nev=specnum,which=:SR)
             arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
 
             arraypopdown3[jj,:] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
@@ -315,7 +325,8 @@ function diagonalisesavedHtotdiffWparfor(Msize0::Int64, Np::Int64, gdown::Float6
     arraypopdown1up2 = zeros(Float64,NOmega,specnum)
     arraypopup3 = zeros(Float64,NOmega,specnum)
     mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
-    mat1 = copy(mat0)
+    mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    phi = zeros(Float64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     println("diagonalising the Hamiltonian for different Omega ...")
     Threads.@threads for jj = 1:NOmega # parfor
