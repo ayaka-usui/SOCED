@@ -282,3 +282,57 @@ function diagonalisesavedHtotdiffW(matho, matdowndown, matupup, matdownup, matso
     return arrayOmega, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
+
+function diagonalisesavedHtotdiffWparfor(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    arraylambda = zeros(ComplexF64,NOmega,specnum)
+    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
+    arraypopdown3 = zeros(Float64,NOmega,specnum)
+    arraypopdown2up1 = zeros(Float64,NOmega,specnum)
+    arraypopdown1up2 = zeros(Float64,NOmega,specnum)
+    arraypopup3 = zeros(Float64,NOmega,specnum)
+    mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    mat1 = copy(mat0)
+
+    println("diagonalising the Hamiltonian for different Omega ...")
+    Threads.@threads for jj = 1:NOmega # parfor
+
+        mat1 .= mat0 + arrayOmega[jj]*matW
+        arraylambda[jj,:], phi .= eigs(mat1,nev=specnum,which=:SR)
+        arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+
+        arraypopdown3[jj,:] .= sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+        arraypopdown2up1[jj,:] .= sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+        arraypopdown1up2[jj,:] .= sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+        arraypopup3[jj,:] .= sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+
+    end
+
+    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+
+    return arrayOmega, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+
+end
