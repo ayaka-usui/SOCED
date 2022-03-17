@@ -1,6 +1,6 @@
-using ArnoldiMethod, SparseArrays, LinearAlgebra
+using Arpack, SparseArrays, LinearAlgebra
 using JLD
-using Arpack
+# using ArnoldiMethod
 # using FLoops
 
 # define functions used here
