@@ -364,13 +364,14 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
             vecmbindmmtid[:,tid] .= in2bindtid(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
 
             vecindcoefftid[:,:,tid] .= coefficientInttid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
-            ind0 = Int64(vecindcoefftid[1,3,tid])
-            ind2 = Int64.(vecindcoefftid[1:ind0,1,tid])
+            # ind0 = Int64(vecindcoefftid[1,3,tid])
+            # ind2 = Int64.(vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),1,tid])
             # Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
             indrow_Hint[binomial(nn,2)+mm] = mm
             indcolumn_Hint[binomial(nn,2)+mm] = nn
-            element_Hint[binomial(nn,2)+mm] = sum(vecV[ind2].*vecindcoefftid[1:ind0,2,tid])
+            # element_Hint[binomial(nn,2)+mm] = sum(vecV[ind2].*vecindcoefftid[1:ind0,2,tid])
+            element_Hint[binomial(nn,2)+mm] = sum(vecV[Int64.(vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),1,tid])].*vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),2,tid])
 
         end
 
