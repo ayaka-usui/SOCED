@@ -20,7 +20,6 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # create Fock basis
     # for down down and up up
     Enecutoff = Msize0 - 1 + Np/2
-    # Enecutoff = 13.5
     matp = zeros(Int64,Msize0+1,Np+1)
     pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
     indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
@@ -51,13 +50,14 @@ function createHtotal(Msize0::Int64, Np::Int64)
     matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matsoc = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matW = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+
     Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
-    matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    # matdowndown = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matupup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matdownup = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-    Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
+    Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matupup,matdownup)
 
     return matho, matdowndown, matupup, matdownup, matsoc, matW
 

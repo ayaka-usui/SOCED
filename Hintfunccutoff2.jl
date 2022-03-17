@@ -212,7 +212,11 @@ function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
 end
 
-function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
+
+    if Msize0 > 150
+       error("The memory for the elements of sparse matrice such may be too large. I have not checked it.")
+    end
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
@@ -233,9 +237,14 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     end
 
     # defines vectors and matrices
-    Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
+    # Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
+
+    indrow_Hint = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    indcolumn_Hint = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    element_Hint = SharedArray{Float64,1}(binomial(maxmatpcut+1,2))
+
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
     vecmbindnn3 = zeros(Int64,2)
@@ -243,7 +252,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecindcoeff = zeros(Float64,3,2)
 
     # define a matrix for the Hamiltonian for down down down
-    for nn = 1:maxmatpcut # parfor
+    # Threads.@threads for nn = 1:maxmatpcut # parfor
+    for nn = 1:maxmatpcut
 
         # ket
         in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
@@ -255,11 +265,23 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
 
             vecindcoeff, ind0 = coefficientInt(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
             ind2 = Int64.(vecindcoeff[1:ind0,1])
-            Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+            # Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+
+            indrow_Hint[binomial(nn,2)+mm] = mm
+            indcolumn_Hint[binomial(nn,2)+mm] = nn
+            element_Hint[binomial(nn,2)+mm] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
         end
 
     end
+
+    indrow_Hint = Vector(indrow_Hint)
+    indcolumn_Hint = Vector(indcolumn_Hint)
+    element_Hint = Vector(element_Hint)
+    deleteat!(indrow_Hint, element_Hint .== 0)
+    deleteat!(indcolumn_Hint, element_Hint .== 0)
+    deleteat!(element_Hint, element_Hint .== 0)
+    Hintdown = sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
 
     # define Hint for down down up
     maxmatp21 = matp21[Msize0+1,1+1]
