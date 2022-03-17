@@ -331,8 +331,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     element_Hint2 = SharedArray{Float64,1}(binomial(maxmatpcut2+1,2))
 
     println("time for down down up")
-    # @time Threads.@threads for nn = 1:maxmatpcut2 # parfor # down down up for ket
-    for nn = 1:maxmatpcut2
+    @time Threads.@threads for nn = 1:maxmatpcut2 # parfor # down down up for ket
+    # for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
@@ -372,7 +372,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     deleteat!(indrow_Hint2, element_Hint2 .== 0.0)
     deleteat!(indcolumn_Hint2, element_Hint2 .== 0.0)
     deleteat!(element_Hint2, element_Hint2 .== 0.0)
-    Hintdu .= sparse(indrow_Hint2,indcolumn_Hint2,element_Hint2,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2] .= sparse(indrow_Hint2,indcolumn_Hint2,element_Hint2,maxmatpcut2,maxmatpcut2)
 
     indrow_Hint = Vector(indrow_Hint)
     indcolumn_Hint = Vector(indcolumn_Hint)
@@ -380,7 +380,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     deleteat!(indrow_Hint, element_Hint .== 0.0)
     deleteat!(indcolumn_Hint, element_Hint .== 0.0)
     deleteat!(element_Hint, element_Hint .== 0.0)
-    Hintdown .= Hintdown + sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    Hintdown[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2] .= sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut2,maxmatpcut2)
 
     # use conjectures for the lower triangle elements of Hint since it is hermite
     Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
