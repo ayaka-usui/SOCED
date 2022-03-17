@@ -220,7 +220,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
-    # maxmatpcut3 = length(indvec3)
 
     # register data of Vijkl in a vector
     ind0 = 0
@@ -252,8 +251,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecindcoeff = zeros(Float64,3,2)
 
     # define a matrix for the Hamiltonian for down down down
-    # Threads.@threads for nn = 1:maxmatpcut # parfor
-    for nn = 1:maxmatpcut
+    Threads.@threads for nn = 1:maxmatpcut # parfor
+    # for nn = 1:maxmatpcut
 
         # ket
         in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
