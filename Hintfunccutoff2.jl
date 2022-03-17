@@ -258,7 +258,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     end
 
     # defines vectors and matrices
-    # Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
+    Hintdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
     Hintdu .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut);
 

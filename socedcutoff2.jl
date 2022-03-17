@@ -26,31 +26,17 @@ function createHtotal(Msize0::Int64, Np::Int64)
     maxmatpcut = length(indvec)
 
     # for down down up
-    # Enecutoff2 = Msize0 - 1 + (Np-1)/2
-    # matp2 = zeros(Int64,Msize0+1,Np-1)
     matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
     matp21 = zeros(Int64,Msize0+1,1+1)
     pascaltriangle!(Msize0,Np-1,matp20)
     pascaltriangle!(Msize0,1,matp21)
     indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
-    # indvec2 = cutMsizeEnespinmixed2(Msize0,Np,matp20,matp21,Enecutoff2,1)
-    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
-    # maxmatpcut3 = length(indvec3)
-
-    # for up up down
-    # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
-    # matp31 = zeros(Int64,Msize0+1,2+1)
-    # pascaltriangle!(Msize0,Np-2,matp30)
-    # pascaltriangle!(Msize0,2,matp31)
-    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp30,matp31,Enecutoff,2)
-    # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
 
     # construct single particle Hamiltonian
     matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matsoc = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     matW = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
-
     Hsocfunccutoffk1W1!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matho,matsoc,matW)
 
     # construct interaction Hamiltonian
