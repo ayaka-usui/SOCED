@@ -218,7 +218,7 @@ function coefficientInt3tid(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
 
 end
 
-function in2bindmixedspins(Msize0::Int64,Np::Int64,indvec2::Vector{Int64},maxmatp21::Int64,matp20::Vector{Int64},matp21::Vector{Int64},vecmbindnn2::Vector{Int64},vecmbindnn::Vector{Int64})
+function in2bindmixedspins(Msize0::Int64,Np::Int64,nn::Int64,indvec2::Vector{Int64},maxmatp21::Int64,matp20::Matrix{Int64},matp21::Matrix{Int64},vecmbindnn2::Vector{Int64},vecmbindnn::Vector{Int64})
    # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
    indketup = mod(indvec2[nn],maxmatp21)
    if indketup != 0
@@ -318,7 +318,6 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     Hintdown .= sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
 
     # define Hint for down down up
-    println("time for down down up")
     maxmatp21 = matp21[Msize0+1,1+1]
     vecmbindnn2tid = zeros(Int64,Np,tmax)
     vecmbindmm2tid = zeros(Int64,Np,tmax)
@@ -331,35 +330,37 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     indcolumn_Hint2 = SharedArray{Int64,1}(binomial(maxmatpcut2+1,2))
     element_Hint2 = SharedArray{Float64,1}(binomial(maxmatpcut2+1,2))
 
-    for nn = 1:maxmatpcut2 # parfor # down down up for ket
+    println("time for down down up")
+    # @time Threads.@threads for nn = 1:maxmatpcut2 # parfor # down down up for ket
+    for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
         # ket
-        vecmbindnntid[:,tid] .= in2bindmixedspins(Msize0,Np,indvec2,maxmatp21,matp20,matp21,vecmbindnn2tid[:,tid],vecmbindnntid[:,tid])
+        vecmbindnntid[:,tid] .= in2bindmixedspins(Msize0,Np,nn,indvec2,maxmatp21,matp20,matp21,vecmbindnn2tid[:,tid],vecmbindnntid[:,tid])
 
         for mm = 1:nn # down down up for bra
 
             # bra
-            vecmbindmmtid[:,tid] .= in2bindmixedspins(Msize0,Np,indvec2,maxmatp21,matp20,matp21,vecmbindmm2tid[:,tid],vecmbindmmtid[:,tid])
+            vecmbindmmtid[:,tid] .= in2bindmixedspins(Msize0,Np,mm,indvec2,maxmatp21,matp20,matp21,vecmbindmm2tid[:,tid],vecmbindmmtid[:,tid])
 
-            vecindcoefftid[:,tid] .= coefficientInt2tid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
-            # ind0 = vecindcoefftid[1,3,tid]
+            vecindcoefftid[:,:,tid] .= coefficientInt2tid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
+            # ind0 = Int64(vecindcoefftid[1,3,tid])
             # ind2 = Int64.(vecindcoefftid[1:ind0,1,tid])
             # Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
             indrow_Hint2[binomial(nn,2)+mm] = mm
             indcolumn_Hint2[binomial(nn,2)+mm] = nn
-            element_Hint2[binomial(nn,2)+mm] = sum(vecV[Int64.(vecindcoefftid[1:vecindcoefftid[1,3,tid],1,tid])].*vecindcoefftid[1:vecindcoefftid[1,3,tid],2,tid])
+            element_Hint2[binomial(nn,2)+mm] = sum(vecV[Int64.(vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),1,tid])].*vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),2,tid])
 
-            vecindcoefftid[:,tid] .= coefficientInt3tid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
-            # ind0 = vecindcoefftid[1,3,tid]
+            vecindcoefftid[:,:,tid] .= coefficientInt3tid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
+            # ind0 = Int64(vecindcoefftid[1,3,tid])
             # ind2 = Int64.(vecindcoefftid[1:ind0,1,tid])
             # Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
             indrow_Hint[binomial(nn,2)+mm] = mm
             indcolumn_Hint[binomial(nn,2)+mm] = nn
-            element_Hint[binomial(nn,2)+mm] = sum(vecV[Int64.(vecindcoefftid[1:vecindcoefftid[1,3,tid],1,tid])].*vecindcoefftid[1:vecindcoefftid[1,3,tid],2,tid])
+            element_Hint[binomial(nn,2)+mm] = sum(vecV[Int64.(vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),1,tid])].*vecindcoefftid[1:Int64(vecindcoefftid[1,3,tid]),2,tid])
 
         end
 
