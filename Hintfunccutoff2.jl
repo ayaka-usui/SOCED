@@ -3,7 +3,7 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("vijkl.jl")
 
-function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientInt!(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
 
     # vecmbindnn3 = zeros(Int64,2)
     # vecmbindmm3 = zeros(Int64,2)
@@ -86,7 +86,8 @@ function coefficientInt(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecm
         end
     end
 
-    return vecindcoeff, ind0
+    vecindcoeff[1,3] = ind0
+    # return vecindcoeff, ind0
 
 end
 
@@ -212,7 +213,7 @@ function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
 end
 
-function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
+function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
 
     if Msize0 > 150
        error("The memory for the elements of sparse matrice such may be too large. I have not checked it.")
@@ -250,25 +251,35 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecmbindmm3 = zeros(Int64,2)
     vecindcoeff = zeros(Float64,3,2)
 
+    tmax = Threads.nthreads()
+    vecmbindnntid = zeros(Int64,Np,tmax)
+    vecmbindmmtid = zeros(Int64,Np,tmax)
+    vecmbindnn3tid = zeros(Int64,2,tmax)
+    vecmbindmm3tid = zeros(Int64,2,tmax)
+    vecindcoefftid = zeros(Float64,3,3,tmax)
+
     # define a matrix for the Hamiltonian for down down down
-    Threads.@threads for nn = 1:maxmatpcut # parfor
-    # for nn = 1:maxmatpcut
+    # Threads.@threads for nn = 1:maxmatpcut # parfor
+    for nn = 1:maxmatpcut
+
+        tid = Threads.threadid()
 
         # ket
-        in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
+        in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnntid[:,tid])
 
         for mm = 1:nn
 
             # bra
-            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
 
-            vecindcoeff, ind0 = coefficientInt(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-            ind2 = Int64.(vecindcoeff[1:ind0,1])
+            coefficientInt!(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
+            ind0 = Int64(vecindcoefftid[1,3,tid])
+            ind2 = Int64.(vecindcoefftid[1:ind0,1,tid])
             # Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
             indrow_Hint[binomial(nn,2)+mm] = mm
             indcolumn_Hint[binomial(nn,2)+mm] = nn
-            element_Hint[binomial(nn,2)+mm] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
+            element_Hint[binomial(nn,2)+mm] = sum(vecV[ind2].*vecindcoefftid[1:ind0,2,tid])
 
         end
 
@@ -280,7 +291,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     deleteat!(indrow_Hint, element_Hint .== 0)
     deleteat!(indcolumn_Hint, element_Hint .== 0)
     deleteat!(element_Hint, element_Hint .== 0)
-    Hintdown = sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    Hintdown .= sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
 
     # define Hint for down down up
     maxmatp21 = matp21[Msize0+1,1+1]
