@@ -1,4 +1,4 @@
-using Arpack, SparseArrays, LinearAlgebra
+using Arpack, SparseArrays, LinearAlgebra, SharedArrays
 using JLD
 # using ArnoldiMethod
 # using FLoops

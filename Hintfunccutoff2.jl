@@ -1,7 +1,97 @@
-using Arpack, SparseArrays, LinearAlgebra
+using Arpack, SparseArrays, LinearAlgebra, SharedArrays
 
 # define functions used here
 include("vijkl.jl")
+include("in2bindtid.jl")
+
+function coefficientInttid(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+
+    # vecmbindnn3 = zeros(Int64,2)
+    # vecmbindmm3 = zeros(Int64,2)
+
+    # a|n>= sqrt(n)|n-1>
+    # a^+|n>= sqrt(n+1)|n+1>
+
+    vecindcoeff .= 0.0 #zeros(Float64,3,2)
+    ind0 = 0
+    vecmbind0 = 0
+    # common = 0
+
+    vecmbindnn3 .= 0
+    vecmbindmm3 .= 0
+
+    for pp = 1:Np
+
+        # consider to edit when parfor is inplemented
+        if vecmbindnn[pp] == vecmbind0
+           continue
+        end
+
+        for qq = 1:Np
+
+            if vecmbindnn[pp] == vecmbindmm[qq]
+
+               vecmbindnn3 .= vecmbindnn[findall(x->x!=pp,1:Np)] # ll kk
+               vecmbindmm3 .= vecmbindmm[findall(x->x!=qq,1:Np)] # jj ii
+               common = vecmbindnn[pp]
+
+               element = 1.0
+
+               # coefficients of operators for ket
+               if vecmbindnn3[1] == vecmbindnn3[2] # a_{kk} a_{kk}
+                  if common == vecmbindnn3[1]
+                     element = sqrt(Np*(Np-1))*element
+                  else
+                     element = sqrt(2*1)*element
+                  end
+               else # vecmbindnn3[1] != vecmbindnn3[2] # a_{kk} a_{ll}
+                  if common == vecmbindnn3[1] || common == vecmbindnn3[2]
+                     element = sqrt(2)*element
+                  # else
+                     # element = 1.0*element
+                  end
+                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
+               end
+
+               # coefficients of operators for bra
+               if vecmbindmm3[1] == vecmbindmm3[2] # a^+_{ii} a^+_{ii}
+                  if common == vecmbindmm3[1]
+                     element = sqrt(2*3)*element
+                  else
+                     element = sqrt(1*2)*element
+                  end
+               else # vecmbindmm3[1] != vecmbindmm3[2] # a^+_{ii} a^+_{jj}
+                  if common == vecmbindmm3[1] || common == vecmbindmm3[2]
+                     element = sqrt(2)*element
+                  # else
+                     # element = 1.0*element
+                  end
+                  element = element*2 # a^+_{ii} a^+_{jj} + a^+_{jj} a^+_{ii}
+               end
+
+               # indices for Vijkl
+               ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+               sort!(ind1,rev=true)
+               ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+
+               ind0 += 1
+               vecindcoeff[ind0,1] = ind2
+               vecindcoeff[ind0,2] = element
+
+               vecmbind0 = vecmbindnn[pp]
+
+               break
+
+            end
+
+        end
+    end
+
+    vecindcoeff[1,3] = ind0
+
+    return vecindcoeff
+
+end
 
 function coefficientInt!(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
 
@@ -213,7 +303,7 @@ function coefficientInt3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
 end
 
-function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintdown::SparseMatrixCSC{Float64}, Hintup::SparseMatrixCSC{Float64}, Hintdu::SparseMatrixCSC{Float64})
+function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST<:(SparseMatrixCSC{Float64, Ti} where Ti<:Integer)
 
     if Msize0 > 150
        error("The memory for the elements of sparse matrice such may be too large. I have not checked it.")
@@ -259,20 +349,21 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecindcoefftid = zeros(Float64,3,3,tmax)
 
     # define a matrix for the Hamiltonian for down down down
-    # Threads.@threads for nn = 1:maxmatpcut # parfor
-    for nn = 1:maxmatpcut
+    Threads.@threads for nn = 1:maxmatpcut # parfor
+    # Threads does not work on Julia 1.6 but does on Julia 1.7
+    # for nn = 1:maxmatpcut
 
         tid = Threads.threadid()
 
         # ket
-        in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnntid[:,tid])
+        vecmbindnntid[:,tid] .= in2bindtid(indvec[nn],Msize0,Np,matp,vecmbindnntid[:,tid])
 
         for mm = 1:nn
 
             # bra
-            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
+            vecmbindmmtid[:,tid] .= in2bindtid(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
 
-            coefficientInt!(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
+            vecindcoefftid[:,:,tid] .= coefficientInttid(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],vecmbindnn3tid[:,tid],vecmbindmm3tid[:,tid],vecindcoefftid[:,:,tid],Np)
             ind0 = Int64(vecindcoefftid[1,3,tid])
             ind2 = Int64.(vecindcoefftid[1:ind0,1,tid])
             # Hintdown[mm,nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
