@@ -349,7 +349,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecindcoefftid = zeros(Float64,3,3,tmax)
 
     # define a matrix for the Hamiltonian for down down down
-    Threads.@threads for nn = 1:maxmatpcut # parfor
+    println("time for down down down")
+    @time Threads.@threads for nn = 1:maxmatpcut # parfor
     # Threads does not work on Julia 1.6 but does on Julia 1.7
     # for nn = 1:maxmatpcut
 
@@ -386,6 +387,7 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     Hintdown .= sparse(indrow_Hint,indcolumn_Hint,element_Hint,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
 
     # define Hint for down down up
+    println("time for down down up")
     maxmatp21 = matp21[Msize0+1,1+1]
     vecmbindnn2 = zeros(Int64,Np)
     vecmbindmm2 = zeros(Int64,Np)
