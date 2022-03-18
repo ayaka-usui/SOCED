@@ -182,9 +182,15 @@ function saveHtot(Msize0::Int64, Np::Int64)
 
 end
 
-function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, matW, Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+function diagonalisesavedHtot(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
-    # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+
     # lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup,nev=specnum,which=:SR)
     lambda, phi = eigs(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW,nev=specnum,which=:SR)
 
@@ -212,6 +218,8 @@ function diagonalisesavedHtot(matho, matdowndown, matupup, matdownup, matsoc, ma
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3 norm]
+
+    save("data_check.jld", "results", results)
 
     # return lambda, spect
     return results
