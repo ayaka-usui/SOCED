@@ -342,8 +342,8 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     maxmatp21 = matp21[Msize0+1,1+1]
 
     # define the Hamiltonian for down down up
-    println("time for single particle part of down down down")
-    for nn = 1:maxmatpcut2
+    println("time for single particle part of down down up")
+    @time Threads.@threads for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
@@ -427,43 +427,71 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     Hho[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hho[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
     Hsoc[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hsoc[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]*(-1) # due to up up down
 
+    # define matrices and vectors
+    indrow_Hsp = SharedArray{Int64,1}(maxmatpcut2*maxmatpcut)
+    indcolumn_Hsp = SharedArray{Int64,1}(maxmatpcut2*maxmatpcut)
+    element_Hsp = SharedArray{Float64,1}(maxmatpcut2*maxmatpcut)
+
     # HW for <down,down,down|down,down,up>
+    println("time for coherent coupling between down down down and down down up")
     for nn = 1:maxmatpcut2
 
+        tid = Threads.threadid()
+
         # ket having mixed spins
+        vecmbindnntid[:,tid] .= in2bindmixedspins(Msize0,Np,nn,indvec2,maxmatp21,matp20,matp21,vecmbindnn2tid[:,tid],vecmbindnntid[:,tid])
+
         # indvec2[nn] = (nndown-1)*maxmatp21 + nnup
-        indketup = mod(indvec2[nn],maxmatp21)
-        if indketup != 0
-           indketdown = div(indvec2[nn],maxmatp21) + 1
-        else # indketup == 0
-           indketdown = div(indvec2[nn],maxmatp21)
-           indketup = maxmatp21
-        end
-        in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
-        vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1] # down
-        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
-        vecmbindnn[Np:Np] = vecmbindnn2[1:1] # up
-        vecmbindnn2 .= vecmbindnn
+        # indketup = mod(indvec2[nn],maxmatp21)
+        # if indketup != 0
+        #    indketdown = div(indvec2[nn],maxmatp21) + 1
+        # else # indketup == 0
+        #    indketdown = div(indvec2[nn],maxmatp21)
+        #    indketup = maxmatp21
+        # end
+        # in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+        # vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1] # down
+        # in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
+        # vecmbindnn[Np:Np] = vecmbindnn2[1:1] # up
+
+        vecmbindnn2tid[:,tid] .= vecmbindnntid[:,tid]
 
         # sort vecmbindnn2 so note vecmbindnn can be not only down down up, down up down, up down down
-        sort!(vecmbindnn2)
+        vecmbindnn2tid[:,tid] = sort(vecmbindnn2tid[:,tid])
 
         for mm = 1:maxmatpcut
 
             # bra having down down down
-            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+            # in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+            vecmbindmmtid[:,tid] .= in2bindtid(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
 
             # HW
-            if vecmbindnn2 == vecmbindmm
-               HW[mm,maxmatpcut+nn] = epsilonW2(vecmbindnn,vecmbindmm,common,Np,1.0)
+            if vecmbindnn2tid[:,tid] == vecmbindmmtid[:,tid]
+               indrow_Hsp[(nn-1)*maxmatpcut+mm] = nn
+               indcolumn_Hsp[(nn-1)*maxmatpcut+mm] = mm
+               element_Hsp[(nn-1)*maxmatpcut+mm] = epsilonW2(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],commontid[:,tid],Np,1.0)
             end
+
+            # if vecmbindnn2 == vecmbindmm
+            #    HW[mm,maxmatpcut+nn] = epsilonW2(vecmbindnn,vecmbindmm,common,Np,1.0)
+            # end
 
         end
 
     end
 
+    indrow_Hsp = Vector(indrow_Hsp)
+    indcolumn_Hsp = Vector(indcolumn_Hsp)
+    element_Hsp = Vector(element_Hsp)
+    deleteat!(indrow_Hsp, element_Hsp .== 0.0)
+    deleteat!(indcolumn_Hsp, element_Hsp .== 0.0)
+    deleteat!(element_Hsp, element_Hsp .== 0.0)
+    HW[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2] .= sparse(indrow_Hsp,indrow_Hsp,element_Hsp,maxmatpcut,maxmatpcut2)
+
     # HW for <up,up,up|up,up,down>
     HW[end-(maxmatpcut-1):end,end-(maxmatpcut+maxmatpcut2-1):end-maxmatpcut] = HW[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+
+    # define matrices and vectors
 
     # HW for <down,down,up|up,up,down>
     indNp = 1
