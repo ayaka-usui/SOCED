@@ -252,32 +252,70 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     Hsoc .= 0
     HW .= 0
 
+    indrow_Hsp = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    indcolumn_Hsp = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    element_Hsp = SharedArray{Float64,1}(binomial(maxmatpcut+1,2))
+    
+    indrow_Hsp2 = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    indcolumn_Hsp2 = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
+    element_Hsp2 = SharedArray{Float64,1}(binomial(maxmatpcut+1,2))
+
     # define vectors
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
     common = zeros(Int64,Np-1)
 
+    tmax = Threads.nthreads()
+    vecmbindnntid = zeros(Int64,Np,tmax)
+    vecmbindmmtid = zeros(Int64,Np,tmax)
+    commontid = zeros(Int64,Np-1,tmax)
+
     # define a matrix for the Hamiltonian for down down down
     for nn = 1:maxmatpcut # parfor
 
+        tid = Threads.threadid()
+
         # ket
-        in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
+        vecmbindnntid[:,tid] .= in2bindtid(indvec[nn],Msize0,Np,matp,vecmbindnntid[:,tid])
+        # in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
 
         # Hho
-        Hho[nn,nn] = sum(vecmbindnn[:]) - Np/2
-        # (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
+        # Hho[nn,nn] = sum(vecmbindnn[:]) - Np/2 # (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
+        indrow_Hsp[binomial(nn,2)+mm] = mm
+        indcolumn_Hsp[binomial(nn,2)+mm] = nn
+        element_Hsp[binomial(nn,2)+mm] = sum(vecmbindnn[:]) - Np/2
 
         for mm = 1:nn-1
 
             # bra
-            in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+            vecmbindmmtid[:,tid] .= in2bindtid(indvec[mm],Msize0,Np,matp,vecmbindmmtid[:,tid])
+            # in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             # Hsoc
-            Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
+            # Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
+            indrow_Hsp2[binomial(nn,2)+mm] = mm
+            indcolumn_Hsp2[binomial(nn,2)+mm] = nn
+            element_Hsp2[binomial(nn,2)+mm] = epsilonsoc2(vecmbindnntid[:,tid],vecmbindmmtid[:,tid],commotid[:,tid],1.0)
 
         end
 
     end
+
+    indrow_Hsp = Vector(indrow_Hsp)
+    indcolumn_Hsp = Vector(indcolumn_Hsp)
+    element_Hsp = Vector(element_Hsp)
+    deleteat!(indrow_Hsp, element_Hsp .== 0.0)
+    deleteat!(indcolumn_Hsp, element_Hsp .== 0.0)
+    deleteat!(element_Hsp, element_Hsp .== 0.0)
+    Hho .= sparse(indrow_Hsp,indcolumn_Hsp,element_Hsp,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+
+    indrow_Hsp2 = Vector(indrow_Hsp2)
+    indcolumn_Hsp2 = Vector(indcolumn_Hsp2)
+    element_Hsp2 = Vector(element_Hsp2)
+    deleteat!(indrow_Hsp2, element_Hsp2 .== 0.0)
+    deleteat!(indcolumn_Hsp2, element_Hsp2 .== 0.0)
+    deleteat!(element_Hsp2, element_Hsp2 .== 0.0)
+    Hsoc .= sparse(indrow_Hsp2,indcolumn_Hsp2,element_Hsp2,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
 
     # define the Hamiltonian for up up up
     Hho[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hho[1:maxmatpcut,1:maxmatpcut]

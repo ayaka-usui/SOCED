@@ -266,11 +266,11 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     indcolumn_Hint = SharedArray{Int64,1}(binomial(maxmatpcut+1,2))
     element_Hint = SharedArray{Float64,1}(binomial(maxmatpcut+1,2))
 
-    vecmbindnn = zeros(Int64,Np)
-    vecmbindmm = zeros(Int64,Np)
-    vecmbindnn3 = zeros(Int64,2)
-    vecmbindmm3 = zeros(Int64,2)
-    vecindcoeff = zeros(Float64,3,2)
+    # vecmbindnn = zeros(Int64,Np)
+    # vecmbindmm = zeros(Int64,Np)
+    # vecmbindnn3 = zeros(Int64,2)
+    # vecmbindmm3 = zeros(Int64,2)
+    # vecindcoeff = zeros(Float64,3,2)
 
     tmax = Threads.nthreads()
     vecmbindnntid = zeros(Int64,Np,tmax)
