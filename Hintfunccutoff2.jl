@@ -235,6 +235,26 @@ end
 #    return vecmbindnn
 # end
 
+# function checkVijkl(Msize0::Int64)
+#
+#    # register data of Vijkl in a vector
+#    ind0 = 0
+#    vecV = zeros(Float64,binomial(Msize0+3,4))
+#    for n1 = 0:Msize0-1
+#        for n2 = 0:n1
+#            for n3 = 0:n2
+#                for n4 = 0:n3
+#                    ind0 += 1
+#                    vecV[ind0] = vijkl(n1,n2,n3,n4)
+#                end
+#            end
+#        end
+#    end
+#
+#    return vecV
+#
+# end
+
 function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hintdown::ST, Hintup::ST, Hintdu::ST) where ST<:(SparseMatrixCSC{Float64, Ti} where Ti<:Integer)
 
     if Msize0 > 150
@@ -247,7 +267,8 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     # register data of Vijkl in a vector
     ind0 = 0
     vecV = zeros(Float64,binomial(Msize0+3,4))
-    for n1 = 0:Msize0-1
+    println("time for Vijkl")
+    @time for n1 = 0:Msize0-1
         for n2 = 0:n1
             for n3 = 0:n2
                 for n4 = 0:n3

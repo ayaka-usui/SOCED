@@ -499,7 +499,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # HW for <down,down,up|up,up,down>
     indNp = 1
     println("time for coherent coupling between down down up and up up down")
-    for nn = 1:maxmatpcut2
+    @time Threads.@threads for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
@@ -546,6 +546,14 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         end
 
     end
+
+    indrow_Hsp = Vector(indrow_Hsp)
+    indcolumn_Hsp = Vector(indcolumn_Hsp)
+    element_Hsp = Vector(element_Hsp)
+    deleteat!(indrow_Hsp, element_Hsp .== 0.0)
+    deleteat!(indcolumn_Hsp, element_Hsp .== 0.0)
+    deleteat!(element_Hsp, element_Hsp .== 0.0)
+    HW[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2] .= sparse(indrow_Hsp,indcolumn_Hsp,element_Hsp,maxmatpcut2,maxmatpcut2)
 
     # since the Hamiltonian is helmitian
     # Hsoc .= Hsoc + Hsoc' - spdiagm(diag(Hsoc))
