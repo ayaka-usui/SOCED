@@ -267,8 +267,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     # register data of Vijkl in a vector
     ind0 = 0
     vecV = zeros(Float64,binomial(Msize0+3,4))
-    println("time for Vijkl")
-    @time for n1 = 0:Msize0-1
+    # println("time for Vijkl")
+    # @time for n1 = 0:Msize0-1
+    for n1 = 0:Msize0-1
         for n2 = 0:n1
             for n3 = 0:n2
                 for n4 = 0:n3
@@ -302,8 +303,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     vecindcoefftid = zeros(Float64,3,3,tmax)
 
     # define a matrix for the Hamiltonian for down down down
-    println("time for interactions of down down down")
-    @time Threads.@threads for nn = 1:maxmatpcut # parfor
+    # println("time for interactions of down down down")
+    # @time Threads.@threads for nn = 1:maxmatpcut # parfor
+    Threads.@threads for nn = 1:maxmatpcut
     # Threads does not work on Julia 1.6 but does on Julia 1.7
     # for nn = 1:maxmatpcut
 
@@ -352,8 +354,9 @@ function Hintfunccutoff2!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0:
     indcolumn_Hint2 = SharedArray{Int64,1}(binomial(maxmatpcut2+1,2))
     element_Hint2 = SharedArray{Float64,1}(binomial(maxmatpcut2+1,2))
 
-    println("time for interactions of down down up")
-    @time Threads.@threads for nn = 1:maxmatpcut2 # parfor # down down up for ket
+    # println("time for interactions of down down up")
+    # @time Threads.@threads for nn = 1:maxmatpcut2 # parfor # down down up for ket
+    for nn = 1:maxmatpcut2
     # for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()

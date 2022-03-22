@@ -274,8 +274,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     commontid = zeros(Int64,Np-1,tmax)
 
     # define a matrix for the Hamiltonian for down down down
-    println("time for single particle part of down down down")
-    @time Threads.@threads for nn = 1:maxmatpcut # parfor
+    # println("time for single particle part of down down down")
+    # @time Threads.@threads for nn = 1:maxmatpcut # parfor
+    Threads.@threads for nn = 1:maxmatpcut
 
         tid = Threads.threadid()
 
@@ -342,8 +343,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     maxmatp21 = matp21[Msize0+1,1+1]
 
     # define the Hamiltonian for down down up
-    println("time for single particle part of down down up")
-    @time Threads.@threads for nn = 1:maxmatpcut2
+    # println("time for single particle part of down down up")
+    # @time Threads.@threads for nn = 1:maxmatpcut2
+    Threads.@threads for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
@@ -433,8 +435,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     element_Hsp = SharedArray{Float64,1}(maxmatpcut2*maxmatpcut)
 
     # HW for <down,down,down|down,down,up>
-    println("time for coherent coupling between down down down and down down up")
-    @time Threads.@threads for nn = 1:maxmatpcut2
+    # println("time for coherent coupling between down down down and down down up")
+    # @time Threads.@threads for nn = 1:maxmatpcut2
+    Threads.@threads for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
@@ -498,8 +501,9 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
     # HW for <down,down,up|up,up,down>
     indNp = 1
-    println("time for coherent coupling between down down up and up up down")
-    @time Threads.@threads for nn = 1:maxmatpcut2
+    # println("time for coherent coupling between down down up and up up down")
+    # @time Threads.@threads for nn = 1:maxmatpcut2
+    Threads.@threads for nn = 1:maxmatpcut2
 
         tid = Threads.threadid()
 
