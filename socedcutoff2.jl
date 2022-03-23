@@ -304,7 +304,7 @@ function diagonalisesavedHtotdiffW(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
 end
 
-function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Float64, gdown1::Float64, Ng::Int64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
     # println("constructoing the Hamiltonian ...")
     # @time begin
@@ -335,36 +335,51 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown::Floa
     maxmatpcut2 = length(indvec2)
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
-    arraylambda = zeros(ComplexF64,NOmega,specnum)
-    arrayspect = zeros(ComplexF64,NOmega,specnum-1)
-    arraypopdown3 = zeros(Float64,NOmega,specnum)
-    arraypopdown2up1 = zeros(Float64,NOmega,specnum)
-    arraypopdown1up2 = zeros(Float64,NOmega,specnum)
-    arraypopup3 = zeros(Float64,NOmega,specnum)
-    mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    arraygdown = LinRange(gdown0,gdown1,Ng)
+
+    arraylambda = zeros(ComplexF64,specnum,NOmega,Ng)
+    arrayspect = zeros(ComplexF64,specnum-1,NOmega,Ng)
+    arraypopdown3 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+    # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
-    println("diagonalising the Hamiltonian for different Omega ...")
-    for jj = 1:NOmega # parfor
-        @time begin
+    # println("diagonalising the Hamiltonian for different Omega ...")
 
-            mat1 .= mat0 + arrayOmega[jj]*matW
-            arraylambda[jj,:], phi = eigs(mat1,nev=specnum,which=:SR)
-            arrayspect[jj,:] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+    for jjg = 1:Ng
 
-            arraypopdown3[jj,:] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
-            arraypopdown2up1[jj,:] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
-            arraypopdown1up2[jj,:] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
-            arraypopup3[jj,:] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+        gdownjjg = arraygdown[jjg]
+        gupjjg = gdownjjg
 
-            println(jj)
+        mat0 .= matho + gdownjjg*matdowndown + gupjjg*matupup + gdu*matdownup + 1im*ksoc*matsoc
 
+        println("jjg=",jjg)
+
+        for jj = 1:NOmega # parfor
+            @time begin
+
+                mat1 .= mat0 + arrayOmega[jj]*matW
+                arraylambda[:,jj,jjg], phi = eigs(mat1,nev=specnum,which=:SR)
+                arrayspect[:,jj,jjg] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+
+                arraypopdown3[:,jj,jjg] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+                arraypopdown2up1[:,jj,jjg] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+                arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+                arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
+
+                println("jj=",jj)
+
+            end
         end
+
     end
 
-    save("data_spectrum.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_jjg.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
     # return arrayOmega, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
