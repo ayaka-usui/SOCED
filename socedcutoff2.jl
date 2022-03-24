@@ -365,7 +365,7 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
 
                 mat1 .= mat0 + arrayOmega[jj]*matW
                 arraylambda[:,jj,jjg], phi = eigs(mat1,nev=specnum,which=:SR)
-                arrayspect[:,jj,jjg] .= arraylambda[jj,2:end] .- arraylambda[jj,1]
+                arrayspect[:,jj,jjg] .= arraylambda[2:end,jj,jjg] .- arraylambda[1,jj,jjg]
 
                 arraypopdown3[:,jj,jjg] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
                 arraypopdown2up1[:,jj,jjg] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
