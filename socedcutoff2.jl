@@ -306,11 +306,11 @@ end
 
 function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Float64, gdown1::Float64, Ng::Int64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    println("constructoing the Hamiltonian ...")
-    @time begin
-        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
-    end
+    # println("constructoing the Hamiltonian ...")
+    # @time begin
+    #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    # end
 
     matho=load("data_Htot90_Np3.jld")["matho"]
     matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
@@ -380,19 +380,19 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
 
     end
 
-    save("data_spectrum_gdownup_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_gdownup_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
-    return arrayOmega, arraygdown, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+    return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
 
 function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, gdu1::Float64, Ng::Int64, gdownup::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    println("constructoing the Hamiltonian ...")
-    @time begin
-        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
-    end
+    # println("constructoing the Hamiltonian ...")
+    # @time begin
+    #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    # end
 
     matho=load("data_Htot90_Np3.jld")["matho"]
     matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
@@ -462,8 +462,8 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
 
     end
 
-    save("data_spectrum_gdu_jjg.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_gdu_jjg.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
-    # return arrayOmega, arraygdu, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+    # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
