@@ -304,7 +304,7 @@ function diagonalisesavedHtotdiffW(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
 end
 
-function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Float64, gdown1::Float64, Ng::Int64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Float64, gdown1::Float64, Ng::Int64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
     # println("constructoing the Hamiltonian ...")
     # @time begin
@@ -312,12 +312,13 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
     #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
     # end
 
-    matho=load("data_Htot90_Np3.jld")["matho"]
-    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
-    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
-    matupup=load("data_Htot90_Np3.jld")["matupup"]
-    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
-    matW=load("data_Htot90_Np3.jld")["matW"]
+    # matho=load("data_Htot90_Np3.jld")["matho"]
+    # matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    # matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    # matupup=load("data_Htot90_Np3.jld")["matupup"]
+    # matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    # matW=load("data_Htot90_Np3.jld")["matW"]
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # for down3
     Enecutoff = Msize0 - 1 + Np/2
@@ -349,8 +350,6 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
     mat1 = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
-    arraypopdown3_test = zeros(Float64,specnum,NOmega,Ng)
-
     # println("diagonalising the Hamiltonian for different Omega ...")
 
     for jjg = 1:Ng
@@ -374,7 +373,87 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
                 arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
                 arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
-                arraypopdown3_test[:,jj,jjg] = sum(abs.(phi[:,1:maxmatpcut]).^2,dims=1)'
+                println("jj=",jj)
+
+            end
+        end
+
+    end
+
+    save("data_spectrum_gdownup_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+
+    return arrayOmega, arraygdown, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+
+end
+
+function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, gdu1::Float64, Ng::Int64, gdownup::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
+
+    # println("constructoing the Hamiltonian ...")
+    # @time begin
+    #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    # end
+
+    # matho=load("data_Htot90_Np3.jld")["matho"]
+    # matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    # matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    # matupup=load("data_Htot90_Np3.jld")["matupup"]
+    # matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    # matW=load("data_Htot90_Np3.jld")["matW"]
+    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    arraygdu = LinRange(gdu0,gdu1,Ng)
+
+    arraylambda = zeros(ComplexF64,specnum,NOmega,Ng)
+    arrayspect = zeros(ComplexF64,specnum-1,NOmega,Ng)
+    arraypopdown3 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
+    arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+    # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    mat0 = matho + 1im*ksoc*matsoc
+    # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    mat1 = copy(mat0)
+    phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+
+    # println("diagonalising the Hamiltonian for different Omega ...")
+
+    for jjg = 1:Ng
+
+        gdujjg = arraygdu[jjg]
+        # gupjjg = gdownjjg
+
+        mat0 .= matho + gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup + 1im*ksoc*matsoc
+
+        println("jjg=",jjg)
+
+        for jj = 1:NOmega # parfor
+            @time begin
+
+                mat1 .= mat0 + arrayOmega[jj]*matW
+                arraylambda[:,jj,jjg], phi = eigs(mat1,nev=specnum,which=:SR)
+                arrayspect[:,jj,jjg] .= arraylambda[2:end,jj,jjg] .- arraylambda[1,jj,jjg]
+
+                arraypopdown3[:,jj,jjg] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
+                arraypopdown2up1[:,jj,jjg] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
+                arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
+                arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
                 println("jj=",jj)
 
@@ -383,10 +462,8 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
 
     end
 
-    save("data_spectrum_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arraypopdown3_test", arraypopdown3_test)
+    save("data_spectrum_gdu_jjg.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
-    # return arrayOmega, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+    # return arrayOmega, arraygdu, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
-
-# plot
