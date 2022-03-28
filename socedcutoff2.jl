@@ -306,19 +306,19 @@ end
 
 function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Float64, gdown1::Float64, Ng::Int64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    # println("constructoing the Hamiltonian ...")
-    # @time begin
-    #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
-    # end
+    println("constructoing the Hamiltonian ...")
+    @time begin
+        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    end
 
-    # matho=load("data_Htot90_Np3.jld")["matho"]
-    # matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
-    # matdownup=load("data_Htot90_Np3.jld")["matdownup"]
-    # matupup=load("data_Htot90_Np3.jld")["matupup"]
-    # matsoc=load("data_Htot90_Np3.jld")["matsoc"]
-    # matW=load("data_Htot90_Np3.jld")["matW"]
-    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+    # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # for down3
     Enecutoff = Msize0 - 1 + Np/2
@@ -388,19 +388,19 @@ end
 
 function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, gdu1::Float64, Ng::Int64, gdownup::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64)
 
-    # println("constructoing the Hamiltonian ...")
-    # @time begin
-    #     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
-    #     # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
-    # end
+    println("constructoing the Hamiltonian ...")
+    @time begin
+        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    end
 
-    # matho=load("data_Htot90_Np3.jld")["matho"]
-    # matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
-    # matdownup=load("data_Htot90_Np3.jld")["matdownup"]
-    # matupup=load("data_Htot90_Np3.jld")["matupup"]
-    # matsoc=load("data_Htot90_Np3.jld")["matsoc"]
-    # matW=load("data_Htot90_Np3.jld")["matW"]
-    matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+    # matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
 
     # for down3
     Enecutoff = Msize0 - 1 + Np/2
