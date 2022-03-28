@@ -349,6 +349,8 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
     mat1 = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
+    arraypopdown3_test = zeros(Float64,specnum,NOmega,Ng)
+
     # println("diagonalising the Hamiltonian for different Omega ...")
 
     for jjg = 1:Ng
@@ -372,6 +374,8 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
                 arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
                 arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
+                arraypopdown3_test[:,jj,jjg] = sum(abs.(phi[:,1:maxmatpcut]).^2,dims=1)'
+
                 println("jj=",jj)
 
             end
@@ -379,8 +383,10 @@ function diagonalisesavedHtotdiffW_cluster(Msize0::Int64, Np::Int64, gdown0::Flo
 
     end
 
-    save("data_spectrum_jjg.jld", "arrayOmega", arrayOmega, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arraypopdown3_test", arraypopdown3_test)
 
     # return arrayOmega, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
+
+# plot
