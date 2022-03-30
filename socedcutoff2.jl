@@ -380,7 +380,8 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
 
     end
 
-    save("data_spectrum_gdownup_jjg.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    indksoc = Int64(ksoc)
+    save("data_spectrum_gdownup_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
     return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
@@ -462,7 +463,8 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
 
     end
 
-    save("data_spectrum_gdu_jjg.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    indksoc = Int64(ksoc)
+    save("data_spectrum_gdu_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
 
     # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
