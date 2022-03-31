@@ -15,6 +15,32 @@ function coefficientonebody(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
     vecmbindnn3 .= 0
     vecmbindmm3 .= 0
 
+    ind0 = 0
+    ind1 = 0
+    ind2 = 0
+
+    for pp = 1:Np
+        for qq = 1:Np
+
+            if vecmbindnn[pp] == vecmbindmm[qq]
+               ind0 += 1
+            else
+               ind1 = pp
+               ind2 = qq
+            end
+
+        end
+    end
+
+    if ind0 != 5
+       return 0.0
+    end
+
+
+
+
+
+
     for pp = 1:Np
 
         # consider to edit when parfor is inplemented
