@@ -63,6 +63,27 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
 end
 
+function onebody(psi::Vector{ComplexF64}, maxmatpcut::Float64)
+
+    for nn = 1:maxmatpcut
+
+      # ket
+      in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
+
+      for mm = 1:nn-1
+
+          # bra
+          in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
+
+          # Hsoc
+          matonebody[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
+
+      end
+
+  end
+
+end
+
 function diagonaliseHtotsingle(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
 
     matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
@@ -344,6 +365,12 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
     arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
     arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+
+    arraypopdown3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    arraypopdown2up1GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
@@ -373,6 +400,11 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
                 arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
                 arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
+                arraypopdown3GSspatial[:,jj,jjg] = phi[1:maxmatpcut,1]
+                arraypopdown2up1GSspatial[:,jj,jjg] = phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,1]
+                arraypopdown1up2GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,1]
+                arraypopup3GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:end,1]
+
                 println("jj=",jj)
 
             end
@@ -381,9 +413,9 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     end
 
     indksoc = Int64(ksoc)
-    save("data_spectrum_gdownup_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_gdownup_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arraypopdown3GSspatial", arraypopdown3GSspatial, "arraypopdown2up1GSspatial", arraypopdown2up1GSspatial, "arraypopdown1up2GSspatial", arraypopdown1up2GSspatial, "arraypopup3GSspatial", arraypopup3GSspatial, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
-    return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+    # return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
 
@@ -427,10 +459,19 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
     arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
     arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+
+    arraypopdown3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    arraypopdown2up1GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    arrayenergyGStot = zeros(Float64,NOmega,Ng)
+    arrayenergyGSint = zeros(Float64,NOmega,Ng)
+
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
+    matint = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     # println("diagonalising the Hamiltonian for different Omega ...")
@@ -441,6 +482,7 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
         # gupjjg = gdownjjg
 
         mat0 .= matho + gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup + 1im*ksoc*matsoc
+        matint .= gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup
 
         println("jjg=",jjg)
 
@@ -456,6 +498,15 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
                 arraypopdown1up2[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:]).^2,dims=1)'
                 arraypopup3[:,jj,jjg] = sum(abs.(phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,:]).^2,dims=1)'
 
+                arraypopdown3GSspatial[:,jj,jjg] = phi[1:maxmatpcut,1]
+                arraypopdown2up1GSspatial[:,jj,jjg] = phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,1]
+                arraypopdown1up2GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,1]
+                arraypopup3GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:end,1]
+
+                # energy
+                arrayenergyGStot[jj,jjg] = phi[:,1]'*mat1*phi[:,1] # same as arraylambda[1]
+                arrayenergyGSint[jj,jjg] = phi[:,1]'*matint*phi[:,1]
+
                 println("jj=",jj)
 
             end
@@ -464,7 +515,7 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     end
 
     indksoc = Int64(ksoc)
-    save("data_spectrum_gdu_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3)
+    save("data_spectrum_gdu_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arraypopdown3GSspatial", arraypopdown3GSspatial, "arraypopdown2up1GSspatial", arraypopdown2up1GSspatial, "arraypopdown1up2GSspatial", arraypopdown1up2GSspatial, "arraypopup3GSspatial", arraypopup3GSspatial, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
     # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
