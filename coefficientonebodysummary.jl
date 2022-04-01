@@ -31,7 +31,7 @@ function coefficientonebody(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
                elseif length(check0) == 1
                   element = element*sqrt(2)
                elseif length(check0) == 2
-                  element = element*sqrt(3*2)
+                  element = element*sqrt(3)
                end
 
                check1 = findall(x->x==vecmbindmm[qq],vecmbindmm3)
@@ -40,7 +40,7 @@ function coefficientonebody(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
                elseif length(check1) == 1
                   element = element*sqrt(2)
                elseif length(check1) == 2
-                  element = element*sqrt(3*2)
+                  element = element*sqrt(3)
                end
 
                return element
@@ -49,5 +49,7 @@ function coefficientonebody(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
 
         end
     end
+
+    return 0.0
 
 end
