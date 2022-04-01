@@ -651,7 +651,7 @@ function diagonalisesavedHtotdiffW_gdownup_onebody(Msize0::Int64, Np::Int64, gdo
     end
 
     indksoc = Int64(ksoc)
-    save("data_spectrum_onebody_gdownup_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraylambdaconden", arraylambdaconden, "arrayphiconden", arrayphiconden)
+    save("data_spectrum_onebody_gdownup_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraylambdaconden", arraylambdaconden, "arrayphiconden", arrayphiconden)
 
     # return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
@@ -764,7 +764,7 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
     end
 
     indksoc = Int64(ksoc)
-    save("data_spectrum_onebody_gdu_jjg_$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraylambdaconden", arraylambdaconden, "arrayphiconden", arrayphiconden)
+    save("data_spectrum_onebody_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraylambdaconden", arraylambdaconden, "arrayphiconden", arrayphiconden)
 
     # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
