@@ -25,7 +25,7 @@ function coefficientonebody1!(jj::Int64, psi::Vector{Float64}, Msize0::Int64, Np
 
    end
 
-   for nn = 1:maxmatpcut2 # down down up
+   for nn = 1:maxmatpcut2
 
        # ket
        indketup = mod(indvec2[nn],maxmatp21)
@@ -40,6 +40,7 @@ function coefficientonebody1!(jj::Int64, psi::Vector{Float64}, Msize0::Int64, Np
        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
        vecmbindnn[Np:Np] = vecmbindnn2[1:1]
 
+       # down down up
        check0 = findall(x->x==jj,vecmbindnn[1:Np-1])
        if length(check0) == 1
           psi[maxmatpcut+nn] = 1.0
@@ -49,30 +50,37 @@ function coefficientonebody1!(jj::Int64, psi::Vector{Float64}, Msize0::Int64, Np
           # psi[maxmatpcut+nn] = 0.0
        end
 
-   end
-
-   for nn = 1:maxmatpcut2 # up up down
-
-       # ket
-       indketup = mod(indvec2[nn],maxmatp21)
-       if indketup != 0
-          indketdown = div(indvec2[nn],maxmatp21) + 1
-       else # indketup == 0
-          indketdown = div(indvec2[nn],maxmatp21)
-          indketup = maxmatp21
-       end
-       in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
-       vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
-       in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
-       vecmbindnn[Np:Np] = vecmbindnn2[1:1]
-
-       if vecmbindnn[Np:Np] == jj
+       # up up down
+       if vecmbindnn[Np] == jj
           psi[maxmatpcut+maxmatpcut2+nn] = 1.0
        # else # vecmbindnn[Np:Np] != jj
           # psi[maxmatpcut+maxmatpcut2+nn] = 0.0
        end
 
    end
+
+   # for nn = 1:maxmatpcut2 # up up down
+   #
+   #     # ket
+   #     indketup = mod(indvec2[nn],maxmatp21)
+   #     if indketup != 0
+   #        indketdown = div(indvec2[nn],maxmatp21) + 1
+   #     else # indketup == 0
+   #        indketdown = div(indvec2[nn],maxmatp21)
+   #        indketup = maxmatp21
+   #     end
+   #     in2bind!(indketdown,Msize0,Np-1,matp20,vecmbindnn2)
+   #     vecmbindnn[1:Np-1] = vecmbindnn2[1:Np-1]
+   #     in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
+   #     vecmbindnn[Np:Np] = vecmbindnn2[1:1]
+   #
+   #     if vecmbindnn[Np:Np] == jj
+   #        psi[maxmatpcut+maxmatpcut2+nn] = 1.0
+   #     # else # vecmbindnn[Np:Np] != jj
+   #        # psi[maxmatpcut+maxmatpcut2+nn] = 0.0
+   #     end
+   #
+   # end
 
    # psi[maxmatpcut+maxmatpcut2++maxmatpcut2+1:end] = 0.0 # up up up
 
@@ -103,7 +111,7 @@ function coefficientonebody2!(jj::Int64, psi::Vector{Float64}, Msize0::Int64, Np
        in2bind!(indketup,Msize0,1,matp21,vecmbindnn2)
        vecmbindnn[Np:Np] = vecmbindnn2[1:1]
 
-       if vecmbindnn[Np:Np] == jj
+       if vecmbindnn[Np] == jj
           psi[maxmatpcut+nn] = 1.0
        # else # vecmbindnn[Np:Np] != jj
           # psi[maxmatpcut+nn] = 0.0
