@@ -715,7 +715,7 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
-    matint = copy(mat0)
+    # matint = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     # println("diagonalising the Hamiltonian for different Omega ...")
