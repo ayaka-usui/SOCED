@@ -402,6 +402,9 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     # arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
     # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
 
+    arrayenergyGStot = zeros(ComplexF64,NOmega,Ng)
+    arrayenergyGSint = zeros(ComplexF64,NOmega,Ng)
+
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
@@ -417,7 +420,7 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
         gupjjg = gdownjjg
 
         mat0 .= matho + gdownjjg*matdowndown + gupjjg*matupup + gdu*matdownup + 1im*ksoc*matsoc
-        matint .= gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup
+        matint .= gdownjjg*matdowndown + gupjjg*matupup + gdu*matdownup
 
         println("jjg=",jjg)
 
@@ -502,8 +505,8 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     # arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
     # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
 
-    arrayenergyGStot = zeros(Float64,NOmega,Ng)
-    arrayenergyGSint = zeros(Float64,NOmega,Ng)
+    arrayenergyGStot = zeros(ComplexF64,NOmega,Ng)
+    arrayenergyGSint = zeros(ComplexF64,NOmega,Ng)
 
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
