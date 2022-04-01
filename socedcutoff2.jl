@@ -10,6 +10,7 @@ include("cutMsizeEnespinmixed.jl")
 include("cutMsizeEnespinmixed2.jl")
 include("Hsocfunccutoffk1W1.jl")
 include("Hintfunccutoff2.jl")
+include("coefficientonebodysummary.jl")
 
 function createHtotal(Msize0::Int64, Np::Int64)
 
@@ -63,17 +64,41 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
 end
 
-function onebody!(psi::Vector{ComplexF64}, maxmatpcut::Int64, Msize0::Int64, matonebody::Matrix{ComplexF64})
+function onebodydensitymatrix!(Msize0::Int64, Np::Int64, psi::Vector{ComplexF64}, rhoij::Matrix{ComplexF64})
+
+    # create Fock basis
+    # for down down and up up
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down down up
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
 
     Msize = Msize0*2
+    psijj = zeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut)
+    arraypsijj = zeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,Msize)
+    # psiii = zeros(Float64,maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut)
+    # rhoij = zeros(ComplexF64,maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut,maxmatpcut+maxmatpcut2+maxmatpcut2+maxmatpcut)
+    # psi1 = copy(psi)
 
     for jj = 1:Msize
-        for ii = 1:Msize
-
-            matonebody[ii,jj] = coefficientonebody(ii,jj,phi)
-
+        coefficientonebody!(jj,psijj,Msize0,Np,maxmatpcut,maxmatpcut2,indvec,indvec2,matp,matp20,matp21)
+        arraypsijj[:,jj] = psijj
+        for ii = 1:jj
+            rhoij[ii,jj] = (arraypsijj[:,ii].*psi)'*(arraypsijj[:,jj].*psi)
         end
     end
+    rhoij = Hermitian(rhoij)
+
+    # return rhoij
 
 end
 
@@ -124,8 +149,11 @@ function diagonaliseHtotspinpop_eigs(Msize0::Int64, Np::Int64, gdown::Float64, g
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
-
     return results
+
+    # rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+    # return rhoij
 
 end
 
@@ -159,7 +187,6 @@ function diagonaliseHtotspinpop_test(Msize0::Int64, Np::Int64, gdown::Float64, g
     lambda4, phi4 = eigen(mattot4,1:specnum)
 
     results = [lambda1 lambda2 lambda3 lambda4]
-
     return results
 
 end
@@ -196,8 +223,14 @@ function diagonaliseHtotspinpop(Msize0::Int64, Np::Int64, gdown::Float64, gup::F
     norm = popdown3 + popdown2up1 + popdown1up2 + popup3
 
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
+    # return results
 
-    return results
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    onebodydensitymatrix!(Msize0,Np,phi[:,2],rhoij)
+    lambdaconden, phiconden = eigs(rhoij,nev=3,which=:LR)
+
+    # return lambdaconden, phiconden
+    return rhoij
 
 end
 

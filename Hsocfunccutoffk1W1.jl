@@ -440,7 +440,7 @@ end
 #
 # end
 
-function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{Float64}, HW::SparseMatrixCSC{Float64}, matonebody::SparseMatrixCSC{Float64})
+function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Hho::SparseMatrixCSC{Float64}, Hsoc::SparseMatrixCSC{Float64}, HW::SparseMatrixCSC{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
@@ -484,9 +484,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # define the Hamiltonian for up up up
     Hho[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hho[1:maxmatpcut,1:maxmatpcut]
     Hsoc[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hsoc[1:maxmatpcut,1:maxmatpcut]*(-1) # due to up up
-
-    # one body
-    matonebody[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = matonebody[1:maxmatpcut,1:maxmatpcut]
 
     # define the Hamiltonian for down down up
     vecmbindnn2 = zeros(Int64,Np)
@@ -624,18 +621,12 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                HW[mm,maxmatpcut+nn] = epsilonW2(vecmbindnn,vecmbindmm,common,Np,1.0)
             end
 
-            # one body
-            matonebody[mm,nn] = coefficientonebody3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-
         end
 
     end
 
     # HW for <up,up,up|up,up,down>
     HW[end-(maxmatpcut-1):end,end-(maxmatpcut+maxmatpcut2-1):end-maxmatpcut] = HW[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2]
-
-    # one body
-    matonebody[end-(maxmatpcut-1):end,end-(maxmatpcut+maxmatpcut2-1):end-maxmatpcut] = matonebody[1:maxmatpcut,maxmatpcut+1:maxmatpcut+maxmatpcut2]
 
     # HW for <down,down,up|up,up,down>
     indNp = 1
@@ -680,9 +671,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             # if vecmbindnn2 == vecmbindmm2
             #    HW[maxmatpcut+mm,maxmatpcut+maxmatpcut2+nn] = epsilonW3(vecmbindnn,vecmbindmm,common,Np,1.0)
             # end
-
-            # one body
-            matonebody[mm,nn] = coefficientonebody4(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
 
         end
 
@@ -731,8 +719,5 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     Hsoc .= Hsoc + (-1)*Hsoc' # Hsco is an imaginary off-diagonal matrix for the reality
     # HW .= HW + HW' - spdiagm(diag(HW))
     HW .= HW + HW' # HW is an off-diagonal matrix
-
-    # one body
-    matonebody .= matonebody + matonebody' - spdiagm(diag(matonebody))
 
 end
