@@ -18,12 +18,15 @@ function coefficientonebody(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},
     ind0 = 0
     ind1 = 0
     ind2 = 0
+    ind3 = 0
 
     for pp = 1:Np
+
         for qq = 1:Np
 
             if vecmbindnn[pp] == vecmbindmm[qq]
                ind0 += 1
+               continue
             else
                ind1 = pp
                ind2 = qq
