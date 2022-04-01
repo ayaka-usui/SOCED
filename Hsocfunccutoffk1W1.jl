@@ -482,7 +482,7 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
 
             # one body
-            matonebody[mm,nn] = coefficientonebody(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
+            matonebody[mm,nn] = coefficientonebody(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,Np)
 
         end
 
