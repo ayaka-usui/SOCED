@@ -406,6 +406,7 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
+    matint = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     # println("diagonalising the Hamiltonian for different Omega ...")
@@ -416,6 +417,7 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
         gupjjg = gdownjjg
 
         mat0 .= matho + gdownjjg*matdowndown + gupjjg*matupup + gdu*matdownup + 1im*ksoc*matsoc
+        matint .= gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup
 
         println("jjg=",jjg)
 
@@ -435,6 +437,10 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
                 # arraypopdown2up1GSspatial[:,jj,jjg] = phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,1]
                 # arraypopdown1up2GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,1]
                 # arraypopup3GSspatial[:,jj,jjg] = phi[maxmatpcut+maxmatpcut2+maxmatpcut2+1:end,1]
+
+                # energy
+                arrayenergyGStot[jj,jjg] = phi[:,1]'*mat1*phi[:,1] # same as arraylambda[1]
+                arrayenergyGSint[jj,jjg] = phi[:,1]'*matint*phi[:,1]
 
                 println("jj=",jj)
 
@@ -726,7 +732,7 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
         # gupjjg = gdownjjg
 
         mat0 .= matho + gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup + 1im*ksoc*matsoc
-        matint .= gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup
+        # matint .= gdownup*matdowndown + gdownup*matupup + gdujjg*matdownup
 
         println("jjg=",jjg)
 
