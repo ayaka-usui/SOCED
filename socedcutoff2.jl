@@ -63,24 +63,17 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
 end
 
-function onebody(psi::Vector{ComplexF64}, maxmatpcut::Float64)
+function onebody!(psi::Vector{ComplexF64}, maxmatpcut::Int64, Msize0::Int64, matonebody::Matrix{ComplexF64})
 
-    for nn = 1:maxmatpcut
+    Msize = Msize0*2
 
-      # ket
-      in2bind!(indvec[nn],Msize0,Np,matp,vecmbindnn)
+    for jj = 1:Msize
+        for ii = 1:Msize
 
-      for mm = 1:nn-1
+            matonebody[ii,jj] = coefficientonebody(ii,jj,phi)
 
-          # bra
-          in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
-
-          # Hsoc
-          matonebody[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
-
-      end
-
-  end
+        end
+    end
 
 end
 

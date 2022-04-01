@@ -1,6 +1,5 @@
 include("in2bind.jl")
 include("delta.jl")
-include("coefficientonebodysummary.jl")
 
 # function check_duplicates(vecmbindnn::Vector{Int64},Np::Int64,hist::Vector{Int64},Msize0::Int64)
 #
@@ -470,9 +469,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         Hho[nn,nn] = sum(vecmbindnn[:]) - Np/2
         # (vecmbindnn[1]-1+1/2) + (vecmbindnn[2]-1+1/2) + (vecmbindnn[3]-1+1/2)
 
-        # one body
-        matonebody[nn,nn] = sum(vecmbindnn[:]) - Np/2
-
         for mm = 1:nn-1
 
             # bra
@@ -480,9 +476,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
             # Hsoc
             Hsoc[mm,nn] = epsilonsoc2(vecmbindnn,vecmbindmm,common,1.0)
-
-            # one body
-            matonebody[mm,nn] = coefficientonebody(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,Np)
 
         end
 
@@ -519,9 +512,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
         # Hho
         Hho[maxmatpcut+nn,maxmatpcut+nn] = sum(vecmbindnn[:]) - Np/2
 
-        # one body
-        matonebody[nn,nn] = sum(vecmbindnn[:]) - Np/2
-
         for mm = 1:nn-1
 
             # bra
@@ -545,9 +535,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                Hsoc[maxmatpcut+mm,maxmatpcut+nn] = epsilonsoc2(vecmbindnn[Np:Np],vecmbindmm[Np:Np],common,1.0)*(-1) # up up
             end
 
-            # one body
-            matonebody[mm,nn] = coefficientonebody2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-
         end
 
     end
@@ -555,9 +542,6 @@ function Hsocfunccutoffk1W1!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # define the Hamiltonian for up up down
     Hho[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hho[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
     Hsoc[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hsoc[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]*(-1) # due to up up down
-
-    # one body
-    matonebody[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = matonebody[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
 
     # # define the Hamiltonian for down up up
     # maxmatp31 = matp31[Msize0+1,2+1]
