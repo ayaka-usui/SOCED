@@ -3,7 +3,15 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("vijkl.jl")
 
-function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function funHO(xrange::Vector{Float64},yrange::Vector{Float64},jjx::Int64,jjy::Int64,vec0::Vector{Int64})
+
+
+
+    return
+
+end
+
+function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Matrix{Float64},Np::Int64)
 
     # vecmbindnn3 = zeros(Int64,2)
     # vecmbindmm3 = zeros(Int64,2)
@@ -11,7 +19,8 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
     # a|n>= sqrt(n)|n-1>
     # a^+|n>= sqrt(n+1)|n+1>
 
-    vecindcoeff .= 0.0 #zeros(Float64,3,5)
+    vecindcoeff0 .= 0 #zeros(Float64,3,4)
+    vecindcoeff1 .= 0.0 #zeros(Float64,3)
     ind0 = 0
     vecmbind0 = 0
     # common = 0
@@ -69,13 +78,15 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
                end
 
                # indices for Vijkl
-               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+               ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
                # sort!(ind1,rev=true)
                # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
 
                ind0 += 1
-               vecindcoeff[ind0,1:4] = vecmbindnn3 #ind2
-               vecindcoeff[ind0,end] = element
+               # vecindcoeff[ind0,1:4] = vecmbindnn3 #ind2
+               # vecindcoeff[ind0,end] = element
+               vecindcoeff0[ind0,1:4] = ind1
+               vecindcoeff1[ind0] = element
 
                vecmbind0 = vecmbindnn[pp]
 
@@ -86,11 +97,11 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
         end
     end
 
-    return vecindcoeff, ind0
+    return vecindcoeff0, vecindcoeff1, ind0
 
 end
 
-function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Matrix{Float64},Np::Int64)
 
     # down down up for g12
 
@@ -100,7 +111,8 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
     # a|n>= sqrt(n)|n-1>
     # a^+|n>= sqrt(n+1)|n+1>
 
-    vecindcoeff .= 0.0 #zeros(Float64,3,2)
+    vecindcoeff0 .= 0 #zeros(Float64,3,2)
+    vecindcoeff1 .= 0.0 #zeros(Float64,3)
     ind0 = 0
     vecmbind0 = 0
     # common = 0
@@ -143,13 +155,13 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
                element = 2*element
 
                # indices for Vijkl
-               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+               ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
                # sort!(ind1,rev=true)
                # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
 
                ind0 += 1
-               vecindcoeff[ind0,1:4] = vecmbindnn3
-               vecindcoeff[ind0,end] = element
+               vecindcoeff0[ind0,1:4] = ind1
+               vecindcoeff1[ind0,end] = element
 
                # vecindcoeff[ind0,1] = ind2
                # vecindcoeff[ind0,2] = element
@@ -163,7 +175,7 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
         end
     end
 
-    return vecindcoeff, ind0
+    return vecindcoeff0, vecindcoeff1, ind0
 
 end
 
@@ -177,7 +189,8 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
     # a|n>= sqrt(n)|n-1>
     # a^+|n>= sqrt(n+1)|n+1>
 
-    vecindcoeff .= 0.0 #zeros(Float64,3,2)
+    vecindcoeff0 .= 0.0 #zeros(Float64,3,2)
+    vecindcoeff1 .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
     # vecmbind0 = 0
     # common = 0
@@ -203,18 +216,18 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
     end
 
     # indices for Vijkl
-    # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+    ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
     # sort!(ind1,rev=true)
     # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
 
     ind0 += 1
-    vecindcoeff[ind0,1:4] = vecmbindnn3
-    vecindcoeff[ind0,end] = element
+    vecindcoeff0[ind0,1:4] = ind1 #vecmbindnn3
+    vecindcoeff1[ind0,end] = element
 
     # vecindcoeff[ind0,1] = ind2
     # vecindcoeff[ind0,2] = element
 
-    return vecindcoeff, ind0
+    return vecindcoeff0, vecindcoeff1, ind0
 
 end
 
@@ -224,14 +237,18 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
     maxmatpcut2 = length(indvec2)
 
     # defines vectors and matrices
-    Mpairdown .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut,15);
-    Mpairup .= 0. #spzeros(Float64,maxmatpcut,maxmatpcut,15);
-    Mpairdu .= 0. #spzeros(Float64,maxmatpcut2,maxmatpcut2,15);
+    Mpairdown0 .= 0
+    Mpairup0 .= 0
+    Mpairdu0 .= 0
+    Mpairdown1 .= 0.0
+    Mpairup1 .= 0.0
+    Mpairdu1 .= 0.0
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
     vecmbindnn3 = zeros(Int64,2)
     vecmbindmm3 = zeros(Int64,2)
-    vecindcoeff = zeros(Float64,3,5)
+    vecindcoeff0 = zeros(Int64,3,4)
+    vecindcoeff1 = zeros(Float64,3)
 
     # define a pair correlation for down down down
     for nn = 1:maxmatpcut # parfor
@@ -244,13 +261,11 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
             # bra
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
-            vecindcoeff, ind0 = coefficientpair(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-            Mpairdown[mm,nn,1:5] = vecindcoeff[1,1:5]
-            if ind0 >= 2
-               Mpairdown[mm,nn,5+1:5+5] = vecindcoeff[2,1:5]
-            end
-            if ind0 == 3
-               Mpairdown[mm,nn,10+1:10+5] = vecindcoeff[3,1:5]
+            vecindcoeff0, vecindcoeff1, ind0 = coefficientpair(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
+
+            for jj = 1:ind0
+                Mpairdown0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdown1[mm,nn,jj] = vecindcoeff1[jj]
             end
 
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
@@ -301,24 +316,18 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
 
             # b = findfirst(x->x==indvec2[mm],indvec3)
 
-            vecindcoeff, ind0 = coefficientpair2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-            Mpairdu[maxmatpcut+mm,maxmatpcut+nn,1:5] = vecindcoeff[1,1:5]
-            if ind0 >= 2
-               Mpairdu[maxmatpcut+mm,maxmatpcut+nn,5+1:5+5] = vecindcoeff[2,1:5]
-            end
-            if ind0 == 3
-               Mpairdu[maxmatpcut+mm,maxmatpcut+nn,10+1:10+5] = vecindcoeff[3,1:5]
+            vecindcoeff0, vecindcoeff1, ind0 = coefficientpair2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
+            for jj = 1:ind0
+                Mpairdu0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdu1[mm,nn,jj] = vecindcoeff1[jj]
             end
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
             # Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
-            vecindcoeff, ind0 = coefficientpair3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff,Np)
-            Mpairdown[maxmatpcut+mm,maxmatpcut+nn,1:5] = vecindcoeff[1,1:5]
-            if ind0 >= 2
-               Mpairdown[maxmatpcut+mm,maxmatpcut+nn,5+1:5+5] = vecindcoeff[2,1:5]
-            end
-            if ind0 == 3
-               Mpairdown[maxmatpcut+mm,maxmatpcut+nn,10+1:10+5] = vecindcoeff[3,1:5]
+            vecindcoeff0, vecindcoeff1, ind0 = coefficientpair3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
+            for jj = 1:ind0
+                Mpairdown0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdown1[mm,nn,jj] = vecindcoeff1[jj]
             end
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
             # Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
@@ -327,45 +336,86 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
 
     end
 
+    #
+    for kk0 = 1:maxmatpcut
+        for kk1 = kk0+1:maxmatpcut
+            Mpairdown0[kk1,kk0,:] = Mpairdown0[kk0,kk1,:]
+            Mpairdown1[kk1,kk0,:] = Mpairdown1[kk0,kk1,:]
+        end
+    end
+
+    #
+    for kk0 = maxmatpcut+1:maxmatpcut+maxmatpcut2
+        for kk1 = kk0+1:maxmatpcut+maxmatpcut2
+            Mpairdown0[kk1,kk0,:] = Mpairdown0[kk0,kk1,:]
+            Mpairdown1[kk1,kk0,:] = Mpairdown1[kk0,kk1,:]
+            Mpairdu0[kk1,kk0,:] = Mpairdu0[kk0,kk1,:]
+            Mpairdu1[kk1,kk0,:] = Mpairdu1[kk0,kk1,:]
+        end
+    end
+
+    Mpairup0[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairdown0[1:maxmatpcut,1:maxmatpcut,:]
+    Mpairup0[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,:] = Mpairdown0[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
+    Mpairup1[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairdown1[1:maxmatpcut,1:maxmatpcut,:]
+    Mpairup1[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,:] = Mpairdown1[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
+
+    Mpairdu0[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:] = Mpairdu0[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2,:]
+    Mpairdu1[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:] = Mpairdu1[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2,:]
+
     # pair correlation
-    fun_nu .= 0.0 #zeros(ComplexF64,Nx,Ny)
+    fun_nudown .= 0.0 #zeros(ComplexF64,Nx,Ny)
+    fun_nudu .= 0.0 #zeros(ComplexF64,Nx,Ny)
+    fun_nuup .= 0.0 #zeros(ComplexF64,Nx,Ny)
 
     for jjy = 1:Ny
         for jjx = 1:Nx
 
             for kk1 = 1:maxmatpcut
                 for kk0 = 1:maxmatpcut
-                    fun_nu[jjx,jjy] += psi[kk1]*(Mpairdown[kk1,kk0,5]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,1:4])) +
-                                        Mpairdown[kk1,kk0,10]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,5+1:5+4])) +
-                                        Mpairdown[kk1,kk0,15]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,10+1:10+4])))
+                    for jj = 1:3
+                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                    end
                 end
             end
 
             for kk1 = maxmatpcut+1:maxmatpcut+maxmatpcut2
                 for kk0 = maxmatpcut+1:maxmatpcut+maxmatpcut2
-                    fun_nu[jjx,jjy] += psi[kk1]*(Mpairdown[kk1,kk0,5]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,1:4])) +
-                                        Mpairdown[kk1,kk0,10]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,5+1:5+4])) +
-                                        Mpairdown[kk1,kk0,15]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown[kk1,kk0,10+1:10+4])))
+                    for jj = 1:3
+                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                    end
+                end
+            end
+
+            for kk1 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+                for kk0 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+                    for jj = 1:3
+                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                    end
+                end
+            end
+
+            for kk1 = maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+                for kk0 = maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+                    for jj = 1:3
+                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                    end
                 end
             end
 
         end
     end
 
-
-
-
-
-
-    # use conjectures for the lower triangle elements of Hint since it is hermite
-    Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
-    Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
-
-    # define Hintup
-    Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
-    Hintup[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut] = Hintdown[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut]
-
-    # define Hint for up up down
-    Hintdu[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+    # # use conjectures for the lower triangle elements of Hint since it is hermite
+    # Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
+    # Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
+    #
+    # # define Hintup
+    # Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
+    # Hintup[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut] = Hintdown[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut]
+    #
+    # # define Hint for up up down
+    # Hintdu[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
 
 end
