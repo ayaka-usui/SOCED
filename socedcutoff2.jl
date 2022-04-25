@@ -617,6 +617,8 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
 
     rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
     lambdaconden = zeros(ComplexF64,specnum)
     phiconden = zeros(ComplexF64,Msize0*2,specnum)
 
@@ -636,11 +638,14 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
     println("calculating one body density matrix ...")
     @time begin
-        onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-        lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+        onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+        lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+        lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+        # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+        # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
     end
 
-    return arraylambda, arrayspect, lambdaconden, phiconden
+    return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
 
 end
 
