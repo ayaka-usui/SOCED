@@ -64,7 +64,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
 end
 
-function onebodydensitymatrix!(Msize0::Int64, Np::Int64, psi::Vector{ComplexF64}, rhoij::Matrix{ComplexF64})
+function onebodydensitymatrix!(Msize0::Int64, Np::Int64, psi::Vector{ComplexF64}, rhoij::Matrix{ComplexF64}, rhoijdown::Matrix{ComplexF64}, rhoijup::Matrix{ComplexF64})
 
     # create Fock basis
     # for down down and up up
@@ -98,7 +98,13 @@ function onebodydensitymatrix!(Msize0::Int64, Np::Int64, psi::Vector{ComplexF64}
             rhoij[ii,jj] = (arraypsijj[:,ii].*psi)'*(arraypsijj[:,jj].*psi)
         end
     end
-    rhoij = Hermitian(rhoij)
+    rhoij .= rhoij/Np
+    rhoij .= rhoij + rhoij' - diagm(diag(rhoij))
+
+    rhoijdown .= rhoij[1:Msize0,1:Msize0]
+    rhoijup .= rhoij[Msize0+1:Msize,Msize0+1:Msize]
+
+    # rhoij .= Hermitian(rhoij)
 
     # return rhoij
 
@@ -231,10 +237,22 @@ function diagonaliseHtotspinpop(Msize0::Int64, Np::Int64, gdown::Float64, gup::F
     # return results
 
     rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
-    onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-    lambdaconden, phiconden = eigs(rhoij,nev=5,which=:LR)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+    onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+    lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+    lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
 
-    return lambdaconden, phiconden
+    # lambdaconden, phiconden = eigs(rhoij,nev=5,which=:LR)
+    # rhoij1 = Hermitian(rhoij)
+    # lambdaconden, phiconden = eigen(rhoij1)
+
+    # lambdaconden .= abs.(lambdaconden)
+
+    return lambdacondendown, phicondendown, lambdacondenup, phicondenup
+
+    # return lambdaconden
+    # return lambdaconden, phiconden
     # return rhoij
 
 end
@@ -559,6 +577,70 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     save("data_spectrum_ene_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
     # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
+
+end
+
+function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+
+    println("constructoing the Hamiltonian ...")
+    @time begin
+        matho, matdowndown, matupup, matdownup, matsoc, matW = createHtotal(Msize0,Np)
+        # save("data_Htot.jld", "matho", matho, "matsoc", matsoc, "matW", matW, "mat1", mat1, "mat2", mat2, "mat3", mat3)
+    end
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arraylambda = zeros(ComplexF64,specnum)
+    arrayspect = zeros(ComplexF64,specnum-1)
+
+    # arraypopdown3 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+
+    # arraypopdown3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    # arraypopdown2up1GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    lambdaconden = zeros(ComplexF64,specnum)
+    phiconden = zeros(ComplexF64,Msize0*2,specnum)
+
+    # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+    mat0 = matho + 1im*ksoc*matsoc
+    # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    mat1 = copy(mat0)
+    phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+
+    println("diagonalising the Hamiltonian ...")
+    @time begin
+        mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+        mat1 .= mat0 + Omega*matW
+        arraylambda, phi = eigs(mat1,nev=specnum,which=:SR)
+        arrayspect .= arraylambda[2:end] .- arraylambda[1]
+    end
+
+    println("calculating one body density matrix ...")
+    @time begin
+        onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+        lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+    end
+
+    return arraylambda, arrayspect, lambdaconden, phiconden
 
 end
 
