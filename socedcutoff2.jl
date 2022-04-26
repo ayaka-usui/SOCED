@@ -580,7 +580,7 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
 
 end
 
-function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64)
+function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
 
     println("constructoing the Hamiltonian ...")
     @time begin
@@ -627,6 +627,8 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
 
     println("diagonalising the Hamiltonian ...")
     @time begin
@@ -645,7 +647,13 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
         # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
     end
 
-    return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
+    println("calculating pair correlation ...")
+    @time begin
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown,Mpairup,Mpairdu,psi,xrange,yrange)
+    end
+
+    # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
+    return arraylambda, fun_nudown, fun_nudu, fun_nuup
 
 end
 

@@ -241,7 +241,7 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
 
 end
 
-function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown::ST, Mpairup::ST, Mpairdu::ST, psi::Vector{ComplexF64}) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown::ST, Mpairup::ST, Mpairdu::ST, psi::Vector{ComplexF64}, xrange::Vector{Float64}, yrange::Vector{Float64}) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
@@ -373,12 +373,12 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
     Mpairdu1[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:] = Mpairdu1[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2,:]
 
     # pair correlation
-    fun_nudown .= 0.0 #zeros(ComplexF64,Nx,Ny)
-    fun_nudu .= 0.0 #zeros(ComplexF64,Nx,Ny)
-    fun_nuup .= 0.0 #zeros(ComplexF64,Nx,Ny)
-
     Nx = length(xrange)
     Ny = length(yrange)
+
+    fun_nudown = zeros(ComplexF64,Nx,Ny)
+    fun_nudu = zeros(ComplexF64,Nx,Ny)
+    fun_nuup = zeros(ComplexF64,Nx,Ny)
 
     phiHO = setfunHO(xrange,Msize0)
 
@@ -440,15 +440,10 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
         end
     end
 
-    # # use conjectures for the lower triangle elements of Hint since it is hermite
-    # Hintdown .= Hintdown + Hintdown' - spdiagm(diag(Hintdown))
-    # Hintdu .= Hintdu + Hintdu' - spdiagm(diag(Hintdu))
-    #
-    # # define Hintup
-    # Hintup[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end] = Hintdown[1:maxmatpcut,1:maxmatpcut]
-    # Hintup[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut] = Hintdown[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut]
-    #
-    # # define Hint for up up down
-    # Hintdu[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2] = Hintdu[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2]
+    fun_nudown .= fun_nudown/Np/(Np-1)
+    fun_nudu .= fun_nudu/Np/(Np-1)
+    fun_nuup .= fun_nuup/Np/(Np-1)
+
+    return fun_nudown, fun_nudu, fun_nuup
 
 end
