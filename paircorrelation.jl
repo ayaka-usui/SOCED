@@ -3,7 +3,22 @@ using Arpack, SparseArrays, LinearAlgebra
 # define functions used here
 include("vijkl.jl")
 
-function funHO(xrange::Vector{Float64},yrange::Vector{Float64},jjx::Int64,jjy::Int64,vec0::Vector{Int64})
+function setfunHO(xrange,Msize0)
+
+    y = variable(Polynomial{Rational{Int}})
+    outcome = basis(Hermite,Msize0)(y)*exp(-y^2/2)
+
+
+
+    return
+
+end
+
+function funHO(xvar::Float64,vec0::Vector{Int64})
+
+    # y = variable(Polynomial{Rational{Int}})
+    outcome = basis(Hermite, vec0[1])(xvar)* exp(-xvar^2/2)
+    * basis(Hermite, vec0[2])(xvar)
 
 
 
@@ -367,13 +382,16 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
     fun_nudu .= 0.0 #zeros(ComplexF64,Nx,Ny)
     fun_nuup .= 0.0 #zeros(ComplexF64,Nx,Ny)
 
+    Nx = length(xrange)
+    Ny = length(yrange)
+
     for jjy = 1:Ny
         for jjx = 1:Nx
 
             for kk1 = 1:maxmatpcut
                 for kk0 = 1:maxmatpcut
                     for jj = 1:3
-                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(xrange,yrange,jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
                     end
                 end
             end
@@ -381,8 +399,8 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
             for kk1 = maxmatpcut+1:maxmatpcut+maxmatpcut2
                 for kk0 = maxmatpcut+1:maxmatpcut+maxmatpcut2
                     for jj = 1:3
-                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
-                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*funHO(xrange,yrange,jjx,jjy,Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(xrange,yrange,jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
                     end
                 end
             end
@@ -390,8 +408,8 @@ function paircorrelation_fun!(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msi
             for kk1 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
                 for kk0 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
                     for jj = 1:3
-                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
-                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*funHO(xrange,yrange,jjx,jjy,Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
+                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*funHO(xrange,yrange,jjx,jjy,Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1:(jj-1)*4+4]))
                     end
                 end
             end
