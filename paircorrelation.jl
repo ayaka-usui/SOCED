@@ -246,7 +246,7 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
 end
 
 # function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown::ST, Mpairup::ST, Mpairdu::ST, psi::Vector{ComplexF64}, xrange::Vector{Float64}, yrange::Vector{Float64}) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
-function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown3int::Array{Int64,3}, Mpairdown2up1int::Array{Int64,3}, Mpairdown1up2int::Array{Int64,3}, Mpairup3int::Array{Int64,3}, Mpairdown3float::Array{Float64,3}, Mpairdown2up1float::Array{Float64,3}, Mpairdown1up2float::Array{Float64,3}, Mpairup3float::Array{Float64,3}, psi::Vector{ComplexF64}, xrange::LinRange{Float64}, yrange::LinRange{Float64})
+function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown3int::SparseMatrixCSC{Int64}, Mpairdown2up1int::SparseMatrixCSC{Int64}, Mpairdown3float::SparseMatrixCSC{Float64}, Mpairdown2up1float::SparseMatrixCSC{Float64}, psi::Vector{ComplexF64}, xrange::LinRange{Float64}, yrange::LinRange{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
