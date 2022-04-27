@@ -631,14 +631,20 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     psi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
     xrange = LinRange(-Lx,Lx,Nx)
     yrange = LinRange(-Lx,Lx,Nx)
-    Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+
+    Mpairdown3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
+    Mpairdown3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
     Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
     Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
-    Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    Mpairup3int1 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    Mpairup3int2 = zeros(Int64,maxmatpcut,maxmatpcut,12)
+
+    Mpairdown3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
+    Mpairdown3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
     Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
     Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    Mpairup3float1 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    Mpairup3float2 = zeros(Float64,maxmatpcut,maxmatpcut,3)
 
     println("diagonalising the Hamiltonian ...")
     @time begin
