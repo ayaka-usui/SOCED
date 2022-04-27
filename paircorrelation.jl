@@ -405,6 +405,13 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                                                                                                       phiHO[jjy,Mpairdown3int[kk1,kk0,(jj-1)*4+4]]
                         end
 
+                        if Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1] != 0
+                           fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2*2+kk1])*Mpairup3float[maxmatpcut2+kk1,maxmatpcut2+kk0,jj]*psi[maxmatpcut+maxmatpcut2*2+kk0]*phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1]]*
+                                                                                                                                                                            phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+3]]*
+                                                                                                                                                                            phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+2]]*
+                                                                                                                                                                            phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+4]]
+                        end
+
                     end
                 end
             end
@@ -427,14 +434,6 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                                                                                                                              phiHO[jjy,Mpairdown2up1int[kk1,kk0,(jj-1)*4+4]]
                         end
 
-                    end
-                end
-            end
-
-            for kk1 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
-                for kk0 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
-                    for jj = 1:3
-
                         if Mpairdown1up2int[kk1,kk0,(jj-1)*4+1] != 0
                            fun_nudu[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2+kk1])*Mpairdown1up2float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2+kk0]*phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+1]]*
                                                                                                                                                      phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+3]]*
@@ -453,18 +452,40 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                 end
             end
 
-            for kk1 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
-                for kk0 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
-                    for jj = 1:3
-                        if Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1] != 0
-                           fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2*2+kk1])*Mpairup3float[maxmatpcut2+kk1,maxmatpcut2+kk0,jj]*psi[maxmatpcut+maxmatpcut2*2+kk0]*phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1]]*
-                                                                                                                                                                            phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+3]]*
-                                                                                                                                                                            phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+2]]*
-                                                                                                                                                                            phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+4]]
-                        end
-                    end
-                end
-            end
+            # for kk1 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+            #     for kk0 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+            #         for jj = 1:3
+            #
+            #             if Mpairdown1up2int[kk1,kk0,(jj-1)*4+1] != 0
+            #                fun_nudu[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2+kk1])*Mpairdown1up2float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2+kk0]*phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+1]]*
+            #                                                                                                                                          phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+3]]*
+            #                                                                                                                                          phiHO[jjy,Mpairdown1up2int[kk1,kk0,(jj-1)*4+2]]*
+            #                                                                                                                                          phiHO[jjy,Mpairdown1up2int[kk1,kk0,(jj-1)*4+4]]
+            #             end
+            #
+            #             if Mpairup3int[kk1,kk0,(jj-1)*4+1] != 0
+            #                fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2+kk1])*Mpairup3float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2+kk0]*phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+1]]*
+            #                                                                                                                                     phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+3]]*
+            #                                                                                                                                     phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+2]]*
+            #                                                                                                                                     phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+4]]
+            #             end
+            #
+            #         end
+            #     end
+            # end
+
+            # for kk1 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+            #     for kk0 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+            #         for jj = 1:3
+            #             if Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1] != 0
+            #                fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2*2+kk1])*Mpairup3float[maxmatpcut2+kk1,maxmatpcut2+kk0,jj]*psi[maxmatpcut+maxmatpcut2*2+kk0]*phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+1]]*
+            #                                                                                                                                                                 phiHO[jjx,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+3]]*
+            #                                                                                                                                                                 phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+2]]*
+            #                                                                                                                                                                 phiHO[jjy,Mpairup3int[maxmatpcut2+kk1,maxmatpcut2+kk0,(jj-1)*4+4]]
+            #             end
+            #         end
+            #     end
+            # end
 
         end
     end
