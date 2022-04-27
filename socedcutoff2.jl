@@ -716,8 +716,13 @@ function diagonalisesavedHtotdiffW_gdownup_onebody(Msize0::Int64, Np::Int64, gdo
     # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
 
     rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
-    arraylambdaconden = zeros(ComplexF64,specnum,NOmega,Ng)
-    arrayphiconden = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+
+    arraylambdacondendown = zeros(ComplexF64,specnum,NOmega,Ng)
+    arraylambdacondenup = zeros(ComplexF64,specnum,NOmega,Ng)
+    arrayphicondendown = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    arrayphicondenup = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
 
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
@@ -743,10 +748,20 @@ function diagonalisesavedHtotdiffW_gdownup_onebody(Msize0::Int64, Np::Int64, gdo
                 arraylambda[:,jj,jjg], phi = eigs(mat1,nev=specnum,which=:SR)
                 arrayspect[:,jj,jjg] .= arraylambda[2:end,jj,jjg] .- arraylambda[1,jj,jjg]
 
-                onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-                lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
-                arraylambdaconden[:,jj,jjg] = lambdaconden
-                arrayphiconden[:,:,jj,jjg] = phiconden
+                # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+                # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+
+                rhoij .= 0.0
+                rhoijdown .= 0.0
+                rhoijup .= 0.0
+                onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+                lambdacondendown, phicondendown = eigs(rhoijdown,nev=specnum,which=:LR)
+                lambdacondenup, phicondenup = eigs(rhoijup,nev=specnum,which=:LR)
+
+                arraylambdacondendown[:,jj,jjg] = lambdacondendown
+                arraylambdacondenup[:,jj,jjg] = lambdacondenup
+                arrayphicondendown[:,:,jj,jjg] = phicondendown
+                arrayphicondenup[:,:,jj,jjg] = phicondenup
 
                 # arraypopdown3[:,jj,jjg] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
                 # arraypopdown2up1[:,jj,jjg] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
@@ -823,8 +838,13 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
     # arrayenergyGSint = zeros(Float64,NOmega,Ng)
 
     rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
-    arraylambdaconden = zeros(ComplexF64,specnum,NOmega,Ng)
-    arrayphiconden = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+
+    arraylambdacondendown = zeros(ComplexF64,specnum,NOmega,Ng)
+    arraylambdacondenup = zeros(ComplexF64,specnum,NOmega,Ng)
+    arrayphicondendown = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    arrayphicondenup = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
 
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
@@ -852,10 +872,20 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
                 arraylambda[:,jj,jjg], phi = eigs(mat1,nev=specnum,which=:SR)
                 arrayspect[:,jj,jjg] .= arraylambda[2:end,jj,jjg] .- arraylambda[1,jj,jjg]
 
-                onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-                lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
-                arraylambdaconden[:,jj,jjg] = lambdaconden
-                arrayphiconden[:,:,jj,jjg] = phiconden
+                # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+                # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+
+                rhoij .= 0.0
+                rhoijdown .= 0.0
+                rhoijup .= 0.0
+                onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+                lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+                lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+
+                arraylambdacondendown[:,jj,jjg] = lambdacondendown
+                arraylambdacondenup[:,jj,jjg] = lambdacondenup
+                arrayphicondendown[:,:,jj,jjg] = phicondendown
+                arrayphicondenup[:,:,jj,jjg] = phicondenup
 
                 # arraypopdown3[:,jj,jjg] = sum(abs.(phi[1:maxmatpcut,:]).^2,dims=1)'
                 # arraypopdown2up1[:,jj,jjg] = sum(abs.(phi[maxmatpcut+1:maxmatpcut+maxmatpcut2,:]).^2,dims=1)'
