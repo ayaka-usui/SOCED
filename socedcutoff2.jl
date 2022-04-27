@@ -1,5 +1,6 @@
 using Arpack, SparseArrays, LinearAlgebra
 using JLD
+# using Plots
 # using ArnoldiMethod
 # using FLoops
 
@@ -11,6 +12,7 @@ include("cutMsizeEnespinmixed2.jl")
 include("Hsocfunccutoffk1W1.jl")
 include("Hintfunccutoff2.jl")
 include("coefficientonebodysummary.jl")
+include("paircorrelation.jl")
 
 function createHtotal(Msize0::Int64, Np::Int64)
 
@@ -626,30 +628,38 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     mat0 = matho + 1im*ksoc*matsoc
     # mat1 = spzeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
     mat1 = copy(mat0)
-    phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+    psi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
     xrange = LinRange(-Lx,Lx,Nx)
     yrange = LinRange(-Lx,Lx,Nx)
+    Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
 
     println("diagonalising the Hamiltonian ...")
     @time begin
         mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
         mat1 .= mat0 + Omega*matW
-        arraylambda, phi = eigs(mat1,nev=specnum,which=:SR)
+        arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
-    println("calculating one body density matrix ...")
-    @time begin
-        onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
-        lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
-        lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
-        # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-        # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
-    end
+    # println("calculating one body density matrix ...")
+    # @time begin
+    #     onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+    #     lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+    #     lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+    #     # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+    #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+    # end
 
     println("calculating pair correlation ...")
     @time begin
-        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown,Mpairup,Mpairdu,psi,xrange,yrange)
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown3int,Mpairdown2up1int,Mpairdown1up2int,Mpairup3int,Mpairdown3float,Mpairdown2up1float,Mpairdown1up2float,Mpairup3float,psi[:,1],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup

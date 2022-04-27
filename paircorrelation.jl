@@ -1,18 +1,19 @@
 
 using Arpack, SparseArrays, LinearAlgebra
+using Polynomials, SpecialPolynomials
 
 # define functions used here
-include("vijkl.jl")
+# include("vijkl.jl")
 
-function setfunHO(xrange::Vector{Float64},Msize0::Int64)
+function setfunHO(xrange::LinRange{Float64},Msize0::Int64)
 
     # y = variable(Polynomial{Rational{Int}})
     Nx = length(xrange)
-    outcome = zeros(Float64,Nx)
+    outcome = zeros(Float64,Nx,Msize0)
 
-    for nn = 0:Msize0-1
+    for nn = 1:Msize0
         for jjx = 1:Nx
-            outcome[jjx,nn] = basis(Hermite,nn)(xrange[jjx])*exp(-xrange[jjx]^2/2)
+            outcome[jjx,nn] = basis(Hermite,nn-1)(xrange[jjx])*exp(-xrange[jjx]^2/2)
         end
         outcome[:,nn] = outcome[:,nn]/sqrt(sum(abs.(outcome[:,nn]).^2))
     end
@@ -21,7 +22,7 @@ function setfunHO(xrange::Vector{Float64},Msize0::Int64)
 
 end
 
-function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Matrix{Float64},Np::Int64)
+function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Vector{Float64},Np::Int64)
 
     # vecmbindnn3 = zeros(Int64,2)
     # vecmbindmm3 = zeros(Int64,2)
@@ -88,9 +89,10 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
                end
 
                # indices for Vijkl
-               ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
                # sort!(ind1,rev=true)
                # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+               ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
 
                ind0 += 1
                # vecindcoeff[ind0,1:4] = vecmbindnn3 #ind2
@@ -111,7 +113,7 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
 end
 
-function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Matrix{Float64},Np::Int64)
+function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Vector{Float64},Np::Int64)
 
     # down down up for g12
 
@@ -165,9 +167,10 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
                element = 2*element
 
                # indices for Vijkl
-               ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
                # sort!(ind1,rev=true)
                # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+               ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
 
                ind0 += 1
                vecindcoeff0[ind0,1:4] = ind1
@@ -189,7 +192,7 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
 
 end
 
-function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff::Matrix{Float64},Np::Int64)
+function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vecmbindnn3::Vector{Int64},vecmbindmm3::Vector{Int64},vecindcoeff0::Matrix{Int64},vecindcoeff1::Vector{Float64},Np::Int64)
 
     # down down up for g
 
@@ -199,14 +202,14 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
     # a|n>= sqrt(n)|n-1>
     # a^+|n>= sqrt(n+1)|n+1>
 
-    vecindcoeff0 .= 0.0 #zeros(Float64,3,2)
+    vecindcoeff0 .= 0 #zeros(Float64,3,2)
     vecindcoeff1 .= 0.0 #zeros(Float64,3,2)
     ind0 = 0
     # vecmbind0 = 0
     # common = 0
 
     if vecmbindnn[end] != vecmbindmm[end]
-       return vecindcoeff, ind0
+       return vecindcoeff0, vecindcoeff1, ind0
     end
 
     vecmbindnn3 .= vecmbindnn[1:2] # ll kk
@@ -226,9 +229,10 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
     end
 
     # indices for Vijkl
-    ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
+    # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
     # sort!(ind1,rev=true)
     # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
+    ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
 
     ind0 += 1
     vecindcoeff0[ind0,1:4] = ind1 #vecmbindnn3
@@ -241,18 +245,21 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
 
 end
 
-function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown::ST, Mpairup::ST, Mpairdu::ST, psi::Vector{ComplexF64}, xrange::Vector{Float64}, yrange::Vector{Float64}) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+# function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown::ST, Mpairup::ST, Mpairdu::ST, psi::Vector{ComplexF64}, xrange::Vector{Float64}, yrange::Vector{Float64}) where ST <: Union{SparseMatrixCSC{Float64},Array{Float64}}
+function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp::Matrix{Int64}, matp20::Matrix{Int64}, matp21::Matrix{Int64}, Mpairdown3int::Array{Int64,3}, Mpairdown2up1int::Array{Int64,3}, Mpairdown1up2int::Array{Int64,3}, Mpairup3int::Array{Int64,3}, Mpairdown3float::Array{Float64,3}, Mpairdown2up1float::Array{Float64,3}, Mpairdown1up2float::Array{Float64,3}, Mpairup3float::Array{Float64,3}, psi::Vector{ComplexF64}, xrange::LinRange{Float64}, yrange::LinRange{Float64})
 
     maxmatpcut = length(indvec)
     maxmatpcut2 = length(indvec2)
 
     # defines vectors and matrices
-    Mpairdown0 .= 0
-    Mpairup0 .= 0
-    Mpairdu0 .= 0
-    Mpairdown1 .= 0.0
-    Mpairup1 .= 0.0
-    Mpairdu1 .= 0.0
+    Mpairdown3int .= 0
+    Mpairdown2up1int .= 0
+    Mpairdown1up2int .= 0
+    Mpairup3int .= 0
+    Mpairdown3float .= 0.0
+    Mpairdown2up1float .= 0.0
+    Mpairdown1up2float .= 0.0
+    Mpairup3float .= 0.0
     vecmbindnn = zeros(Int64,Np)
     vecmbindmm = zeros(Int64,Np)
     vecmbindnn3 = zeros(Int64,2)
@@ -274,8 +281,8 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             vecindcoeff0, vecindcoeff1, ind0 = coefficientpair(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
 
             for jj = 1:ind0
-                Mpairdown0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-                Mpairdown1[mm,nn,jj] = vecindcoeff1[jj]
+                Mpairdown3int[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdown3float[mm,nn,jj] = vecindcoeff1[jj]
             end
 
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
@@ -328,16 +335,16 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
 
             vecindcoeff0, vecindcoeff1, ind0 = coefficientpair2(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
             for jj = 1:ind0
-                Mpairdu0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-                Mpairdu1[mm,nn,jj] = vecindcoeff1[jj]
+                Mpairdown2up1int[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdown2up1float[mm,nn,jj] = vecindcoeff1[jj]
             end
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
             # Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
             vecindcoeff0, vecindcoeff1, ind0 = coefficientpair3(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
             for jj = 1:ind0
-                Mpairdown0[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-                Mpairdown1[mm,nn,jj] = vecindcoeff1[jj]
+                Mpairdown3int[maxmatpcut+mm,maxmatpcut+nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
+                Mpairdown3float[maxmatpcut+mm,maxmatpcut+nn,jj] = vecindcoeff1[jj]
             end
             # ind2 = Int64.(vecindcoeff[1:ind0,1])
             # Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
@@ -349,28 +356,27 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     #
     for kk0 = 1:maxmatpcut
         for kk1 = kk0+1:maxmatpcut
-            Mpairdown0[kk1,kk0,:] = Mpairdown0[kk0,kk1,:]
-            Mpairdown1[kk1,kk0,:] = Mpairdown1[kk0,kk1,:]
+            Mpairdown3int[kk1,kk0,:] = Mpairdown3int[kk0,kk1,:]
+            Mpairdown3float[kk1,kk0,:] = Mpairdown3float[kk0,kk1,:]
         end
     end
 
-    #
-    for kk0 = maxmatpcut+1:maxmatpcut+maxmatpcut2
-        for kk1 = kk0+1:maxmatpcut+maxmatpcut2
-            Mpairdown0[kk1,kk0,:] = Mpairdown0[kk0,kk1,:]
-            Mpairdown1[kk1,kk0,:] = Mpairdown1[kk0,kk1,:]
-            Mpairdu0[kk1,kk0,:] = Mpairdu0[kk0,kk1,:]
-            Mpairdu1[kk1,kk0,:] = Mpairdu1[kk0,kk1,:]
+    for kk0 = 1:maxmatpcut2 #maxmatpcut+1:maxmatpcut+maxmatpcut2
+        for kk1 = kk0+1:maxmatpcut2
+            Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,:] = Mpairdown3int[maxmatpcut+kk0,maxmatpcut+kk1,:]
+            Mpairdown3float[maxmatpcut+kk1,maxmatpcut+kk0,:] = Mpairdown3float[maxmatpcut+kk0,maxmatpcut+kk1,:]
+            Mpairdown2up1int[kk1,kk0,:] = Mpairdown2up1int[kk0,kk1,:]
+            Mpairdown2up1float[kk1,kk0,:] = Mpairdown2up1float[kk0,kk1,:]
         end
     end
 
-    Mpairup0[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairdown0[1:maxmatpcut,1:maxmatpcut,:]
-    Mpairup0[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,:] = Mpairdown0[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
-    Mpairup1[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairdown1[1:maxmatpcut,1:maxmatpcut,:]
-    Mpairup1[end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,end-maxmatpcut-maxmatpcut2+1:end-maxmatpcut,:] = Mpairdown1[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
+    Mpairup3int[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairdown3int[1:maxmatpcut,1:maxmatpcut,:]
+    Mpairup3int[1:maxmatpcut2,1:maxmatpcut2,:] = Mpairdown3int[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
+    Mpairup3float[end-(maxmatpcut-1):end,end-(maxmatpcut-1):end,:] = Mpairup3float[1:maxmatpcut,1:maxmatpcut,:]
+    Mpairup3float[1:maxmatpcut2,1:maxmatpcut2,:] = Mpairup3float[1+maxmatpcut:maxmatpcut2+maxmatpcut,1+maxmatpcut:maxmatpcut2+maxmatpcut,:]
 
-    Mpairdu0[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:] = Mpairdu0[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2,:]
-    Mpairdu1[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2+maxmatpcut2,:] = Mpairdu1[maxmatpcut+1:maxmatpcut+maxmatpcut2,maxmatpcut+1:maxmatpcut+maxmatpcut2,:]
+    Mpairdown1up2int .= Mpairdown2up1int
+    Mpairdown1up2float .= Mpairdown2up1float
 
     # pair correlation
     Nx = length(xrange)
@@ -383,56 +389,81 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     phiHO = setfunHO(xrange,Msize0)
 
     for jjy = 1:Ny
+
+        println("jjy=",jjy)
+
         for jjx = 1:Nx
+
+            println("jjx=",jjx)
 
             for kk1 = 1:maxmatpcut
                 for kk0 = 1:maxmatpcut
                     for jj = 1:3
-                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                        phiHO[xrange[jjx],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                        phiHO[yrange[jjy],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                        phiHO[yrange[jjy],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+4])]
+
+                        if Mpairdown3int[kk1,kk0,(jj-1)*4+1] != 0
+                           fun_nudown[jjx,jjy] += conj(psi[kk1])*Mpairdown3float[kk1,kk0,jj]*psi[kk0]*phiHO[jjx,Mpairdown3int[kk1,kk0,(jj-1)*4+1]]*
+                                                                                                      phiHO[jjx,Mpairdown3int[kk1,kk0,(jj-1)*4+3]]*
+                                                                                                      phiHO[jjy,Mpairdown3int[kk1,kk0,(jj-1)*4+2]]*
+                                                                                                      phiHO[jjy,Mpairdown3int[kk1,kk0,(jj-1)*4+4]]
+                        end
+
                     end
                 end
             end
 
-            for kk1 = maxmatpcut+1:maxmatpcut+maxmatpcut2
-                for kk0 = maxmatpcut+1:maxmatpcut+maxmatpcut2
+            for kk1 = 1:maxmatpcut2 #maxmatpcut+1:maxmatpcut+maxmatpcut2
+                for kk0 = 1:maxmatpcut2 #maxmatpcut+1:maxmatpcut+maxmatpcut2
                     for jj = 1:3
-                        fun_nudown[jjx,jjy] += psi[kk1]*Mpairdown1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                        phiHO[xrange[jjx],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                        phiHO[yrange[jjy],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                        phiHO[yrange[jjy],Int64.(Mpairdown0[kk1,kk0,(jj-1)*4+4])]
-                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                    phiHO[xrange[jjx],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+4])]
+
+                        if Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,(jj-1)*4+1] != 0
+                           fun_nudown[jjx,jjy] += conj(psi[maxmatpcut+kk1])*Mpairdown3float[maxmatpcut+kk1,maxmatpcut+kk0,jj]*psi[maxmatpcut+kk0]*phiHO[jjx,Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,(jj-1)*4+1]]*
+                                                                                                                                                  phiHO[jjx,Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,(jj-1)*4+3]]*
+                                                                                                                                                  phiHO[jjy,Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,(jj-1)*4+2]]*
+                                                                                                                                                  phiHO[jjy,Mpairdown3int[maxmatpcut+kk1,maxmatpcut+kk0,(jj-1)*4+4]]
+                        end
+
+                        if Mpairdown2up1int[kk1,kk0,(jj-1)*4+1] != 0
+                           fun_nudu[jjx,jjy] += conj(psi[maxmatpcut+kk1])*Mpairdown2up1float[kk1,kk0,jj]*psi[maxmatpcut+kk0]*phiHO[jjx,Mpairdown2up1int[kk1,kk0,(jj-1)*4+1]]*
+                                                                                                                             phiHO[jjx,Mpairdown2up1int[kk1,kk0,(jj-1)*4+3]]*
+                                                                                                                             phiHO[jjy,Mpairdown2up1int[kk1,kk0,(jj-1)*4+2]]*
+                                                                                                                             phiHO[jjy,Mpairdown2up1int[kk1,kk0,(jj-1)*4+4]]
+                        end
+
                     end
                 end
             end
 
-            for kk1 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
-                for kk0 = maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+            for kk1 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
+                for kk0 = 1:maxmatpcut2 #maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2
                     for jj = 1:3
-                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                    phiHO[xrange[jjx],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+4])]
-                        fun_nudu[jjx,jjy] += psi[kk1]*Mpairdu1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                    phiHO[xrange[jjx],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairdu0[kk1,kk0,(jj-1)*4+4])]
+
+                        if Mpairdown1up2int[kk1,kk0,(jj-1)*4+1] != 0
+                           fun_nudu[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2+kk1])*Mpairdown1up2float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2+kk0]*phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+1]]*
+                                                                                                                                                     phiHO[jjx,Mpairdown1up2int[kk1,kk0,(jj-1)*4+3]]*
+                                                                                                                                                     phiHO[jjy,Mpairdown1up2int[kk1,kk0,(jj-1)*4+2]]*
+                                                                                                                                                     phiHO[jjy,Mpairdown1up2int[kk1,kk0,(jj-1)*4+4]]
+                        end
+
+                        if Mpairup3int[kk1,kk0,(jj-1)*4+1] != 0
+                           fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2+kk1])*Mpairup3float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2+kk0]*phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+1]]*
+                                                                                                                                                phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+3]]*
+                                                                                                                                                phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+2]]*
+                                                                                                                                                phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+4]]
+                        end
+
                     end
                 end
             end
 
-            for kk1 = maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
-                for kk0 = maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+            for kk1 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
+                for kk0 = 1:maxmatpcut #maxmatpcut+maxmatpcut2*2+1:maxmatpcut+maxmatpcut2*2+maxmatpcut
                     for jj = 1:3
-                        fun_nuup[jjx,jjy] += psi[kk1]*Mpairup1[kk1,kk0,jj]*psi[kk0]*phiHO[xrange[jjx],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+1])]*
-                                                                                    phiHO[xrange[jjx],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+3])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+2])]*
-                                                                                    phiHO[yrange[jjy],Int64.(Mpairup0[kk1,kk0,(jj-1)*4+4])]
+                        if Mpairup3int[kk1,kk0,(jj-1)*4+1] != 0
+                           fun_nuup[jjx,jjy] += conj(psi[maxmatpcut+maxmatpcut2*2+kk1])*Mpairup3float[kk1,kk0,jj]*psi[maxmatpcut+maxmatpcut2*2+kk0]*phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+1]]*
+                                                                                                                                                    phiHO[jjx,Mpairup3int[kk1,kk0,(jj-1)*4+3]]*
+                                                                                                                                                    phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+2]]*
+                                                                                                                                                    phiHO[jjy,Mpairup3int[kk1,kk0,(jj-1)*4+4]]
+                        end
                     end
                 end
             end
