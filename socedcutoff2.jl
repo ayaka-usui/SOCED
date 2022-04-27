@@ -642,9 +642,10 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
     println("diagonalising the Hamiltonian ...")
     @time begin
-        mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
-        mat1 .= mat0 + Omega*matW
-        arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
+        # mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+        # mat1 .= mat0 + Omega*matW
+        mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        arraylambda, psi = eigen(mattot,1:specnum) #eigs(mat1,nev=specnum,which=:SR)
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
@@ -663,7 +664,7 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
-    return arraylambda, fun_nudown, fun_nudu, fun_nuup
+    return arraylambda, psi, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
 
 end
 
