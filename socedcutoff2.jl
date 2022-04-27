@@ -1001,13 +1001,13 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     indksoc = Int64(ksoc)
     indOmega = Int64(Omega)
 
-    println("diagonalising the Hamiltonian ...")
-    @time begin
-        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-        mattot = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
-        arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
-        arrayspect .= arraylambda[2:end] .- arraylambda[1]
-    end
+    # println("diagonalising the Hamiltonian ...")
+    # @time begin
+    #     # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+    #     mattot = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+    #     arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
+    #     arrayspect .= arraylambda[2:end] .- arraylambda[1]
+    # end
 
     # println("calculating one body density matrix ...")
     # @time begin
