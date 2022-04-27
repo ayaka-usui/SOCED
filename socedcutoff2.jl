@@ -731,8 +731,8 @@ function diagonalisesavedHtotdiffW_gdownup_onebody(Msize0::Int64, Np::Int64, gdo
 
     arraylambdacondendown = zeros(ComplexF64,specnum,NOmega,Ng)
     arraylambdacondenup = zeros(ComplexF64,specnum,NOmega,Ng)
-    arrayphicondendown = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
-    arrayphicondenup = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    arrayphicondendown = zeros(ComplexF64,Msize0,specnum,NOmega,Ng)
+    arrayphicondenup = zeros(ComplexF64,Msize0,specnum,NOmega,Ng)
 
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
@@ -853,8 +853,8 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
 
     arraylambdacondendown = zeros(ComplexF64,specnum,NOmega,Ng)
     arraylambdacondenup = zeros(ComplexF64,specnum,NOmega,Ng)
-    arrayphicondendown = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
-    arrayphicondenup = zeros(ComplexF64,Msize0*2,specnum,NOmega,Ng)
+    arrayphicondendown = zeros(ComplexF64,Msize0,specnum,NOmega,Ng)
+    arrayphicondenup = zeros(ComplexF64,Msize0,specnum,NOmega,Ng)
 
     # mat0 = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
     mat0 = matho + 1im*ksoc*matsoc
@@ -889,8 +889,8 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
                 rhoijdown .= 0.0
                 rhoijup .= 0.0
                 onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
-                lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
-                lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+                lambdacondendown, phicondendown = eigs(rhoijdown,nev=specnum,which=:LR)
+                lambdacondenup, phicondenup = eigs(rhoijup,nev=specnum,which=:LR)
 
                 arraylambdacondendown[:,jj,jjg] = lambdacondendown
                 arraylambdacondenup[:,jj,jjg] = lambdacondenup
