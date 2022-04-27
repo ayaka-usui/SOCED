@@ -884,3 +884,92 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
     # return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3
 
 end
+
+function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
+
+    # construct Hamiltonian
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arraylambda = zeros(ComplexF64,specnum)
+    arrayspect = zeros(ComplexF64,specnum-1)
+
+    # arraypopdown3 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+
+    # arraypopdown3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    # arraypopdown2up1GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+    lambdaconden = zeros(ComplexF64,specnum)
+    phiconden = zeros(ComplexF64,Msize0*2,specnum)
+
+    psi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
+    Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+
+    indgdown = Int64(gdown)
+    indgup = Int64(gup)
+    indgdu = Int64(gdu)
+    indksoc = Int64(ksoc)
+    indOmega = Int64(Omega)
+
+    println("diagonalising the Hamiltonian ...")
+    @time begin
+        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        mattot = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+        arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
+        arrayspect .= arraylambda[2:end] .- arraylambda[1]
+    end
+
+    # println("calculating one body density matrix ...")
+    # @time begin
+    #     onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+    #     lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+    #     lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+    #     # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+    #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+    # end
+
+    println("calculating pair correlation ...")
+    @time begin
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown3int,Mpairdown2up1int,Mpairdown1up2int,Mpairup3int,Mpairdown3float,Mpairdown2up1float,Mpairdown1up2float,Mpairup3float,psi[:,1],xrange,yrange)
+    end
+
+    # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
+    save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
+
+end
