@@ -12,7 +12,7 @@ include("cutMsizeEnespinmixed2.jl")
 include("Hsocfunccutoffk1W1.jl")
 include("Hintfunccutoff2.jl")
 include("coefficientonebodysummary.jl")
-include("paircorrelation.jl")
+include("paircorrelation2.jl")
 
 function createHtotal(Msize0::Int64, Np::Int64)
 
@@ -632,30 +632,35 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     xrange = LinRange(-Lx,Lx,Nx)
     yrange = LinRange(-Lx,Lx,Nx)
 
-    Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    # Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
     # Mpairdown3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
     # Mpairdown3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    # Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
     # Mpairup3int1 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
     # Mpairup3int2 = zeros(Int64,maxmatpcut,maxmatpcut,12)
+    # Mpairdown3int = spzeros(Int64,(maxmatpcut+maxmatpcut2)^2,12)
+    # Mpairdown2up1int = spzeros(Int64,maxmatpcut2^2,12)
 
-    Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    # Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
     # Mpairdown3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
     # Mpairdown3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    # Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
     # Mpairup3float1 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
     # Mpairup3float2 = zeros(Float64,maxmatpcut,maxmatpcut,3)
+    # Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
+    # Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
 
     println("diagonalising the Hamiltonian ...")
     @time begin
-        # mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
-        # mat1 .= mat0 + Omega*matW
-        mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-        arraylambda, psi = eigen(mattot,1:specnum) #eigs(mat1,nev=specnum,which=:SR)
+        mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
+        mat1 .= mat0 + Omega*matW
+        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
+        # arraylambda, psi = eigen(mattot,1:specnum)
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
@@ -670,7 +675,7 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
     println("calculating pair correlation ...")
     @time begin
-        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown3int,Mpairdown2up1int,Mpairdown1up2int,Mpairup3int,Mpairdown3float,Mpairdown2up1float,Mpairdown1up2float,Mpairup3float,psi[:,1],xrange,yrange)
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
@@ -981,8 +986,8 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     # Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
     # Mpairup3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
     # Mpairup3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    Mpairdown3int = spzeros(Int64,(maxmatpcut+maxmatpcut2)^2,12)
-    Mpairdown2up1int = spzeros(Int64,maxmatpcut2^2,12)
+    # Mpairdown3int = spzeros(Int64,(maxmatpcut+maxmatpcut2)^2,12)
+    # Mpairdown2up1int = spzeros(Int64,maxmatpcut2^2,12)
 
     # Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
     # Mpairdown3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
@@ -992,8 +997,8 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     # Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
     # Mpairup3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
     # Mpairup3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
-    Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
+    # Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
+    # Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
 
     indgdown = Int64(gdown)
     indgup = Int64(gup)
@@ -1020,7 +1025,7 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
 
     println("calculating pair correlation ...")
     @time begin
-        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,Mpairdown3int,Mpairdown2up1int,Mpairdown3float,Mpairdown2up1float,psi[:,1],xrange,yrange)
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
