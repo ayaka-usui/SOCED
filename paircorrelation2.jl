@@ -10,12 +10,13 @@ function setfunHO(xrange::LinRange{Float64},Msize0::Int64)
     # y = variable(Polynomial{Rational{Int}})
     Nx = length(xrange)
     outcome = zeros(Float64,Nx,Msize0)
+    dx = abs(xrange[2]-xrange[1])
 
     for nn = 1:Msize0
         for jjx = 1:Nx
             outcome[jjx,nn] = basis(Hermite,nn-1)(xrange[jjx])*exp(-xrange[jjx]^2/2)
         end
-        outcome[:,nn] = outcome[:,nn]/sqrt(sum(abs.(outcome[:,nn]).^2))
+        outcome[:,nn] = outcome[:,nn]/sqrt(sum(abs.(outcome[:,nn]).^2)*dx)
     end
 
     return outcome
