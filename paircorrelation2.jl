@@ -42,7 +42,7 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
 
     for pp = 1:Np
 
-        # consider to edit when parfor is inplemented
+        # consider to edit when parfor is implemented
         if vecmbindnn[pp] == vecmbind0
            continue
         end
@@ -70,7 +70,7 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
                   # else
                      # element = 1.0*element
                   end
-                  element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
+                  # element = element*2 # a_{kk} a_{ll} + a_{ll} a_{kk}
                end
 
                # coefficients of operators for bra
@@ -86,20 +86,38 @@ function coefficientpair(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},vec
                   # else
                      # element = 1.0*element
                   end
-                  element = element*2 # a^+_{ii} a^+_{jj} + a^+_{jj} a^+_{ii}
+                  # element = element*2 # a^+_{ii} a^+_{jj} + a^+_{jj} a^+_{ii}
                end
 
-               # indices for Vijkl
-               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
-               # sort!(ind1,rev=true)
-               # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
-               ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
-
+               # a^+_{ii} a^+_{jj} a_{kk} a_{ll}
+               ind1 = [vecmbindmm3[2], vecmbindmm3[1], vecmbindnn3[2], vecmbindnn3[1]] # ii jj kk ll
                ind0 += 1
-               # vecindcoeff[ind0,1:4] = vecmbindnn3 #ind2
-               # vecindcoeff[ind0,end] = element
                vecindcoeff0[ind0,1:4] = ind1
                vecindcoeff1[ind0] = element
+
+               # a^+_{ii} a^+_{jj} a_{ll} a_{kk}
+               if vecmbindnn3[1] != vecmbindnn3[2]
+                  ind1 .= [vecmbindmm3[2], vecmbindmm3[1], vecmbindnn3[1], vecmbindnn3[2]]
+                  ind0 += 1
+                  vecindcoeff0[ind0,1:4] = ind1
+                  vecindcoeff1[ind0] = element
+               end
+
+               # a^+_{jj} a^+_{ii} a_{kk} a_{ll}
+               if vecmbindmm3[1] != vecmbindmm3[2]
+                  ind1 .= [vecmbindmm3[1], vecmbindmm3[2], vecmbindnn3[2], vecmbindnn3[1]]
+                  ind0 += 1
+                  vecindcoeff0[ind0,1:4] = ind1
+                  vecindcoeff1[ind0] = element
+               end
+
+               # a^+_{jj} a^+_{ii} a_{ll} a_{kk}
+               if vecmbindnn3[1] != vecmbindnn3[2] && vecmbindmm3[1] != vecmbindmm3[2]
+                  ind1 .= [vecmbindmm3[1], vecmbindmm3[2], vecmbindnn3[1], vecmbindnn3[2]]
+                  ind0 += 1
+                  vecindcoeff0[ind0,1:4] = ind1
+                  vecindcoeff1[ind0] = element
+               end
 
                vecmbind0 = vecmbindnn[pp]
 
@@ -153,32 +171,27 @@ function coefficientpair2(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
                # coefficients of operators for ket
                if common == vecmbindnn3[1]
                   element = sqrt(2)*element
-               # else
-               #    element = 1.0*element
                end
 
                # coefficients of operators for bra
                if common == vecmbindmm3[1]
                   element = sqrt(2)*element
-               # else
-               #    element = 1.0*element
                end
 
                # a^+_{down}a^+_{up}a_{down}a_{up} + a^+_{up}a^+_{down}a_{up}a_{down}
-               element = 2*element
+               # element = 2*element
 
-               # indices for Vijkl
-               # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
-               # sort!(ind1,rev=true)
-               # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
-               ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
-
+               # a^+_{down}a^+_{up}a_{down}a_{up}
+               ind1 = [vecmbindmm3[1], vecmbindmm3[2], vecmbindnn3[1], vecmbindnn3[2]] # ii jj kk ll
                ind0 += 1
                vecindcoeff0[ind0,1:4] = ind1
                vecindcoeff1[ind0,end] = element
 
-               # vecindcoeff[ind0,1] = ind2
-               # vecindcoeff[ind0,2] = element
+               # a^+_{up}a^+_{down}a_{up}a_{down}
+               ind1 .= [vecmbindmm3[2], vecmbindmm3[1], vecmbindnn3[2], vecmbindnn3[1]] # ii jj kk ll
+               ind0 += 1
+               vecindcoeff0[ind0,1:4] = ind1
+               vecindcoeff1[ind0,end] = element
 
                vecmbind0 = vecmbindnn[pp]
 
@@ -218,29 +231,43 @@ function coefficientpair3(vecmbindnn::Vector{Int64},vecmbindmm::Vector{Int64},ve
 
     element = 1.0
 
+    # note that the order of the indices matters if vecmbindnn3[1] != vecmbindnn3[2]
     if vecmbindnn3[1] == vecmbindnn3[2]
        element = sqrt(2)*element
-    else # vecmbindnn3[1] != vecmbindnn3[2]
-       element = 2*element
     end
     if vecmbindmm3[1] == vecmbindmm3[2]
        element = sqrt(2)*element
-    else # vecmbindmm3[1] != vecmbindmm3[2]
-       element = 2*element
     end
 
-    # indices for Vijkl
-    # ind1 = [vecmbindnn3[1]-1, vecmbindnn3[2]-1, vecmbindmm3[1]-1, vecmbindmm3[2]-1] # ii jj kk ll
-    # sort!(ind1,rev=true)
-    # ind2 = binomial(ind1[1]+3,4) + binomial(ind1[2]+2,3) + binomial(ind1[3]+1,2) + binomial(ind1[4],1) + 1
-    ind1 = [vecmbindnn3[1], vecmbindnn3[2], vecmbindmm3[1], vecmbindmm3[2]] # ii jj kk ll
-
+    # a^+_{ii} a^+_{jj} a_{kk} a_{ll}
+    ind1 = [vecmbindmm3[2], vecmbindmm3[1], vecmbindnn3[2], vecmbindnn3[1]] # ii jj kk ll
     ind0 += 1
     vecindcoeff0[ind0,1:4] = ind1 #vecmbindnn3
     vecindcoeff1[ind0,end] = element
 
-    # vecindcoeff[ind0,1] = ind2
-    # vecindcoeff[ind0,2] = element
+    # a^+_{ii} a^+_{jj} a_{ll} a_{kk}
+    if vecmbindnn3[1] != vecmbindnn3[2]
+       ind1 .= [vecmbindmm3[2], vecmbindmm3[1], vecmbindnn3[1], vecmbindnn3[2]]
+       ind0 += 1
+       vecindcoeff0[ind0,1:4] = ind1
+       vecindcoeff1[ind0,end] = element
+    end
+
+    # a^+_{jj} a^+_{ii} a_{kk} a_{ll}
+    if vecmbindmm3[1] != vecmbindmm3[2]
+       ind1 .= [vecmbindmm3[1], vecmbindmm3[2], vecmbindnn3[2], vecmbindnn3[1]]
+       ind0 += 1
+       vecindcoeff0[ind0,1:4] = ind1
+       vecindcoeff1[ind0,end] = element
+    end
+
+    # a^+_{jj} a^+_{ii} a_{ll} a_{kk}
+    if vecmbindnn3[1] != vecmbindnn3[2] && vecmbindmm3[1] != vecmbindmm3[2]
+       ind1 .= [vecmbindmm3[1], vecmbindmm3[2], vecmbindnn3[1], vecmbindnn3[2]]
+       ind0 += 1
+       vecindcoeff0[ind0,1:4] = ind1
+       vecindcoeff1[ind0,end] = element
+    end
 
     return vecindcoeff0, vecindcoeff1, ind0
 
@@ -264,8 +291,8 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     vecmbindmm = zeros(Int64,Np)
     vecmbindnn3 = zeros(Int64,2)
     vecmbindmm3 = zeros(Int64,2)
-    vecindcoeff0 = zeros(Int64,3,4)
-    vecindcoeff1 = zeros(Float64,3)
+    vecindcoeff0 = zeros(Int64,3*4,4) #zeros(Int64,3,4)
+    vecindcoeff1 = zeros(Float64,3*4) #zeros(Float64,3)
 
     # pair correlation
     Nx = length(xrange)
@@ -274,6 +301,9 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     fun_nudu = zeros(Float64,Nx,Ny)
     fun_nuup = zeros(Float64,Nx,Ny)
     phiHO = setfunHO(xrange,Msize0)
+
+    fun_nudown1 = zeros(Float64,Nx,Ny)
+    fun_nuup1 = zeros(Float64,Nx,Ny)
 
     # define a pair correlation for down down down
     for nn = 1:maxmatpcut # parfor
@@ -425,15 +455,15 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nudown[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
-                                                                                                                    phiHO[jjy,vecindcoeff0[jj,2]]*
-                                                                                                                    phiHO[jjx,vecindcoeff0[jj,3]]*
-                                                                                                                    phiHO[jjy,vecindcoeff0[jj,4]]
+                           fun_nudown1[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                                                                                                                     phiHO[jjy,vecindcoeff0[jj,2]]*
+                                                                                                                     phiHO[jjx,vecindcoeff0[jj,3]]*
+                                                                                                                     phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nuup[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
-                                                                                                                                          phiHO[jjy,vecindcoeff0[jj,2]]*
-                                                                                                                                          phiHO[jjx,vecindcoeff0[jj,3]]*
-                                                                                                                                          phiHO[jjy,vecindcoeff0[jj,4]]
+                           fun_nuup1[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                                                                                                                                           phiHO[jjy,vecindcoeff0[jj,2]]*
+                                                                                                                                           phiHO[jjx,vecindcoeff0[jj,3]]*
+                                                                                                                                           phiHO[jjy,vecindcoeff0[jj,4]]
                        end
                    end
                end
@@ -442,37 +472,19 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nudown[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
-                                                                                                                       phiHO[jjy,vecindcoeff0[jj,2]]*
-                                                                                                                       phiHO[jjx,vecindcoeff0[jj,3]]*
-                                                                                                                       phiHO[jjy,vecindcoeff0[jj,4]]
+                           fun_nudown1[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                                                                                                                        phiHO[jjy,vecindcoeff0[jj,2]]*
+                                                                                                                        phiHO[jjx,vecindcoeff0[jj,3]]*
+                                                                                                                        phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nuup[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
-                                                                                                                                             phiHO[jjy,vecindcoeff0[jj,2]]*
-                                                                                                                                             phiHO[jjx,vecindcoeff0[jj,3]]*
-                                                                                                                                             phiHO[jjy,vecindcoeff0[jj,4]]
+                           fun_nuup1[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                                                                                                                                              phiHO[jjy,vecindcoeff0[jj,2]]*
+                                                                                                                                              phiHO[jjx,vecindcoeff0[jj,3]]*
+                                                                                                                                              phiHO[jjy,vecindcoeff0[jj,4]]
                        end
                    end
                end
             end
-
-            # for jj = 1:ind0
-            #     # Mpairdown2up1int[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-            #     # Mpairdown2up1float[mm,nn,jj] = vecindcoeff1[jj]
-            #     Mpairdown2up1int[(nn-1)*maxmatpcut2+mm,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-            #     Mpairdown2up1float[(nn-1)*maxmatpcut2+mm,jj] = vecindcoeff1[jj]
-            # end
-            # # ind2 = Int64.(vecindcoeff[1:ind0,1])
-            # # Hintdu[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
-            #
-            # for jj = 1:ind0
-            #     # Mpairdown3int[maxmatpcut+mm,maxmatpcut+nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-            #     # Mpairdown3float[maxmatpcut+mm,maxmatpcut+nn,jj] = vecindcoeff1[jj]
-            #     Mpairdown3int[(maxmatpcut+nn-1)*(maxmatpcut+maxmatpcut2)+(maxmatpcut+mm),4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]
-            #     Mpairdown3float[(maxmatpcut+nn-1)*(maxmatpcut+maxmatpcut2)+(maxmatpcut+mm),jj] = vecindcoeff1[jj]
-            # end
-            # # ind2 = Int64.(vecindcoeff[1:ind0,1])
-            # # Hintdown[maxmatpcut+mm,maxmatpcut+nn] = sum(vecV[ind2].*vecindcoeff[1:ind0,2])
 
         end
 
@@ -677,6 +689,9 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     fun_nudu .= fun_nudu/Np/(Np-1)
     fun_nuup .= fun_nuup/Np/(Np-1)
 
-    return fun_nudown, fun_nudu, fun_nuup
+    fun_nudown1 .= fun_nudown1/Np/(Np-1)
+    fun_nuup1 .= fun_nuup1/Np/(Np-1)
+
+    return fun_nudown, fun_nudu, fun_nuup, fun_nudown1, fun_nuup1
 
 end

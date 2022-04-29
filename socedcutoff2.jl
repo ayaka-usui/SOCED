@@ -658,9 +658,9 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     @time begin
         mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
         mat1 .= mat0 + Omega*matW
-        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-        arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
-        # arraylambda, psi = eigen(mattot,1:specnum)
+        mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        # arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
+        arraylambda, psi = eigen(mattot,1:specnum)
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
@@ -675,11 +675,14 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
     println("calculating pair correlation ...")
     @time begin
-        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+        fun_nudown1, fun_nudu1, fun_nuup1, fun_nudown01, fun_nuup01 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+        fun_nudown2, fun_nudu2, fun_nuup2, fun_nudown02, fun_nuup02 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,2],xrange,yrange)
+        fun_nudown3, fun_nudu3, fun_nuup3, fun_nudown03, fun_nuup03 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,3],xrange,yrange)
+        fun_nudown4, fun_nudu4, fun_nuup4, fun_nudown04, fun_nuup04 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,4],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
-    return arraylambda, psi, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
+    return arraylambda, psi, xrange, yrange, fun_nudown1, fun_nudu1, fun_nuup1, fun_nudown01, fun_nuup01, fun_nudown2, fun_nudu2, fun_nuup2, fun_nudown02, fun_nuup02, fun_nudown3, fun_nudu3, fun_nuup3, fun_nudown03, fun_nuup03, fun_nudown4, fun_nudu4, fun_nuup4, fun_nudown04, fun_nuup04
 
 end
 
