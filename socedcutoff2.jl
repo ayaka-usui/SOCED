@@ -658,9 +658,9 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     @time begin
         mat0 .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc
         mat1 .= mat0 + Omega*matW
-        mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-        # arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
-        arraylambda, psi = eigen(mattot,1:specnum)
+        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        arraylambda, psi = eigs(mat1,nev=specnum,which=:SR)
+        # arraylambda, psi = eigen(mattot,1:specnum)
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
@@ -673,16 +673,21 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
     # end
 
+    # psi[:,1] = ones(maxmatpcut*2+maxmatpcut2*2)
+    # psi[1,1] = 1.0
+    # psi[2,1] = 1.0
+    # psi[:,1] = psi[:,1]/sqrt(sum(abs.(psi[:,1]).^2))
+
     println("calculating pair correlation ...")
     @time begin
-        fun_nudown1, fun_nudu1, fun_nuup1, fun_nudown01, fun_nuup01 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
-        fun_nudown2, fun_nudu2, fun_nuup2, fun_nudown02, fun_nuup02 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,2],xrange,yrange)
-        fun_nudown3, fun_nudu3, fun_nuup3, fun_nudown03, fun_nuup03 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,3],xrange,yrange)
-        fun_nudown4, fun_nudu4, fun_nuup4, fun_nudown04, fun_nuup04 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,4],xrange,yrange)
+        fun_nu1 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+        # fun_nu2 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,2],xrange,yrange)
+        # fun_nu3 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,3],xrange,yrange)
+        # fun_nu4 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,4],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
-    return arraylambda, psi, xrange, yrange, fun_nudown1, fun_nudu1, fun_nuup1, fun_nudown01, fun_nuup01, fun_nudown2, fun_nudu2, fun_nuup2, fun_nudown02, fun_nuup02, fun_nudown3, fun_nudu3, fun_nuup3, fun_nudown03, fun_nuup03, fun_nudown4, fun_nudu4, fun_nuup4, fun_nudown04, fun_nuup04
+    return arraylambda, psi, xrange, yrange, fun_nu1 #fun_nu2, fun_nu3, fun_nu4
 
 end
 
