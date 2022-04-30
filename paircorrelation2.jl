@@ -297,13 +297,13 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # pair correlation
     Nx = length(xrange)
     Ny = length(yrange)
-    # fun_nudown = zeros(Float64,Nx,Ny)
-    # fun_nudu = zeros(Float64,Nx,Ny)
-    # fun_nuup = zeros(Float64,Nx,Ny)
+    fun_nudown = zeros(Float64,Nx,Ny)
+    fun_nudu = zeros(Float64,Nx,Ny)
+    fun_nuup = zeros(Float64,Nx,Ny)
     phiHO = setfunHO(xrange,Msize0)
     # fun_nudown1 = zeros(Float64,Nx,Ny)
     # fun_nuup1 = zeros(Float64,Nx,Ny)
-    fun_nu = zeros(Float64,Nx,Ny)
+    # fun_nu = zeros(Float64,Nx,Ny)
     dx = abs(xrange[2]-xrange[1])
 
     # define a pair correlation for down down down
@@ -329,12 +329,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += abs(conj(psi[mm])*psi[nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudown[jjx,jjy] += abs(conj(psi[mm])*psi[nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                           phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                           phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                           phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2*2+mm])*psi[maxmatpcut+maxmatpcut2*2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nuup[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2*2+mm])*psi[maxmatpcut+maxmatpcut2*2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                             phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                             phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                             phiHO[jjy,vecindcoeff0[jj,4]]
@@ -348,12 +348,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[mm])*psi[nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudown[jjx,jjy] += 2*real(conj(psi[mm])*psi[nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                              phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                              phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                              phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2*2+mm])*psi[maxmatpcut+maxmatpcut2*2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nuup[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2*2+mm])*psi[maxmatpcut+maxmatpcut2*2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                                phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                                phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                                phiHO[jjy,vecindcoeff0[jj,4]]
@@ -426,12 +426,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudu[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                   phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                   phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                   phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudu[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                           phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                           phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                           phiHO[jjy,vecindcoeff0[jj,4]]
@@ -443,12 +443,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                      phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                      phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                      phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                              phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                              phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                              phiHO[jjy,vecindcoeff0[jj,4]]
@@ -463,12 +463,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudown[jjx,jjy] += abs(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                      phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                      phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                      phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nuup[jjx,jjy] += abs(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                            phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                            phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                            phiHO[jjy,vecindcoeff0[jj,4]]
@@ -480,12 +480,12 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                for jjx = 1:Nx
                    for jjy = 1:Ny
                        for jj = 1:ind0
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nudown[jjx,jjy] += 2*real(conj(psi[maxmatpcut+mm])*psi[maxmatpcut+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                         phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                         phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                         phiHO[jjy,vecindcoeff0[jj,4]]
 
-                           fun_nu[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
+                           fun_nuup[jjx,jjy] += 2*real(conj(psi[maxmatpcut+maxmatpcut2+mm])*psi[maxmatpcut+maxmatpcut2+nn])*vecindcoeff1[jj]*phiHO[jjx,vecindcoeff0[jj,1]]*
                                                                                                                                               phiHO[jjy,vecindcoeff0[jj,2]]*
                                                                                                                                               phiHO[jjx,vecindcoeff0[jj,3]]*
                                                                                                                                               phiHO[jjy,vecindcoeff0[jj,4]]
@@ -693,15 +693,15 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     #     end
     # end
 
-    # fun_nudown .= fun_nudown/Np/(Np-1)
-    # fun_nudu .= fun_nudu/Np/(Np-1)
-    # fun_nuup .= fun_nuup/Np/(Np-1)
+    fun_nudown .= fun_nudown/Np/(Np-1)
+    fun_nudu .= fun_nudu/Np/(Np-1)
+    fun_nuup .= fun_nuup/Np/(Np-1)
 
     # fun_nudown1 .= fun_nudown1/Np/(Np-1)
     # fun_nuup1 .= fun_nuup1/Np/(Np-1)
 
-    fun_nu .= fun_nu/Np/(Np-1)
+    # fun_nu .= fun_nu/Np/(Np-1)
 
-    return fun_nu
+    return fun_nudown, fun_nudu, fun_nuup
 
 end

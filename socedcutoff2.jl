@@ -684,14 +684,14 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
 
     println("calculating pair correlation ...")
     @time begin
-        fun_nu1 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
         # fun_nu2 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,2],xrange,yrange)
         # fun_nu3 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,3],xrange,yrange)
         # fun_nu4 = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,4],xrange,yrange)
     end
 
     # return arraylambda, arrayspect, lambdacondendown, phicondendown, lambdacondenup, phicondenup
-    return arraylambda, psi, xrange, yrange, fun_nu1 #fun_nu2, fun_nu3, fun_nu4
+    return arraylambda, psi, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
 
 end
 
@@ -1017,6 +1017,7 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     indgdu = Int64(gdu)
     indksoc = Int64(ksoc)
     indOmega = Int64(Omega)
+    indNx = Nx
 
     println("diagonalising the Hamiltonian ...")
     @time begin
@@ -1041,6 +1042,6 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     end
 
     # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
-    save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
+    save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.Nx$indNx.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
 
 end
