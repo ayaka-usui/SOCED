@@ -304,6 +304,7 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     # fun_nudown1 = zeros(Float64,Nx,Ny)
     # fun_nuup1 = zeros(Float64,Nx,Ny)
     fun_nu = zeros(Float64,Nx,Ny)
+    dx = abs(xrange[2]-xrange[1])
 
     # define a pair correlation for down down down
     for nn = 1:maxmatpcut # parfor
@@ -317,6 +318,11 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
             in2bind!(indvec[mm],Msize0,Np,matp,vecmbindmm)
 
             vecindcoeff0, vecindcoeff1, ind0 = coefficientpair(vecmbindnn,vecmbindmm,vecmbindnn3,vecmbindmm3,vecindcoeff0,vecindcoeff1,Np)
+
+            # println(vecmbindnn)
+            # println(vecmbindmm)
+            # println(vecindcoeff0[1:ind0,1:4])
+            # println(vecindcoeff1[1:ind0])
 
             if nn == mm
 
@@ -356,6 +362,8 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
                end
 
             end
+
+            # println(sum(fun_nu)*dx^2/Np/(Np-1))
 
             # for jj = 1:ind0
             #     # Mpairdown3int[mm,nn,4*(jj-1)+1:4*(jj-1)+4] = vecindcoeff0[jj,1:4]

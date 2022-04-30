@@ -13,6 +13,8 @@ include("Hsocfunccutoffk1W1.jl")
 include("Hintfunccutoff2.jl")
 include("coefficientonebodysummary.jl")
 include("paircorrelation2.jl")
+# include("paircorrelation2_test.jl")
+
 
 function createHtotal(Msize0::Int64, Np::Int64)
 
@@ -673,12 +675,12 @@ function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup
     #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
     # end
 
-    psi .= 0.0
+    # psi .= 0.0
     # psi[:,1] = ones(maxmatpcut*2+maxmatpcut2*2)
-    psi[1,1] = 1.0
-    psi[2,1] = 1.0
-    psi[3,1] = 1.0
-    psi[:,1] = psi[:,1]/sqrt(sum(abs.(psi[:,1]).^2))
+    # psi[1,1] = 1.0
+    # psi[2,1] = 1.0
+    # psi[3,1] = 1.0
+    # psi[:,1] = psi[:,1]/sqrt(sum(abs.(psi[:,1]).^2))
 
     println("calculating pair correlation ...")
     @time begin
