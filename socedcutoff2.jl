@@ -163,11 +163,19 @@ function diagonaliseHtotspinpop_eigs(Msize0::Int64, Np::Int64, gdown::Float64, g
     results = [lambda popdown3 popdown2up1 popdown1up2 popup3]
     # return results
 
-    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
-    onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-    lambdaconden, phiconden = eigs(rhoij,nev=5,which=:LR)
+    # rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+    # lambdaconden, phiconden = eigs(rhoij,nev=5,which=:LR)
 
-    return lambdaconden, phiconden
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+    onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+    lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+    lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+
+    return lambdacondendown, phicondendown, lambdacondenup, phicondenup
+    # return lambdaconden, phiconden
     # return rhoij
 
 end
