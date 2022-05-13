@@ -1096,7 +1096,7 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     indgup = Int64(gup)
     indgdu = Int64(gdu)
     indksoc = Int64(ksoc)
-    indOmega = Int64(Omega)
+    # indOmega = Int64(Omega)
     indNx = Nx
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
@@ -1106,6 +1106,8 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     fun_nuup_Omega = zeros(Float64,Nx,Ny,NOmega)
 
     for jjOmega = 1:NOmega
+
+        @time begin
 
         Omega = arrayOmega[jjOmega]
 
@@ -1118,6 +1120,8 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
         fun_nudown_Omega[:,:,jjOmega] .= fun_nudown
         fun_nudu_Omega[:,:,jjOmega] .= fun_nudu
         fun_nuup_Omega[:,:,jjOmega] .= fun_nuup
+
+        end
 
     end
 
