@@ -1054,7 +1054,7 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
 
 end
 
-function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu0::Float64, gdu1::Float64, Ngdu::Int64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64, Lx::Float64, Nx::Int64)
+function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64, Lx::Float64, Nx::Int64)
 
     # construct Hamiltonian
     matho=load("data_Htot90_Np3.jld")["matho"]
@@ -1080,7 +1080,7 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     maxmatpcut2 = length(indvec2)
 
     arraylambda = zeros(ComplexF64,specnum)
-    arrayspect = zeros(ComplexF64,specnum-1)
+    # arrayspect = zeros(ComplexF64,specnum-1)
 
     rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
     rhoijdown = zeros(ComplexF64,Msize0,Msize0)
@@ -1092,28 +1092,6 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     xrange = LinRange(-Lx,Lx,Nx)
     yrange = LinRange(-Lx,Lx,Nx)
 
-    # Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
-    # Mpairdown3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
-    # Mpairdown3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    # Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    # Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    # Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
-    # Mpairup3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
-    # Mpairup3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
-    # Mpairdown3int = spzeros(Int64,(maxmatpcut+maxmatpcut2)^2,12)
-    # Mpairdown2up1int = spzeros(Int64,maxmatpcut2^2,12)
-
-    # Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
-    # Mpairdown3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
-    # Mpairdown3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    # Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    # Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    # Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
-    # Mpairup3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
-    # Mpairup3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
-    # Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
-    # Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
-
     indgdown = Int64(gdown)
     indgup = Int64(gup)
     indgdu = Int64(gdu)
@@ -1121,29 +1099,29 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     indOmega = Int64(Omega)
     indNx = Nx
 
-    println("diagonalising the Hamiltonian ...")
-    @time begin
-        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
-        mattot = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    mattot = copy(matho)
+    fun_nudown_Omega = zeros(Float64,Nx,Ny,NOmega)
+    fun_nudu_Omega = zeros(Float64,Nx,Ny,NOmega)
+    fun_nuup_Omega = zeros(Float64,Nx,Ny,NOmega)
+
+    for jjOmega = 1:NOmega
+
+        Omega = arrayOmega[jjOmega]
+
+        mattot .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
         arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
-        arrayspect .= arraylambda[2:end] .- arraylambda[1]
-    end
+        # arrayspect .= arraylambda[2:end] .- arraylambda[1]
 
-    # println("calculating one body density matrix ...")
-    # @time begin
-    #     onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
-    #     lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
-    #     lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
-    #     # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
-    #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
-    # end
-
-    println("calculating pair correlation ...")
-    @time begin
         fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+
+        fun_nudown_Omega[:,:,jjOmega] .= fun_nudown
+        fun_nudu_Omega[:,:,jjOmega] .= fun_nudu
+        fun_nuup_Omega[:,:,jjOmega] .= fun_nuup
+
     end
 
     # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
-    save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.Nx$indNx.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
+    save("data_paircorre_Omega_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Nx$indNx.jld", "xrange", xrange, "yrange", yrange, "arrayOmega", arrayOmega, "fun_nudown_Omega", fun_nudown_Omega, "fun_nudu_Omega", fun_nudu_Omega, "fun_nuup_Omega", fun_nuup_Omega)
 
 end
