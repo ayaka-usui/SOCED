@@ -1101,9 +1101,9 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
     mattot = copy(matho)
-    fun_nudown_Omega = zeros(Float64,Nx,Ny,NOmega)
-    fun_nudu_Omega = zeros(Float64,Nx,Ny,NOmega)
-    fun_nuup_Omega = zeros(Float64,Nx,Ny,NOmega)
+    fun_nudown_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nudu_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nuup_Omega = zeros(Float64,Nx,Nx,NOmega)
 
     for jjOmega = 1:NOmega
 
