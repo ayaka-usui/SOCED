@@ -1129,3 +1129,30 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     save("data_paircorre_Omega_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Nx$indNx.jld", "xrange", xrange, "yrange", yrange, "arrayOmega", arrayOmega, "fun_nudown_Omega", fun_nudown_Omega, "fun_nudu_Omega", fun_nudu_Omega, "fun_nuup_Omega", fun_nuup_Omega)
 
 end
+
+function TG_paircorrelation_Np3(Nx::Int64,Lx::Float64,xi0::Float64)
+
+    # funTG = zeros(Float64,Nx,Nx)
+
+    # xrange = LinRange(-Lx,Lx,Nx)
+    # yrange = LinRange(-Lx,Lx,Nx)
+
+    # xi0 = 2*pi/10;
+    xrange = LinRange(-Lx,Lx,Nx)
+    dx = xrange[2]-xrange[1]
+
+    psi0 = 1.0/sqrt(sqrt(pi))*exp.(-(xrange./xi0).^2/2)
+    psi1 = 1.0/sqrt(sqrt(pi))*exp.(-(xrange./xi0).^2/2)/sqrt(2).*(xrange./xi0)*2
+    psi2 = 1.0/sqrt(sqrt(pi))*exp.(-(xrange./xi0).^2/2)/sqrt(8).*(4*(xrange./xi0).^2 .- 2)
+
+    funTG = psi0.^2*(psi1.^2)' + psi1.^2*(psi2.^2)' + psi2.^2*(psi0.^2)' +
+            psi1.^2*(psi0.^2)' + psi2.^2*(psi1.^2)' + psi0.^2*(psi2.^2)' -
+            2*(psi0.*psi1)*(psi0.*psi1)' -
+            2*(psi1.*psi2)*(psi1.*psi2)' -
+            2*(psi0.*psi2)*(psi0.*psi2)'
+
+    funTG .= funTG/(sum(funTG)*dx^2)
+
+    return funTG
+
+end
