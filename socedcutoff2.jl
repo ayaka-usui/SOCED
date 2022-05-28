@@ -1151,7 +1151,8 @@ function TG_paircorrelation_Np3(Nx::Int64,Lx::Float64,xi0::Float64)
             2*(psi1.*psi2)*(psi1.*psi2)' -
             2*(psi0.*psi2)*(psi0.*psi2)'
 
-    funTG .= funTG/(sum(funTG)*dx^2)
+    # funTG .= funTG/(sum(funTG)*dx^2)
+    funTG .= funTG/3/2
 
     return funTG
 
