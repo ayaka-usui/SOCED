@@ -1105,6 +1105,82 @@ function diagonaliseH_paircorrelation_arrayOmegag12(Msize0::Int64, Np::Int64, gd
     fun_nudu_Omega = zeros(Float64,Nx,Nx,NOmega)
     fun_nuup_Omega = zeros(Float64,Nx,Nx,NOmega)
 
+    for jjOmega = 1:NOmega
+
+        @time begin
+
+        Omega = arrayOmega[jjOmega]
+
+        mattot .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+        arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
+        # arrayspect .= arraylambda[2:end] .- arraylambda[1]
+
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+
+        fun_nudown_Omega[:,:,jjOmega] .= fun_nudown
+        fun_nudu_Omega[:,:,jjOmega] .= fun_nudu
+        fun_nuup_Omega[:,:,jjOmega] .= fun_nuup
+
+        end
+
+    end
+
+    # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
+    save("data_paircorre_Omega_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Nx$indNx.jld", "xrange", xrange, "yrange", yrange, "arrayOmega", arrayOmega, "fun_nudown_Omega", fun_nudown_Omega, "fun_nudu_Omega", fun_nudu_Omega, "fun_nuup_Omega", fun_nuup_Omega)
+
+end
+
+function diagonaliseH_paircorrelation_arrayOmegag12_parfor(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega0::Float64, Omega1::Float64, NOmega::Int64, specnum::Int64, Lx::Float64, Nx::Int64)
+
+    # construct Hamiltonian
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arraylambda = zeros(ComplexF64,specnum)
+    # arrayspect = zeros(ComplexF64,specnum-1)
+
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+    lambdaconden = zeros(ComplexF64,specnum)
+    phiconden = zeros(ComplexF64,Msize0*2,specnum)
+
+    psi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
+
+    indgdown = Int64(gdown)
+    indgup = Int64(gup)
+    indgdu = Int64(gdu)
+    indksoc = Int64(ksoc)
+    # indOmega = Int64(Omega)
+    indNx = Nx
+
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    mattot = copy(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc)
+    fun_nudown_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nudu_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nuup_Omega = zeros(Float64,Nx,Nx,NOmega)
+
     Threads.@threads for jjOmega = 1:NOmega
 
         # @time begin
