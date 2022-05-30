@@ -1176,7 +1176,7 @@ function diagonaliseH_paircorrelation_arrayOmegag12_parfor(Msize0::Int64, Np::In
     indNx = Nx
 
     arrayOmega = LinRange(Omega0,Omega1,NOmega)
-    mattot = copy(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc)
+    # mattot = spzeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,maxmatpcut*2+maxmatpcut2*2) #copy(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc)
     fun_nudown_Omega = zeros(Float64,Nx,Nx,NOmega)
     fun_nudu_Omega = zeros(Float64,Nx,Nx,NOmega)
     fun_nuup_Omega = zeros(Float64,Nx,Nx,NOmega)
@@ -1185,9 +1185,11 @@ function diagonaliseH_paircorrelation_arrayOmegag12_parfor(Msize0::Int64, Np::In
 
         # @time begin
 
-        Omega = arrayOmega[jjOmega]
+        # Omega = arrayOmega[jjOmega]
 
-        mattot .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+        mattot = spzeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,maxmatpcut*2+maxmatpcut2*2)
+
+        mattot .= matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + arrayOmega[jjOmega]*matW
         arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
         # arrayspect .= arraylambda[2:end] .- arraylambda[1]
 
@@ -1202,7 +1204,7 @@ function diagonaliseH_paircorrelation_arrayOmegag12_parfor(Msize0::Int64, Np::In
     end
 
     # return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
-    save("data_paircorre_Omega_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Nx$indNx.jld", "xrange", xrange, "yrange", yrange, "arrayOmega", arrayOmega, "fun_nudown_Omega", fun_nudown_Omega, "fun_nudu_Omega", fun_nudu_Omega, "fun_nuup_Omega", fun_nuup_Omega)
+    save("data_paircorre_Omega_parfor_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Nx$indNx.jld", "xrange", xrange, "yrange", yrange, "arrayOmega", arrayOmega, "fun_nudown_Omega", fun_nudown_Omega, "fun_nudu_Omega", fun_nudu_Omega, "fun_nuup_Omega", fun_nuup_Omega)
 
 end
 
