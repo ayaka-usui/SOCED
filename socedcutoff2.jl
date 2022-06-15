@@ -1020,11 +1020,11 @@ function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, 
     # Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
     # Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
 
-    indgdown = Int64(gdown)
-    indgup = Int64(gup)
-    indgdu = Int64(gdu)
-    indksoc = Int64(ksoc)
-    indOmega = Int64(Omega)
+    indgdown = gdown #Int64(gdown)
+    indgup = gup #Int64(gup)
+    indgdu = gdu #Int64(gdu)
+    indksoc = ksoc #Int64(ksoc)
+    indOmega = Omega #Int64(Omega)
     indNx = Nx
 
     println("diagonalising the Hamiltonian ...")
