@@ -1235,3 +1235,25 @@ function TG_paircorrelation_Np3(Nx::Int64,Lx::Float64,xi0::Float64)
     return funTG
 
 end
+
+function maxk(a, k)
+    b = partialsortperm(a, 1:k, rev=true)
+    return collect(zip(b, a[b]))
+end
+
+function charapara_widthdepth(fun_nu,Nx,xrange)
+
+    peak2 = maxk(fun_nu[:,Int64((Nx-1)/2)+1],2)
+    width = 0.0
+    depth = 0.0
+    charapara = 0.0
+
+    if peak2[1][2] - peak2[2][2] < 10^(-5)
+       width = abs(xrange[peak2[1][1]] - xrange[peak2[2][1]])
+       depth = peak2[1][2]-minimum(fun_nu[min(peak2[1][1],peak2[2][1]):max(peak2[1][1],peak2[2][1]),Int64((Nx-1)/2)+1])
+       charapara = width*depth
+    end
+
+    return charapara
+
+end
