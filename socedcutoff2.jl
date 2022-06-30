@@ -950,6 +950,110 @@ function diagonalisesavedHtotdiffW_gdu_onebody(Msize0::Int64, Np::Int64, gdu0::F
 
 end
 
+function diagonaliseH_paircorrelation_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
+
+    # construct Hamiltonian
+    matho=load("data_Htot90_Np3.jld")["matho"]
+    matdowndown=load("data_Htot90_Np3.jld")["matdowndown"]
+    matdownup=load("data_Htot90_Np3.jld")["matdownup"]
+    matupup=load("data_Htot90_Np3.jld")["matupup"]
+    matsoc=load("data_Htot90_Np3.jld")["matsoc"]
+    matW=load("data_Htot90_Np3.jld")["matW"]
+
+    # for down3
+    Enecutoff = Msize0 - 1 + Np/2
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down2up1
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+
+    arraylambda = zeros(ComplexF64,specnum)
+    arrayspect = zeros(ComplexF64,specnum-1)
+
+    # arraypopdown3 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown2up1 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
+    # arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
+
+    # arraypopdown3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+    # arraypopdown2up1GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopdown1up2GSspatial = zeros(Float64,maxmatpcut2,NOmega,Ng)
+    # arraypopup3GSspatial = zeros(Float64,maxmatpcut,NOmega,Ng)
+
+    rhoij = zeros(ComplexF64,Msize0*2,Msize0*2)
+    rhoijdown = zeros(ComplexF64,Msize0,Msize0)
+    rhoijup = zeros(ComplexF64,Msize0,Msize0)
+    lambdaconden = zeros(ComplexF64,specnum)
+    phiconden = zeros(ComplexF64,Msize0*2,specnum)
+
+    psi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
+
+    # Mpairdown3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    # Mpairdown3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
+    # Mpairdown3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairdown2up1int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairdown1up2int = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairup3int = zeros(Int64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,12)
+    # Mpairup3int1 = zeros(Int64,maxmatpcut,maxmatpcut,12)
+    # Mpairup3int2 = zeros(Int64,maxmatpcut2,maxmatpcut2,12)
+    # Mpairdown3int = spzeros(Int64,(maxmatpcut+maxmatpcut2)^2,12)
+    # Mpairdown2up1int = spzeros(Int64,maxmatpcut2^2,12)
+
+    # Mpairdown3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    # Mpairdown3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
+    # Mpairdown3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairdown2up1float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairdown1up2float = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairup3float = zeros(Float64,maxmatpcut+maxmatpcut2,maxmatpcut+maxmatpcut2,3)
+    # Mpairup3float1 = zeros(Float64,maxmatpcut,maxmatpcut,3)
+    # Mpairup3float2 = zeros(Float64,maxmatpcut2,maxmatpcut2,3)
+    # Mpairdown3float = spzeros(Float64,(maxmatpcut+maxmatpcut2)^2,3)
+    # Mpairdown2up1float = spzeros(Float64,maxmatpcut2^2,3)
+
+    indgdown = gdown #Int64(gdown)
+    indgup = gup #Int64(gup)
+    indgdu = gdu #Int64(gdu)
+    indksoc = ksoc #Int64(ksoc)
+    indOmega = Omega #Int64(Omega)
+    indNx = Nx
+
+    println("diagonalising the Hamiltonian ...")
+    @time begin
+        # mattot = Hermitian(Array(matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW))
+        mattot = matho + gdown*matdowndown + gup*matupup + gdu*matdownup + 1im*ksoc*matsoc + Omega*matW
+        arraylambda, psi = eigs(mattot,nev=specnum,which=:SR)
+        arrayspect .= arraylambda[2:end] .- arraylambda[1]
+    end
+
+    # println("calculating one body density matrix ...")
+    # @time begin
+    #     onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij,rhoijdown,rhoijup)
+    #     lambdacondendown, phicondendown = eigs(rhoijdown,nev=5,which=:LR)
+    #     lambdacondenup, phicondenup = eigs(rhoijup,nev=5,which=:LR)
+    #     # onebodydensitymatrix!(Msize0,Np,phi[:,1],rhoij)
+    #     # lambdaconden, phiconden = eigs(rhoij,nev=specnum,which=:LR)
+    # end
+
+    println("calculating pair correlation ...")
+    @time begin
+        fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
+    end
+
+    return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup
+    # save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.Nx$indNx.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
+
+end
+
 function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
 
     # construct Hamiltonian
@@ -1230,9 +1334,29 @@ function TG_paircorrelation_Np3(Nx::Int64,Lx::Float64,xi0::Float64)
             2*(psi0.*psi2)*(psi0.*psi2)'
 
     # funTG .= funTG/(sum(funTG)*dx^2)
-    funTG .= funTG/3/2
+    funTG .= funTG/3/2/xi0^2
 
     return funTG
+
+end
+
+function sweepingxi0_paircorrelation(Nx::Int64,Lx::Float64,fun_nu::Matrix{Float64},xi0_0::Float64,xi0_1::Float64,Nxi0::Int64)
+
+    xrange = LinRange(-Lx,Lx,Nx)
+    dx = xrange[2]-xrange[1]
+
+    arrayxi0 = LinRange(xi0_0,xi0_1,Nxi0)
+    diff = zeros(Float64,Nxi0)
+
+    fun_nu .= fun_nu/(sum(fun_nu)*dx^2)
+
+    for jj = 1:Nxi0
+        xi0 = arrayxi0[jj]
+        funTG = TG_paircorrelation_Np3(Nx,Lx,xi0)
+        diff[jj] = sum(abs.(fun_nu - funTG))*dx^2
+    end
+
+    return arrayxi0, diff
 
 end
 
