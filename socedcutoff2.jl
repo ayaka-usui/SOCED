@@ -1353,6 +1353,7 @@ function sweepingxi0_paircorrelation(Nx::Int64,Lx::Float64,fun_nu::Matrix{Float6
     for jj = 1:Nxi0
         xi0 = arrayxi0[jj]
         funTG = TG_paircorrelation_Np3(Nx,Lx,xi0)
+        funTG .= funTG/(sum(funTG)*dx^2)
         diff[jj] = sum(abs.(fun_nu - funTG))*dx^2
     end
 
@@ -1360,9 +1361,38 @@ function sweepingxi0_paircorrelation(Nx::Int64,Lx::Float64,fun_nu::Matrix{Float6
 
 end
 
-function maxk(a, k)
+function maxk(a::Vector{Float64}, k::Int64)
     b = partialsortperm(a, 1:k, rev=true)
     return collect(zip(b, a[b]))
+end
+
+function max2k(a::Matrix, k::Int64)
+
+    if length(size(a)) != 2
+       error("input should be 2d matrix")
+    end
+
+    length_v = length(a)
+    v = zeros(Float64,length_v)
+    size_v = size(a)
+
+    for jj = 1:length_v
+        jj1 = mod1(jj,size_v[1])
+        jj2 = (jj-1)÷size_v[1]+1
+        v[jj] = a[jj1,jj2]
+    end
+
+    b = partialsortperm(v, 1:k, rev=true)
+    ind_b = zeros(Int64,k,2)
+
+    for jj = 1:k
+        jj1 = mod1(b[jj],size_v[1])
+        jj2 = (b[jj]-1)÷size_v[1]+1
+        ind_b[jj,:] = [jj1,jj2]
+    end
+
+    return v[b], ind_b
+
 end
 
 function charapara_widthdepth(fun_nu,Nx,xrange)
@@ -1379,5 +1409,20 @@ function charapara_widthdepth(fun_nu,Nx,xrange)
     end
 
     return charapara
+
+end
+
+function charapara_width(fun_nu,Nx,xrange)
+
+    peak2 = maxk(fun_nu[:,Int64((Nx-1)/2)+1],2)
+    width = 0.0
+
+    if peak2[1][2] - peak2[2][2] < 10^(-5)
+       width = abs(xrange[peak2[1][1]] - xrange[peak2[2][1]])
+    else
+       error("there is only one peak")
+    end
+
+    return width
 
 end
