@@ -1420,7 +1420,8 @@ function charapara_width(fun_nu,Nx,xrange)
     if peak2[1][2] - peak2[2][2] < 10^(-5)
        width = abs(xrange[peak2[1][1]] - xrange[peak2[2][1]])
     else
-       error("there is only one peak")
+       println("there is only one peak")
+       width = 0.0
     end
 
     return width

@@ -25,3 +25,4 @@ Manifest.toml
 .DS_Store
 *.jld
 H_3_particles.txt
+*.png
