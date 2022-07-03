@@ -17,7 +17,9 @@ function setfunHO(xrange::LinRange{Float64},Msize0::Int64)
             outcome[jjx,nn] = basis(Hermite,nn-1)(xrange[jjx])*exp(-xrange[jjx]^2/2)
         end
 
-        outcome[:,nn] = outcome[:,nn]/sqrt(sum(abs.(outcome[:,nn]).^2)*dx)
+        outcome[:,nn] = outcome[:,nn]/sqrt(exp((nn-1)*log(2)+logfactorial(nn-1))*sqrt(pi))
+        # outcome[:,nn] = outcome[:,nn]/sqrt(2^(nn-1)*factorial(nn-1)*sqrt(pi))
+        # outcome[:,nn] = outcome[:,nn]/sqrt(sum(abs.(outcome[:,nn]).^2)*dx)
 
     end
 
@@ -475,10 +477,6 @@ function paircorrelation_fun(indvec::Vector{Int64}, indvec2::Vector{Int64}, Msiz
     fun_nudown .= fun_nudown/Np/(Np-1)
     fun_nudu .= fun_nudu/Np/(Np-1)
     fun_nuup .= fun_nuup/Np/(Np-1)
-
-    # fun_nudown .= fun_nudown/(sum(fun_nudown)*dx^2)
-    # fun_nudu .= fun_nudu/(sum(fun_nudu)*dx^2)
-    # fun_nuup .= fun_nuup/(sum(fun_nuup)*dx^2)
 
     return fun_nudown, fun_nudu, fun_nuup
 
