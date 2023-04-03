@@ -573,10 +573,60 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
 
     end
 
-    indksoc = Int64(ksoc)
-    save("data_spectrum_ene_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
+    # indksoc = Int64(ksoc)
+    # save("data_spectrum_ene_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
     return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3, arrayenergyGStot, arrayenergyGSint
+
+end
+
+function plottest0(arraypopdown2up1)
+
+    test = arraypopdown2up1[1,:,:].-3/8
+    size0 = size(arraypopdown2up1[1,:,:])
+
+    for jj = 1:size0[1]
+        for ii = 1:size0[2]
+            if test[jj,ii] < 0.0
+                test[jj,ii] = NaN
+            end
+        end
+    end
+
+    return test
+
+end
+
+function plottest1(arraypopdown3)
+
+    test = arraypopdown3[1,:,:].-1/8
+    size0 = size(arraypopdown3[1,:,:])
+
+    for jj = 1:size0[1]
+        for ii = 1:size0[2]
+            if test[jj,ii] < 0.0
+                test[jj,ii] = NaN
+            end
+        end
+    end
+
+    return test
+
+end
+
+function plotenergyerror()
+
+    arrayk = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 5.5, 6.0]
+
+    energyg0 = [1.5000000000000175, 1.5, 1.4999999999998943, 1.5000000000001439, 1.500031718214867, 1.5999068416323183, 2.0359027534663454, 3.024184652434016]
+
+    energyg1 = [2.4197868676065117, 2.420144673581986, 2.421841420906276, 2.4254587195358415, 2.433722389339515, 2.518617064258919, 2.906251219386661, 3.861473180998914]
+
+    energyg10 = [4.223469871621669, 4.226212679791851, 4.239303553268347, 4.267740113334156, 4.336313301135704, 4.751150726067593, 5.422254241434274, 6.622550679838369]
+
+    # plot(arrayk,energyg0)
+
+    return arrayk, energyg0, energyg1, energyg10
 
 end
 
