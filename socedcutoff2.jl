@@ -630,6 +630,25 @@ function plotenergyerror()
 
 end
 
+function plotpairTG(Lx,Nx)
+
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
+    fun = zeros(Float64,Nx,Nx)
+    
+    for jjx = 1:Nx
+        xx = xrange[jjx]
+        for jjy = 1:Nx
+            yy = yrange[jjy]
+            fun[jjx,jjy] = exp(-2*(xx^2+yy^2))*(xx-yy)^2*(3+4xx^2+4*yy^2+16*xx^2*yy^2+16*xx*yy)
+        end
+    end
+    fun[:,:] .= fun[:,:]*sqrt(pi/2)/16/(3*sqrt(pi)^3/32/sqrt(2))
+
+    return xrange, yrange, fun
+
+end
+
 function diagonaliseH_onebody_test(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
 
     println("constructoing the Hamiltonian ...")
