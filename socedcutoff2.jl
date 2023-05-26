@@ -14,6 +14,7 @@ include("Hintfunccutoff2.jl")
 include("coefficientonebodysummary.jl")
 include("paircorrelation2.jl")
 # include("paircorrelation2_test.jl")
+include("changebasis.jl")
 
 
 function createHtotal(Msize0::Int64, Np::Int64)
@@ -30,6 +31,10 @@ function createHtotal(Msize0::Int64, Np::Int64)
     pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
     indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
     maxmatpcut = length(indvec)
+
+    #
+    mat_from2ndto1st = changefrom2ndto1st(indvec,Msize0,Np,matp)
+    return mat_from2ndto1st
 
     # for down down up
     # Enecutoff2 = Msize0 - 1 + (Np-1)/2
