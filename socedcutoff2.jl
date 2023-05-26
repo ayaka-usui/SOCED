@@ -32,10 +32,6 @@ function createHtotal(Msize0::Int64, Np::Int64)
     indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
     maxmatpcut = length(indvec)
 
-    #
-    mat_from2ndto1st = changefrom2ndto1st(indvec,Msize0,Np,matp)
-    return mat_from2ndto1st
-
     # for down down up
     # Enecutoff2 = Msize0 - 1 + (Np-1)/2
     # matp2 = zeros(Int64,Msize0+1,Np-1)
@@ -48,6 +44,10 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
     # maxmatpcut3 = length(indvec3)
+
+    #
+    basis_1st, basis_1st_0 = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
+    return basis_1st, basis_1st_0
 
     # for up up down
     # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
