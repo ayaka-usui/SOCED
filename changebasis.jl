@@ -104,6 +104,8 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
     # ind0 = ind1 + 1
     vec_space_jj = zeros(Int64,3)
 
+    mat_from2ndto1st = zeros(Float64,maxmatpcut2_new,maxmatpcut2) #spzeros(Float64,maxmatpcut2_new,maxmatpcut2)
+
     for nn = 1:maxmatpcut2
 
         list_from_index_downup!(indvec2[nn],Msize0,Np,matp20,matp21,maxmatp21,vecmbindnn,vecmbindnn2)
@@ -127,27 +129,23 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
         end
         ind0 += indvec2_new[nn]
 
+        mat_from2ndto1st[ind0-indvec2_new[nn]+1:ind0,nn] .= 1/sqrt(indvec2_new[nn])
+
     end
 
-    return basis_1st
-
-    # # maxmatpcut2_new = sum(indvec2_new)
-    # mat_from2ndto1st = zeros(Float64,maxmatpcut2_new,maxmatpcut2) #spzeros(Float64,maxmatpcut2_new,maxmatpcut2)
-    # ind0 = 1
-
-    # for nn = 1:maxmatpcut2
-
-    #     ind1 = ind0 + indvec2_new[nn] - 1
-    #     mat_from2ndto1st[ind0:ind1,nn] .= 1/sqrt(indvec2_new[nn]) 
-    #     ind0 = ind1 + 1
-
-    # end
-
-    # return mat_from2ndto1st
+    return basis_1st, mat_from2ndto1st
     
 end
 
+function changefrom1sttospin_downup()
 
+    for nn = 1:
+
+        basis_1st[nn,1:3] == 
+
+    end
+
+end
 
 
 
