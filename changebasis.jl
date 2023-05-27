@@ -10,7 +10,6 @@ function changefrom2ndto1st_downdown_upup(indvec::Vector{Int64}, Msize0::Int64, 
 
     maxmatpcut = length(indvec)
     vecmbindnn = zeros(Int64,Np)
-    # perms(a) = unique(collect(permutations(a))) # list of all permutations
     indvec_new = zeros(Int64,maxmatpcut)
     
     for nn = 1:maxmatpcut
@@ -127,9 +126,8 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
             basis_1st[ind0+jj,Np+indup] = 1
 
         end
+        mat_from2ndto1st[ind0+1:ind0+indvec2_new[nn],nn] .= 1/sqrt(indvec2_new[nn])
         ind0 += indvec2_new[nn]
-
-        mat_from2ndto1st[ind0-indvec2_new[nn]+1:ind0,nn] .= 1/sqrt(indvec2_new[nn])
 
     end
 
@@ -137,12 +135,49 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
     
 end
 
-function changefrom1sttospin_downup()
+function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
-    for nn = 1:
+    # basis_spin = copy(basis_1st)
+    maxmatpcut2_new = size(basis_1st)[2]
+    mat_from1sttospin = zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
+    index_spin = zeros(Int64,Int64(maxmatpcut2_new/3),3)
+    ind = 0
 
-        basis_1st[nn,1:3] == 
+    for nn = 1:maxmatpcut2_new
+        
+        check = findfirst(x -> x==nn, index_spin[1:ind,2:3])
+        if !isa(check,Nothing) # if check is not Nothing
+           continue
+        end
+        ind += 1
+        count = 2
 
+        if basis_1st[nn,6] == 1 # down down up  
+           index_spin[ind,1] = nn
+        elseif basis_1st[nn,5] == 1 # down up down
+           index_spin[ind,2] = nn
+        else # basis_1st[nn,4] == 1 # up down down
+           index_spin[ind,3] = nn
+        end
+
+        for jj = 1:maxmatpcut2_new
+            if jj == nn
+               continue
+            end
+            check = findfirst(x -> x==jj, index_spin[1:ind-1,1:3])
+            if !isa(check,Nothing)
+               continue
+            end
+            if basis_1st[nn,1] == basis_1st[jj,1] && basis_1st[nn,2] == basis_1st[jj,2] && basis_1st[nn,3] == basis_1st[jj,3]
+               index_spin[ind,count] = jj
+               count += 1
+            end
+            if count > 3
+               index_spin[ind,1] = nn
+               break
+            end
+        end
+        
     end
 
 end
