@@ -47,7 +47,8 @@ function createHtotal(Msize0::Int64, Np::Int64)
 
     #
     basis_1st, mat_from2ndto1st = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
-    return basis_1st, mat_from2ndto1st
+    mat_from1sttospin = changefrom1sttospin_downup(basis_1st)
+    return basis_1st, mat_from2ndto1st, mat_from1sttospin
 
     # for up up down
     # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1

@@ -135,6 +135,30 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
     
 end
 
+function distinguish_downdownup!(nn::Int64,basis_1st::Matrix{Int64},index_spin::Matrix{Int64},ind::Int64)
+
+    if basis_1st[nn,6] == 1 # down down up  
+       index_spin[ind,1] = nn
+    elseif basis_1st[nn,5] == 1 # down up down
+       index_spin[ind,2] = nn
+    else # basis_1st[nn,4] == 1 # up down down
+       index_spin[ind,3] = nn
+    end
+    
+end
+
+function check_nn_included(nn::Int64,index_spin_checked::Matrix{Int64})
+
+    if length(index_spin_checked) == 0
+       check = findfirst(x->x==1,0)
+    else
+       check = findfirst(x->x==nn, index_spin_checked)
+    end
+    
+    return check
+
+end
+
 function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
     # basis_spin = copy(basis_1st)
@@ -145,40 +169,48 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
     for nn = 1:maxmatpcut2_new
         
-        check = findfirst(x -> x==nn, index_spin[1:ind,2:3])
+        check = check_nn_included(nn,index_spin[1:ind,2:3])
+        # check = findfirst(x -> x==nn, index_spin[1:ind,2:3])
         if !isa(check,Nothing) # if check is not Nothing
            continue
         end
         ind += 1
-        count = 2
-
-        if basis_1st[nn,6] == 1 # down down up  
-           index_spin[ind,1] = nn
-        elseif basis_1st[nn,5] == 1 # down up down
-           index_spin[ind,2] = nn
-        else # basis_1st[nn,4] == 1 # up down down
-           index_spin[ind,3] = nn
-        end
+        distinguish_downdownup!(nn,basis_1st,index_spin,ind)
+        count = 0
 
         for jj = 1:maxmatpcut2_new
             if jj == nn
                continue
             end
-            check = findfirst(x -> x==jj, index_spin[1:ind-1,1:3])
+            check = check_nn_included(jj,index_spin[1:ind-1,1:3])
+            # check = findfirst(x -> x==jj, index_spin[1:ind-1,1:3])
             if !isa(check,Nothing)
                continue
             end
             if basis_1st[nn,1] == basis_1st[jj,1] && basis_1st[nn,2] == basis_1st[jj,2] && basis_1st[nn,3] == basis_1st[jj,3]
-               index_spin[ind,count] = jj
+               distinguish_downdownup!(jj,basis_1st,index_spin,ind)
                count += 1
             end
-            if count > 3
-               index_spin[ind,1] = nn
+            if count > 2
                break
             end
         end
+
+        println(index_spin[ind,1:3])
+
+        mat_from1sttospin[index_spin[ind,1],index_spin[ind,1]] = 1
+        mat_from1sttospin[index_spin[ind,1],index_spin[ind,2]] = 2
+        mat_from1sttospin[index_spin[ind,1],index_spin[ind,3]] = 3
+        mat_from1sttospin[index_spin[ind,2],index_spin[ind,1]] = 4
+        mat_from1sttospin[index_spin[ind,2],index_spin[ind,2]] = 5
+        mat_from1sttospin[index_spin[ind,2],index_spin[ind,3]] = 6
+        mat_from1sttospin[index_spin[ind,3],index_spin[ind,1]] = 7
+        mat_from1sttospin[index_spin[ind,3],index_spin[ind,2]] = 8
+        mat_from1sttospin[index_spin[ind,3],index_spin[ind,3]] = 9
         
     end
+
+    return mat_from1sttospin
 
 end
 
