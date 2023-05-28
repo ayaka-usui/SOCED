@@ -114,6 +114,9 @@ function mat_from2ndtospin_downup(Msize0::Int64, Np::Int64)
 
     # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
     mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom2ndtospin_downup(indvec2,Msize0,Np,matp20,matp21)
+
+    # save
+    # save("data_mat_from2ndtospin_downup_$Msize0.Np3.jld", "Msize0", Msize0, "Np", Np, "mat_from2ndto1st_downup", mat_from2ndto1st_downup, "mat_from1sttospin_downdownup", mat_from1sttospin_downdownup, "mat_from1sttospin_upupdown", mat_from1sttospin_upupdown, "mat_S2", mat_S2, "mat_M2", mat_M2, "mat_M4", mat_M4, "mat_S3", mat_S3, "mat_M1", mat_M1, "mat_M3", mat_M3, "maxmatpcut", maxmatpcut, "maxmatpcut2", maxmatpcut2)
     
     return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3, maxmatpcut, maxmatpcut2
 

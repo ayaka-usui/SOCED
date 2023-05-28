@@ -165,7 +165,7 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
     mat_from1sttospin_upupdown = spzeros(Float64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
     index_spin = zeros(Int64,Int64(maxmatpcut2_new/3),3)
     ind = 0
-    # ind_avoid = zeros(Int64,Int64(maxmatpcut2_new/3),2)
+    ind_avoid = zeros(Int64,maxmatpcut2_new)
 
     mat_S2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
     mat_M2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
@@ -175,17 +175,20 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
     mat_M1 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
     mat_M3 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
 
-    println("in total it is",Int64(maxmatpcut2_new/3))
-
     for nn = 1:maxmatpcut2_new
         
-        check = check_nn_included(nn,index_spin[1:ind,:])
-        # check = findfirst(x -> x==nn, index_spin[1:ind,1:3])
-        if !isa(check,Nothing) # if check is not Nothing
+        if ind_avoid[nn] == 1
            continue
         end
+        # check = check_nn_included(nn,index_spin[1:ind,:])
+        # # check = findfirst(x -> x==nn, index_spin[1:ind,1:3])
+        # if !isa(check,Nothing) # if check is not Nothing
+        #    continue
+        # end
+
         ind += 1
         distinguish_downdownup!(nn,basis_1st,index_spin,ind)
+        ind_avoid[nn] = 1
         count = 0
 
         for jj = 1:maxmatpcut2_new
@@ -193,16 +196,20 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
             if jj == nn
                continue
             end
-            check = check_nn_included(jj,index_spin[1:ind,:])
-            # check = findfirst(x -> x==jj, index_spin[1:ind,1:3])
-            if !isa(check,Nothing)
+
+            if ind_avoid[jj] == 1
                continue
             end
+            # check = check_nn_included(jj,index_spin[1:ind,:])
+            # # check = findfirst(x -> x==jj, index_spin[1:ind,1:3])
+            # if !isa(check,Nothing)
+            #    continue
+            # end
 
             if basis_1st[nn,1] == basis_1st[jj,1] && basis_1st[nn,2] == basis_1st[jj,2] && basis_1st[nn,3] == basis_1st[jj,3]
                distinguish_downdownup!(jj,basis_1st,index_spin,ind)
+               ind_avoid[jj] = 1
                count += 1
-               #ind_avoid[ind,count] = jj
             end
             if count == 2
                break
@@ -211,6 +218,7 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
         end
 
         println("ind=",ind)
+        println("It ends at ind=",Int64(maxmatpcut2_new/3))
 
         # println(index_spin[ind,1:3])
 
