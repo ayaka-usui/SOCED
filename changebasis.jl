@@ -101,7 +101,7 @@ function changefrom2ndto1st_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::In
     ind0 = 0
     vec_space_jj = zeros(Int64,3)
 
-    mat_from2ndto1st = zeros(Float64,maxmatpcut2_new,maxmatpcut2) #spzeros(Float64,maxmatpcut2_new,maxmatpcut2)
+    mat_from2ndto1st = spzeros(Float64,maxmatpcut2_new,maxmatpcut2) #zeros(Float64,maxmatpcut2_new,maxmatpcut2)
 
     for nn = 1:maxmatpcut2
 
@@ -161,10 +161,18 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
     # basis_spin = copy(basis_1st)
     maxmatpcut2_new = size(basis_1st)[1]
-    mat_from1sttospin_downdownup = zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
-    mat_from1sttospin_upupdown = zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_from1sttospin_downdownup = spzeros(Float64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_from1sttospin_upupdown = spzeros(Float64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
     index_spin = zeros(Int64,Int64(maxmatpcut2_new/3),3)
     ind = 0
+
+    mat_S2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_M2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_M4 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
+
+    mat_S3 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_M1 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
+    mat_M3 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
 
     for nn = 1:maxmatpcut2_new
         
@@ -210,6 +218,9 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
         mat_from1sttospin_downdownup[index_spin[ind,3],index_spin[ind,1]] = 0
         mat_from1sttospin_downdownup[index_spin[ind,3],index_spin[ind,2]] =-1/sqrt(2)
         mat_from1sttospin_downdownup[index_spin[ind,3],index_spin[ind,3]] = 1/sqrt(2)
+        mat_S2[index_spin[ind,1],index_spin[ind,1]] = 1
+        mat_M2[index_spin[ind,2],index_spin[ind,2]] = 1
+        mat_M4[index_spin[ind,3],index_spin[ind,3]] = 1
 
         # up up down -> S3 M1 M3 
         mat_from1sttospin_upupdown[index_spin[ind,1],index_spin[ind,1]] = 1/sqrt(3)
@@ -221,21 +232,24 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
         mat_from1sttospin_upupdown[index_spin[ind,3],index_spin[ind,1]] = 0
         mat_from1sttospin_upupdown[index_spin[ind,3],index_spin[ind,2]] = 1/sqrt(2)
         mat_from1sttospin_upupdown[index_spin[ind,3],index_spin[ind,3]] =-1/sqrt(2)
+        mat_S3[index_spin[ind,1],index_spin[ind,1]] = 1
+        mat_M1[index_spin[ind,1],index_spin[ind,1]] = 1
+        mat_M3[index_spin[ind,1],index_spin[ind,1]] = 1
         
     end
 
     # println(index_spin)
 
-    return mat_from1sttospin_downdownup, mat_from1sttospin_upupdown
+    return mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3
 
 end
 
 function changefrom2ndtospin_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp20::Matrix{Int64}, matp21::Matrix{Int64})
 
     basis_1st, mat_from2ndto1st_downup = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
-    mat_from1sttospin_downdownup, mat_from1sttospin_upupdown = changefrom1sttospin_downup(basis_1st)
+    mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom1sttospin_downup(basis_1st)
     
-    return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown
+    return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3
 
 end
 

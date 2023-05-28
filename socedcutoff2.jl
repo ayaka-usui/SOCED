@@ -1,5 +1,6 @@
 using Arpack, SparseArrays, LinearAlgebra
 using JLD
+using Combinatorics
 # using Plots
 # using ArnoldiMethod
 # using FLoops
@@ -70,6 +71,77 @@ function createHtotal(Msize0::Int64, Np::Int64)
     Hintfunccutoff2!(indvec,indvec2,Msize0,Np,matp,matp20,matp21,matdowndown,matupup,matdownup)
 
     return matho, matdowndown, matupup, matdownup, matsoc, matW
+
+end
+
+function mat_from2ndtospin_downup(Msize0::Int64, Np::Int64)
+
+    # Since we care about population for spin basis, we do not touch down down down and up up up
+
+    if Np != 3
+       error("This code is specific for Np=3.")
+    end
+
+    # create Fock basis
+    # for down down and up up
+    Enecutoff = Msize0 - 1 + Np/2
+    # Enecutoff = 13.5
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down down up
+    # Enecutoff2 = Msize0 - 1 + (Np-1)/2
+    # matp2 = zeros(Int64,Msize0+1,Np-1)
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    # indvec2 = cutMsizeEnespinmixed2(Msize0,Np,matp20,matp21,Enecutoff2,1)
+    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+    # maxmatpcut3 = length(indvec3)
+    
+    # for up up down
+    # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
+    # matp31 = zeros(Int64,Msize0+1,2+1)
+    # pascaltriangle!(Msize0,Np-2,matp30)
+    # pascaltriangle!(Msize0,2,matp31)
+    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp30,matp31,Enecutoff,2)
+    # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
+
+    # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
+    mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom2ndtospin_downup(indvec2,Msize0,Np,matp20,matp21)
+    
+    return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3, maxmatpcut, maxmatpcut2
+
+end
+
+function population_SM(Msize0::Int64, Np::Int64, phi::Vector{ComplexF64})
+
+    # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
+    mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3, maxmatpcut, maxmatpcut2 = mat_from2ndtospin_downup(Msize0,Np)
+
+    # test
+    phi = zeros(ComplexF64,maxmatpcut+maxmatpcut2*2+maxmatpcut)
+    
+    # population of S1 and S4
+    pop_S1 = sum(abs.(phi[1:maxmatpcut]).^2)
+    pop_S4 = sum(abs.(phi[end-maxmatpcut+1:end]).^2)
+
+    # population of S2, S4, M1, M2, M3, M4
+    phi_S2M2M4 = mat_from1sttospin_downdownup*(mat_from2ndto1st_downup*phi[maxmatpcut+1:maxmatpcut+maxmatpcut2])
+    pop_S2 = sum(abs.(mat_S2*phi_S2M2M4).^2)
+    pop_M2 = sum(abs.(mat_M2*phi_S2M2M4).^2)
+    pop_M4 = sum(abs.(mat_M4*phi_S2M2M4).^2)
+    phi_S3M1M3 = mat_from1sttospin_upupdown*(mat_from2ndto1st_downup*phi[maxmatpcut+maxmatpcut2+1:maxmatpcut+maxmatpcut2*2])
+    pop_S3 = sum(abs.(mat_S3*phi_S3M1M3).^2)
+    pop_M1 = sum(abs.(mat_M1*phi_S3M1M3).^2)
+    pop_M3 = sum(abs.(mat_M3*phi_S3M1M3).^2)
+    
+    return pop_S1, pop_S2, pop_S3, pop_S4, pop_M1, pop_M2, pop_M3, pop_M4
 
 end
 
