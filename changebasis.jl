@@ -175,6 +175,8 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
     mat_M1 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
     mat_M3 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
 
+    println("in total it is",Int64(maxmatpcut2_new/3))
+
     for nn = 1:maxmatpcut2_new
         
         check = check_nn_included(nn,index_spin[1:ind,:])
@@ -207,6 +209,8 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
             end
 
         end
+
+        println("ind=",ind)
 
         # println(index_spin[ind,1:3])
 
