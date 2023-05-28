@@ -44,12 +44,7 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
     maxmatpcut2 = length(indvec2)
     # maxmatpcut3 = length(indvec3)
-
-    #
-    basis_1st, mat_from2ndto1st = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
-    mat_from1sttospin = changefrom1sttospin_downup(basis_1st)
-    return basis_1st, mat_from2ndto1st, mat_from1sttospin
-
+    
     # for up up down
     # matp30 = zeros(Int64,Msize0+1,Np-2+1) # Np-2=1
     # matp31 = zeros(Int64,Msize0+1,2+1)
@@ -57,6 +52,10 @@ function createHtotal(Msize0::Int64, Np::Int64)
     # pascaltriangle!(Msize0,2,matp31)
     # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp30,matp31,Enecutoff,2)
     # maxmatpcut3 = length(indvec3) # maxmatpcut3 == maxmatpcut2
+
+    # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
+    mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown = changefrom2ndtospin_downup(indvec2,Msize0,Np,matp20,matp21)
+    return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown
 
     # construct single particle Hamiltonian
     matho = spzeros(Float64,maxmatpcut+maxmatpcut2*2+maxmatpcut,maxmatpcut+maxmatpcut2*2+maxmatpcut)
