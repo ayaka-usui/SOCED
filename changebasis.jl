@@ -159,12 +159,13 @@ end
 
 function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
-    # basis_spin = copy(basis_1st)
+    basis_1st_edit = copy(basis_1st)
     maxmatpcut2_new = size(basis_1st)[1]
     mat_from1sttospin_downdownup = spzeros(Float64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
     mat_from1sttospin_upupdown = spzeros(Float64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Float64,maxmatpcut2_new,maxmatpcut2_new)
     index_spin = zeros(Int64,Int64(maxmatpcut2_new/3),3)
     ind = 0
+    # ind_avoid = zeros(Int64,Int64(maxmatpcut2_new/3),2)
 
     mat_S2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new) #zeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
     mat_M2 = spzeros(Int64,maxmatpcut2_new,maxmatpcut2_new)
@@ -199,8 +200,9 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
             if basis_1st[nn,1] == basis_1st[jj,1] && basis_1st[nn,2] == basis_1st[jj,2] && basis_1st[nn,3] == basis_1st[jj,3]
                distinguish_downdownup!(jj,basis_1st,index_spin,ind)
                count += 1
+               #ind_avoid[ind,count] = jj
             end
-            if count > 2
+            if count == 2
                break
             end
 
@@ -247,7 +249,7 @@ end
 function changefrom2ndtospin_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp20::Matrix{Int64}, matp21::Matrix{Int64})
 
     basis_1st, mat_from2ndto1st_downup = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
-    mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom1sttospin_downup(basis_1st)
+    @time mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom1sttospin_downup(basis_1st)
     
     return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3
 
