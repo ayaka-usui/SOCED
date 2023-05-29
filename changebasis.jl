@@ -217,8 +217,8 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
 
         end
 
-        println("ind=",ind)
-        println("It ends at ind=",Int64(maxmatpcut2_new/3))
+        # println("ind=",ind)
+        # println("It ends at ind=",Int64(maxmatpcut2_new/3))
 
         # println(index_spin[ind,1:3])
 
@@ -252,7 +252,10 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
         
     end
 
-    # println(index_spin)
+    # return index_spin, basis_1st
+
+    # println(sum(ind_avoid))
+    # println(maxmatpcut2_new)
 
     return mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3
 
@@ -261,9 +264,11 @@ end
 function changefrom2ndtospin_downup(indvec2::Vector{Int64}, Msize0::Int64, Np::Int64, matp20::Matrix{Int64}, matp21::Matrix{Int64})
 
     basis_1st, mat_from2ndto1st_downup = changefrom2ndto1st_downup(indvec2,Msize0,Np,matp20,matp21)
-    @time mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom1sttospin_downup(basis_1st)
+    mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3 = changefrom1sttospin_downup(basis_1st)
+    # index_spin, basis_1st = changefrom1sttospin_downup(basis_1st)
     
     return mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3
+    # return index_spin, basis_1st
 
 end
 
