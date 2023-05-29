@@ -247,8 +247,8 @@ function changefrom1sttospin_downup(basis_1st::Matrix{Int64})
         mat_from1sttospin_upupdown[index_spin[ind,3],index_spin[ind,2]] = 1/sqrt(2)
         mat_from1sttospin_upupdown[index_spin[ind,3],index_spin[ind,3]] =-1/sqrt(2)
         mat_S3[index_spin[ind,1],index_spin[ind,1]] = 1
-        mat_M1[index_spin[ind,1],index_spin[ind,1]] = 1
-        mat_M3[index_spin[ind,1],index_spin[ind,1]] = 1
+        mat_M1[index_spin[ind,2],index_spin[ind,2]] = 1
+        mat_M3[index_spin[ind,3],index_spin[ind,3]] = 1
         
     end
 
