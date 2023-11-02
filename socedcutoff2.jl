@@ -17,6 +17,37 @@ include("paircorrelation2.jl")
 # include("paircorrelation2_test.jl")
 include("changebasis.jl")
 
+function test_size(Msize0::Int64, Np::Int64)
+
+    if Np != 3
+       error("This code is specific for Np=3.")
+    end
+
+    # create Fock basis
+    # for down down and up up
+    Enecutoff = Msize0 - 1 + Np/2
+    # Enecutoff = 13.5
+    matp = zeros(Int64,Msize0+1,Np+1)
+    pascaltriangle!(Msize0,Np,matp) # note the indices are m+1 and n+1 for N^m_n
+    indvec = cutMsizeEnespinless(Msize0,Np,matp,Enecutoff)
+    maxmatpcut = length(indvec)
+
+    # for down down up
+    # Enecutoff2 = Msize0 - 1 + (Np-1)/2
+    # matp2 = zeros(Int64,Msize0+1,Np-1)
+    matp20 = zeros(Int64,Msize0+1,Np-1+1) # Np-1=2
+    matp21 = zeros(Int64,Msize0+1,1+1)
+    pascaltriangle!(Msize0,Np-1,matp20)
+    pascaltriangle!(Msize0,1,matp21)
+    indvec2 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    # indvec2 = cutMsizeEnespinmixed2(Msize0,Np,matp20,matp21,Enecutoff2,1)
+    # indvec3 = cutMsizeEnespinmixed(Msize0,Np,matp20,matp21,Enecutoff,1)
+    maxmatpcut2 = length(indvec2)
+    # maxmatpcut3 = length(indvec3)
+
+    return (maxmatpcut+maxmatpcut2)*2
+
+end
 
 function createHtotal(Msize0::Int64, Np::Int64)
 
@@ -671,6 +702,25 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     # save("data_spectrum_ene_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
     return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3, arrayenergyGStot, arrayenergyGSint, arraypopS1, arraypopS2, arraypopS3, arraypopS4, arraypopM1, arraypopM2, arraypopM3, arraypopM4
+
+end
+
+function plot_arrayspect(arrayOmega,arrayspect,jj1,jj2)
+
+    plot([2*4^2,2*4^2+1e-5],[-10,10],color=:black,lw=2,ls=:dash)
+    plot!([arrayOmega[jj2],arrayOmega[jj2]+1e-5],[-10,10],color=:black,lw=2,ls=:dot)
+
+    plot!(arrayOmega,real(arrayspect[1,:,jj1]),color=:blue,lw=4)
+    plot!(arrayOmega,real(arrayspect[2,:,jj1]),color=:blue,lw=4)
+    plot!(arrayOmega,real(arrayspect[3,:,jj1]),color=:blue,lw=4)
+    plot!(arrayOmega,real(arrayspect[4,:,jj1]),color=:blue,lw=4)
+    plot!(arrayOmega,real(arrayspect[5,:,jj1]),color=:blue,lw=4)
+
+    plot!(legend=:none)
+    
+    xlims!((9,41))
+    ylims!((-0.05,1.2))
+    plot!(aspect_ratio=32/1.25)
 
 end
 
