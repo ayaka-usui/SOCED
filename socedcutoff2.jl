@@ -566,6 +566,7 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
 
     # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
+    mat_from2ndto1st_downup, mat_from1sttospin_downdownup, mat_from1sttospin_upupdown, mat_S2, mat_M2, mat_M4, mat_S3, mat_M1, mat_M3, maxmatpcut, maxmatpcut2 = mat_from2ndtospin_downup(Msize0,Np)
 
     println("diagonalising the Hamiltonian for different Omega ...")
 
