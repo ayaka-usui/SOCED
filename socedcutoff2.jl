@@ -548,6 +548,15 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     arraypopdown1up2 = zeros(Float64,specnum,NOmega,Ng)
     arraypopup3 = zeros(Float64,specnum,NOmega,Ng)
 
+    arraypopS1 = zeros(Float64,NOmega,Ng)
+    arraypopS2 = zeros(Float64,NOmega,Ng)
+    arraypopS3 = zeros(Float64,NOmega,Ng)
+    arraypopS4 = zeros(Float64,NOmega,Ng)
+    arraypopM1 = zeros(Float64,NOmega,Ng)
+    arraypopM2 = zeros(Float64,NOmega,Ng)
+    arraypopM3 = zeros(Float64,NOmega,Ng)
+    arraypopM4 = zeros(Float64,NOmega,Ng)
+
     arrayenergyGStot = zeros(ComplexF64,NOmega,Ng)
     arrayenergyGSint = zeros(ComplexF64,NOmega,Ng)
 
@@ -555,6 +564,8 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
     mat1 = copy(mat0)
     matint = copy(mat0)
     phi = zeros(ComplexF64,maxmatpcut*2+maxmatpcut2*2,specnum)
+
+    # construct transformation from 2nd quantisation basis to spin basis (only for downdownup and upupdown)
 
     println("diagonalising the Hamiltonian for different Omega ...")
 
@@ -584,6 +595,9 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
                 arrayenergyGStot[jj,jjg] = phi[:,1]'*mat1*phi[:,1] # same as arraylambda[1]
                 arrayenergyGSint[jj,jjg] = phi[:,1]'*matint*phi[:,1]
 
+                # population of S, M
+                arraypopS1[jj,jjg], arraypopS2[jj,jjg], arraypopS3[jj,jjg], arraypopS4[jj,jjg], arraypopM1[jj,jjg], arraypopM2[jj,jjg], arraypopM3[jj,jjg], arraypopM4[jj,jjg] = population_SM(phi[:,1],mat_from2ndto1st_downup,mat_from1sttospin_downdownup,mat_from1sttospin_upupdown,mat_S2,mat_M2,mat_M4,mat_S3,mat_M1,mat_M3,maxmatpcut,maxmatpcut2)
+
                 println("jj=",jj)
 
             end
@@ -591,10 +605,10 @@ function diagonalisesavedHtotdiffW_gdownup(Msize0::Int64, Np::Int64, gdown0::Flo
 
     end
 
-    indksoc = Int64(ksoc)
-    save("data_spectrum_ene_gdownup_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
+    # indksoc = Int64(ksoc)
+    # save("data_spectrum_ene_gdownup_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdown", arraygdown, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
-    return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3, arrayenergyGStot, arrayenergyGSint
+    return arrayOmega, arraygdown, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3, arrayenergyGStot, arrayenergyGSint, arraypopS1, arraypopS2, arraypopS3, arraypopS4, arraypopM1, arraypopM2, arraypopM3, arraypopM4
 
 end
 
@@ -645,7 +659,7 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     arraypopS3 = zeros(Float64,NOmega,Ng)
     arraypopS4 = zeros(Float64,NOmega,Ng)
     arraypopM1 = zeros(Float64,NOmega,Ng)
-    arraypopM2 = zeros(Float64,NOmega,Ng) 
+    arraypopM2 = zeros(Float64,NOmega,Ng)
     arraypopM3 = zeros(Float64,NOmega,Ng)
     arraypopM4 = zeros(Float64,NOmega,Ng)
    
@@ -702,6 +716,42 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
     # save("data_spectrum_ene_gdu_jjg_ksoc$indksoc.jld", "arrayOmega", arrayOmega, "arraygdu", arraygdu, "ksoc", ksoc, "arraylambda", arraylambda, "arrayspect", arrayspect, "arraypopdown3", arraypopdown3, "arraypopdown2up1", arraypopdown2up1, "arraypopdown1up2", arraypopdown1up2, "arraypopup3", arraypopup3, "arrayenergyGStot", arrayenergyGStot, "arrayenergyGSint", arrayenergyGSint)
 
     return arrayOmega, arraygdu, ksoc, arraylambda, arrayspect, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3, arrayenergyGStot, arrayenergyGSint, arraypopS1, arraypopS2, arraypopS3, arraypopS4, arraypopM1, arraypopM2, arraypopM3, arraypopM4
+
+end
+
+function plot_spinpop(arrayOmega,arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3,arraypopS1,arraypopS2,arraypopS3,arraypopS4,arraypopM1,arraypopM2,arraypopM3,arraypopM4,jj1,jj2)
+
+    NOmega = length(arrayOmega)
+
+    plot(arrayOmega,ones(NOmega)*3/4,color=:black,ls=:dot,lw=2)
+    plot!(arrayOmega,ones(NOmega)*1/4,color=:black,ls=:dot,lw=2)
+    plot!([arrayOmega[jj2],arrayOmega[jj2]+1e-5],[-10,10],color=:black,lw=2,ls=:dot)
+
+    plot!(arrayOmega,arraypopdown3[1,:,jj1]+arraypopup3[1,:,jj1],color=:grey,lw=4)
+    plot!(arrayOmega,arraypopdown2up1[1,:,jj1]+arraypopdown1up2[1,:,jj1],color=:black,lw=4)
+    plot!(arrayOmega,arraypopM1[:,jj1]+arraypopM2[:,jj1]+arraypopM3[:,jj1]+arraypopM4[:,jj1],lw=3,color=:red,ls=:dot)
+    plot!(arrayOmega,arraypopS2[:,jj1]+arraypopS3[:,jj1],lw=3,ls=:dash,color=:blue)
+    # plot!(arrayOmega,arraypopS1[:,jj1]+arraypopS4[:,jj1],lw=2)
+
+    plot!(legend=:none)
+    
+    xlims!((9,41))
+    ylims!((-0.05,1.05))
+    plot!(aspect_ratio=32/1.1)
+
+end
+
+function plot_eneint(arrayOmega,arrayenergyGSint_g1,arrayenergyGSint_g2,arrayenergyGSint_g10)
+
+    plot(arrayOmega,real(arrayenergyGSint_g1[:,1]),lw=3)
+    plot!(arrayOmega,real(arrayenergyGSint_g2[:,1]),lw=3,ls=:dash)
+    plot!(arrayOmega,real(arrayenergyGSint_g10[:,1]),lw=3,ls=:dot)
+    
+    plot!(legend=:none)
+    
+    xlims!((9,41))
+    ylims!((0.0,0.51))
+    plot!(aspect_ratio=32/0.51)
 
 end
 
@@ -1202,6 +1252,12 @@ function diagonaliseH_paircorrelation_test(Msize0::Int64, Np::Int64, gdown::Floa
         arrayspect .= arraylambda[2:end] .- arraylambda[1]
     end
 
+    # energy
+    mat0 = matho + 1im*ksoc*matsoc
+    energyEk = psi[:,1]'*mat0*psi[:,1] + ksoc^2/2*3
+    println("kinetic energy is", energyEk)
+
+
     println("calculating pair correlation ...")
     @time begin
         fun_nudown, fun_nudu, fun_nuup = paircorrelation_fun(indvec,indvec2,Msize0,Np,matp,matp20,matp21,psi[:,1],xrange,yrange)
@@ -1211,6 +1267,28 @@ function diagonaliseH_paircorrelation_test(Msize0::Int64, Np::Int64, gdown::Floa
 
     return arraylambda, arrayspect, xrange, yrange, fun_nudown, fun_nudu, fun_nuup, fun, psi[:,1]
     # save("data_paircorre_gdown$indgdown.gup$indgup.gdu$indgdu.ksoc$indksoc.Omega$indOmega.Nx$indNx.jld", "arraylambda", arraylambda, "arrayspect", arrayspect, "xrange", xrange, "yrange", yrange, "fun_nudown", fun_nudown, "fun_nudu", fun_nudu, "fun_nuup", fun_nuup)
+
+end
+
+function diagonaliseH_paircorrelation_arrayOmega(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64, Omega0::Float64, Omega1::Float64, NOmega::Int64)
+
+    arrayOmega = LinRange(Omega0,Omega1,NOmega)
+    # arrayOmega = [10.0, ]
+    # NOmega = length(arrayOmega)
+    
+    xrange = LinRange(-Lx,Lx,Nx)
+    yrange = LinRange(-Lx,Lx,Nx)
+    fun_nudown_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nudu_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_nuup_Omega = zeros(Float64,Nx,Nx,NOmega)
+    fun_Omega = zeros(Float64,Nx,Nx,NOmega)
+
+    for jj = 1:NOmega
+        arraylambda, arrayspect, xrange, yrange, fun_nudown_Omega[:,:,jj], fun_nudu_Omega[:,:,jj], fun_nuup_Omega[:,:,jj], fun_Omega[:,:,jj], psi = diagonaliseH_paircorrelation_test(Msize0,Np,gdown,gup,gdu,ksoc,arrayOmega[jj],specnum,Lx,Nx)
+        println("jj=",jj)
+    end
+
+    return xrange, yrange, fun_nudown_Omega, fun_nudu_Omega, fun_nuup_Omega, fun_Omega
 
 end
 
