@@ -835,10 +835,11 @@ function plotpairTG(Lx,Nx)
         xx = xrange[jjx]
         for jjy = 1:Nx
             yy = yrange[jjy]
-            fun[jjx,jjy] = exp(-2*(xx^2+yy^2))*(xx-yy)^2*(3+4xx^2+4*yy^2+16*xx^2*yy^2+16*xx*yy)
+            fun[jjx,jjy] = exp(-xx^2-yy^2)*(xx-yy)^2*(2*xx^2+2*yy^2+8*xx*yy+4*xx^2*yy^2+3)/(6*pi)
+            #fun[jjx,jjy] = exp(-2*(xx^2+yy^2))*(xx-yy)^2*(3+4xx^2+4*yy^2+16*xx^2*yy^2+16*xx*yy)
         end
     end
-    fun[:,:] .= fun[:,:]*sqrt(pi/2)/16/(3*sqrt(pi)^3/32/sqrt(2))
+    # fun[:,:] .= fun[:,:]*sqrt(pi/2)/16/(3*sqrt(pi)^3/32/sqrt(2))
 
     return xrange, yrange, fun
 
