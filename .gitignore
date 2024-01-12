@@ -26,3 +26,5 @@ Manifest.toml
 *.jld
 H_3_particles.txt
 *.png
+*.fig
+*.txt
