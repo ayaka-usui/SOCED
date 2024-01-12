@@ -1294,6 +1294,11 @@ function diagonaliseH_paircorrelation_arrayOmega(Msize0::Int64, Np::Int64, gdown
 
 end
 
+# using DelimitedFiles
+# open("pair_TG.txt", "w") do io
+#     writedlm(io, [xrange yrange fun])
+# end;
+
 function diagonaliseH_paircorrelation(Msize0::Int64, Np::Int64, gdown::Float64, gup::Float64, gdu::Float64, ksoc::Float64, Omega::Float64, specnum::Int64, Lx::Float64, Nx::Int64)
 
     # construct Hamiltonian
