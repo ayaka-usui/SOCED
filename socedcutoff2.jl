@@ -720,6 +720,12 @@ function diagonalisesavedHtotdiffW_gdu(Msize0::Int64, Np::Int64, gdu0::Float64, 
 
 end
 
+function plot2Dpopulation(arrayOmega, arraygdu, arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3)
+
+    heatmap(arrayOmega, arraygdu, arraypopdown3+arraypopup3)
+
+end
+
 function plot_spinpop(arrayOmega,arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3,arraypopS1,arraypopS2,arraypopS3,arraypopS4,arraypopM1,arraypopM2,arraypopM3,arraypopM4,jj1,jj2)
 
     NOmega = length(arrayOmega)
