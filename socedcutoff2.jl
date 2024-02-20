@@ -732,13 +732,34 @@ function plot_spinpop(arrayOmega,arraypopdown3, arraypopdown2up1, arraypopdown1u
 
     plot(arrayOmega,ones(NOmega)*3/4,color=:black,ls=:dot,lw=2)
     plot!(arrayOmega,ones(NOmega)*1/4,color=:black,ls=:dot,lw=2)
-    plot!([arrayOmega[jj2],arrayOmega[jj2]+1e-5],[-10,10],color=:black,lw=2,ls=:dot)
+    # plot!([arrayOmega[jj2],arrayOmega[jj2]+1e-5],[-10,10],color=:black,lw=2,ls=:dot)
 
     plot!(arrayOmega,arraypopdown3[1,:,jj1]+arraypopup3[1,:,jj1],color=:grey,lw=4)
     plot!(arrayOmega,arraypopdown2up1[1,:,jj1]+arraypopdown1up2[1,:,jj1],color=:black,lw=4)
-    plot!(arrayOmega,arraypopM1[:,jj1]+arraypopM2[:,jj1]+arraypopM3[:,jj1]+arraypopM4[:,jj1],lw=3,color=:red,ls=:dot)
-    plot!(arrayOmega,arraypopS2[:,jj1]+arraypopS3[:,jj1],lw=3,ls=:dash,color=:blue)
+    # plot!(arrayOmega,arraypopM1[:,jj1]+arraypopM2[:,jj1]+arraypopM3[:,jj1]+arraypopM4[:,jj1],lw=3,color=:red,ls=:dot)
+    # plot!(arrayOmega,arraypopS2[:,jj1]+arraypopS3[:,jj1],lw=3,ls=:dash,color=:blue)
     # plot!(arrayOmega,arraypopS1[:,jj1]+arraypopS4[:,jj1],lw=2)
+
+    plot!(legend=:none)
+    
+    xlims!((9,41))
+    ylims!((-0.05,1.05))
+    plot!(aspect_ratio=32/1.1)
+
+end
+
+function plot_spinpop_2(arrayOmega,arraypopdown3, arraypopdown2up1, arraypopdown1up2, arraypopup3,arraypopdown3_2, arraypopdown2up1_2, arraypopdown1up2_2, arraypopup3_2)
+
+    NOmega = length(arrayOmega)
+
+    plot(arrayOmega,ones(NOmega)*3/4,color=:black,ls=:dot,lw=2)
+    plot!(arrayOmega,ones(NOmega)*1/4,color=:black,ls=:dot,lw=2)
+
+    plot!(arrayOmega,arraypopdown3[1,:,1]+arraypopup3[1,:,1],color=:grey,lw=4)
+    plot!(arrayOmega,arraypopdown2up1[1,:,1]+arraypopdown1up2[1,:,1],color=:black,lw=4)
+
+    plot!(arrayOmega,arraypopdown3_2[1,:]+arraypopup3_2[1,:],color=RGB(254/255,178/255,76/255),lw=4)
+    plot!(arrayOmega,arraypopdown2up1_2[1,:]+arraypopdown1up2_2[1,:],color=RGB(240/255,59/255,32/255),lw=4)
 
     plot!(legend=:none)
     
@@ -764,14 +785,31 @@ end
 
 function plot_arrayspect(arrayOmega,arrayspect,jj1,jj2)
 
+    arrayspect1 = copy(arrayspect)
+    jj3 = 167 #184 #129 #151 #179
+    arrayspect1[3,jj3:end,jj1] = arrayspect[4,jj3:end,jj1]
+    arrayspect1[4,jj3:end,jj1] = arrayspect[3,jj3:end,jj1]
+
     plot([2*4^2,2*4^2+1e-5],[-10,10],color=:black,lw=2,ls=:dash)
     plot!([arrayOmega[jj2],arrayOmega[jj2]+1e-5],[-10,10],color=:black,lw=2,ls=:dot)
 
-    plot!(arrayOmega,real(arrayspect[1,:,jj1]),color=:blue,lw=4)
-    plot!(arrayOmega,real(arrayspect[2,:,jj1]),color=:blue,lw=4)
-    plot!(arrayOmega,real(arrayspect[3,:,jj1]),color=:blue,lw=4)
-    plot!(arrayOmega,real(arrayspect[4,:,jj1]),color=:blue,lw=4)
-    plot!(arrayOmega,real(arrayspect[5,:,jj1]),color=:blue,lw=4)
+    plot!(arrayOmega,real(arrayspect1[1,:,jj1]),lw=11,color=:black)
+    plot!(arrayOmega,real(arrayspect1[2,:,jj1]),lw=9,color=RGB(8/255,104/255,172/255))
+    plot!(arrayOmega,real(arrayspect1[3,:,jj1]),lw=7,color=RGB(67/255,162/255,202/255))
+    plot!(arrayOmega,real(arrayspect1[4,:,jj1]),lw=6,color=RGB(123/255,204/255,196/255))
+    plot!(arrayOmega,real(arrayspect1[5,:,jj1]),lw=4,color=RGB(186/255,228/255,188/255)) 
+
+    # plot!(arrayOmega,real(arrayspect1[1,:,jj1]),lw=4,color=:black)
+    # plot!(arrayOmega,real(arrayspect1[2,:,jj1]),lw=4,color=:black)
+    # plot!(arrayOmega,real(arrayspect1[3,:,jj1]),lw=4,color=:black)
+    # plot!(arrayOmega,real(arrayspect1[4,:,jj1]),lw=4,color=:black)
+    # plot!(arrayOmega,real(arrayspect1[5,:,jj1]),lw=4,color=:black) 
+    #lw=4
+
+    # plot!(arrayOmega,real(arrayspect1[6,:,jj1]),color=:blue,lw=4)
+    # plot!(arrayOmega,real(arrayspect1[7,:,jj1]),color=:blue,lw=4)
+    # plot!(arrayOmega,real(arrayspect1[8,:,jj1]),color=:blue,lw=4)
+    # plot!(arrayOmega,real(arrayspect1[9,:,jj1]),color=:blue,lw=4)
 
     plot!(legend=:none)
     
@@ -841,7 +879,8 @@ function plotpairTG(Lx,Nx)
         xx = xrange[jjx]
         for jjy = 1:Nx
             yy = yrange[jjy]
-            fun[jjx,jjy] = exp(-xx^2-yy^2)*(xx-yy)^2*(2*xx^2+2*yy^2+8*xx*yy+4*xx^2*yy^2+3)/(6*pi)
+            # fun[jjx,jjy] = exp(-(2*xx)^2-(2*yy)^2)*(2*xx-2*yy)^2*(2*(2*xx)^2+2*(2*yy)^2+8*(2*xx)*2*yy+4*(2*xx)^2*(2*yy)^2+3)/(6*pi) # scale=1/2
+            fun[jjx,jjy] = exp(-xx^2-yy^2)*(xx-yy)^2*(2*xx^2+2*yy^2+8*xx*yy+4*xx^2*yy^2+3)/(6*pi) # scale=1
             #fun[jjx,jjy] = exp(-2*(xx^2+yy^2))*(xx-yy)^2*(3+4xx^2+4*yy^2+16*xx^2*yy^2+16*xx*yy)
         end
     end
